@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#000</color>
+    <color name="white">#fff</color>
+    <color name="yellow">#f9d30b</color>
+    <color name="colorPrimary">#1ca0e1</color>
+    <color name="light_blue">#E6F2F8</color>
+    <color name="colorPrimaryDark">#1E668A</color>
+    <color name="colorPrimaryLight">#55C2F8</color>
+    <color name="blue">#007aff</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="lavender">#8692f7</color>
+    <color name="grey">#f1f3f4</color>
+    <color name="grey_2">#f3f2f7</color>
+    <color name="light_grey">#F6F6F6</color>
+    <color name="gray">#7A7A7A</color>
+    <color name="light_gray">#D1D0D0</color>
+    <color name="orange">#F68840</color>
+    <color name="green">#308312</color>
+    <color name="background_edit_text">#f0f2f5</color>
+    <color name="background">#cccad3</color>
+    <color name="shimmer_color">#FFF7F5F5</color>
+    <color name="text_highlight">#0165ce</color>
+    <color name="background_highlight">#ecf4ff</color>
+    <color name="angry">#F16A1F</color>
+    <color name="heart">#E3253F</color>
+    <color name="like">#0165ce</color>
+    <color name="sad">#F9BC4C</color>
+    <color name="haha">#F9BC4C</color>
+    <color name="wow">#F9BC4C</color>
+</resources>

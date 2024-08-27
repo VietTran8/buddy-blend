@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.fragments.SearchResultAllFragment">
+
+    <ScrollView
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <View
+                android:id="@+id/firstDivider"
+                app:layout_constraintTop_toTopOf="parent"
+                android:background="@color/background"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"/>
+            <TextView
+                android:id="@+id/txtPeople"
+                android:text="Mọi người"
+                android:layout_marginBottom="10dp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="10dp"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rcvPeople"
+                android:background="@color/background"
+                android:layout_below="@id/txtPeople"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <View
+                android:id="@+id/divider"
+                android:background="@color/background"
+                android:layout_below="@id/rcvPeople"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"/>
+
+            <TextView
+                android:id="@+id/txtPosts"
+                android:text="Bài viết"
+                android:layout_below="@id/divider"
+                android:layout_marginBottom="10dp"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="10dp"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rcvPosts"
+                android:background="@color/background"
+                android:layout_below="@id/txtPosts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

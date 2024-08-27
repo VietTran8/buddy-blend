@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:padding="10dp"
+    android:clickable="true"
+    android:background="@drawable/custom_ripple">
+
+    <androidx.cardview.widget.CardView
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:cardCornerRadius="45dp"
+        android:id="@+id/userAvatarWrapper"
+        android:layout_width="wrap_content"
+        android:outlineAmbientShadowColor="@color/transparent"
+        android:outlineSpotShadowColor="@color/transparent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/userAvatar"
+            android:layout_width="56dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/test"
+            android:layout_height="56dp"/>
+    </androidx.cardview.widget.CardView>
+
+    <RelativeLayout
+        android:id="@+id/infoWrapper"
+        android:layout_width="0dp"
+        android:layout_marginStart="15dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/userAvatarWrapper"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/userFullName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phan Hoàn Việt"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/friends"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/userFullName"
+            android:layout_marginTop="1dp"
+            android:textColor="@color/gray"
+            android:text="4 bạn bè"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnAction"
+            android:layout_below="@id/friends"
+            android:background="@drawable/custom_button_ripple"
+            android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
+            android:insetTop="3dp"
+            android:insetBottom="3dp"
+            android:minHeight="0dp"
+            android:text="Thêm bạn bè"
+            android:textStyle="bold"
+            android:textColor="@color/blue"
+            app:backgroundTint="@color/background_highlight"
+            android:layout_height="wrap_content"/>
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:clickable="true"
+    android:background="@drawable/custom_ripple"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/userAvatarWrapper"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:cardCornerRadius="56dp"
+        android:outlineAmbientShadowColor="@color/transparent"
+        android:outlineSpotShadowColor="@color/transparent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/userAvatar"
+            android:src="@drawable/test2"
+            android:layout_width="56dp"
+            android:scaleType="centerCrop"
+            android:layout_height="56dp"/>
+    </androidx.cardview.widget.CardView>
+
+    <ImageView
+        android:id="@+id/notificationType"
+        android:layout_width="32dp"
+        android:scaleType="fitXY"
+        android:translationX="-23dp"
+        app:layout_constraintLeft_toRightOf="@id/userAvatarWrapper"
+        app:layout_constraintBottom_toBottomOf="@id/userAvatarWrapper"
+        android:layout_height="32dp"
+        android:src="@drawable/react_angry"
+        android:translationZ="100dp" />
+
+    <TextView
+        android:id="@+id/notiInfo"
+        android:layout_marginStart="15dp"
+        android:text="Phan Hoàn Việt đã bình luận về bài viết mà bạn được gắn thẻ nè hahaha haha haha haha haha haha haha haha"
+        android:ellipsize="end"
+        android:maxLines="2"
+        app:layout_constraintLeft_toRightOf="@id/userAvatarWrapper"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/btnAction"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:id="@+id/btnAction"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/notiInfo"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="24dp"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/baseline_more_horiz_24"
+        android:layout_height="24dp"/>
+
+    <TextView
+        android:id="@+id/createdAt"
+        android:text="20 giờ trước"
+        app:layout_constraintLeft_toRightOf="@id/userAvatarWrapper"
+        app:layout_constraintTop_toBottomOf="@id/notiInfo"
+        android:layout_marginStart="15dp"
+        android:textColor="@color/gray"
+        android:textSize="12sp"
+        android:layout_marginTop="1dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

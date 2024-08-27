@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Buddy Blend</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="angry_vn">Phẫn nộ</string>
+    <string name="sad_vn">Buồn</string>
+    <string name="haha_vn">Haha</string>
+    <string name="wow_vn">Wow</string>
+    <string name="heart_vn">Yêu thích</string>
+    <string name="like_vn">Thích</string>
+</resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="15dp"
+    android:layout_marginStart="15dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <ImageButton
+        android:translationZ="10dp"
+        android:id="@+id/delImage"
+        android:background="@color/transparent"
+        android:layout_alignRight="@id/imgViewContainer"
+        android:layout_alignTop="@id/imgViewContainer"
+        android:layout_width="24dp"
+        android:layout_margin="10dp"
+        android:scaleType="fitXY"
+        android:src="@drawable/cancel"
+        android:layout_height="24dp"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/imgViewContainer"
+        android:layout_centerInParent="true"
+        app:cardCornerRadius="10dp"
+        android:outlineAmbientShadowColor="@color/transparent"
+        android:outlineSpotShadowColor="@color/transparent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/imageView"
+            android:src="@drawable/test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="350dp"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop" />
+    </androidx.cardview.widget.CardView>
+</RelativeLayout>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="10dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.cardview.widget.CardView
+        android:id="@+id/avatarContainer"
+        app:cardCornerRadius="53dp"
+        android:outlineSpotShadowColor="@color/transparent"
+        android:outlineAmbientShadowColor="@color/transparent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:scaleType="centerCrop"
+            android:src="@drawable/test"
+            android:id="@+id/selectedAvatar"
+            android:layout_width="53dp"
+            android:layout_height="53dp"/>
+    </androidx.cardview.widget.CardView>
+    <ImageButton
+        android:layout_toRightOf="@+id/avatarContainer"
+        android:layout_marginStart="-15dp"
+        android:id="@+id/btnDel"
+        android:translationZ="10dp"
+        android:src="@drawable/cancel"
+        android:background="@color/transparent"
+        android:scaleType="centerInside"
+        android:layout_width="16dp"
+        android:layout_height="16dp"/>
+</RelativeLayout>
