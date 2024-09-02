@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.dtos.ResDTO;
 import vn.edu.tdtu.dtos.request.ReportRequest;
-import vn.edu.tdtu.services.PostService;
 import vn.edu.tdtu.services.ReportService;
 
 @RestController

@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.JoinRoomMessage;
 import vn.edu.tdtu.dto.MessageNoti;
-import vn.edu.tdtu.dto.MessageResponse;
 import vn.edu.tdtu.dto.SendMessage;
 import vn.edu.tdtu.mapper.RoomResponseMapper;
 import vn.edu.tdtu.model.Message;
@@ -64,17 +63,9 @@ public class SocketService {
                 .imageUrls(messageDto.getImageUrls())
                 .build();
 
-//        Room foundRoom = roomService.findById(messageDto.getRoomId());
         Room foundRoom = roomService.findExistingRoom(messageDto.getFromUserId(), messageDto.getToUserId());
 
-        if(
-                foundRoom != null
-//                        &&
-//                ((foundRoom.getUserId1().equals(messageDto.getToUserId()) ||
-//                        foundRoom.getUserId2().equals(messageDto.getToUserId())) &&
-//                (foundRoom.getUserId1().equals(messageDto.getFromUserId()) ||
-//                        foundRoom.getUserId2().equals(messageDto.getFromUserId())))
-        ) {
+        if(foundRoom != null) {
             foundRoom.getMessages().add(newMessage);
             roomService.saveRoom(foundRoom);
             kafkaMsgService.publishMessageNoti(new MessageNoti(newMessage));

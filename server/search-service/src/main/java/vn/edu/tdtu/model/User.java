@@ -1,15 +1,11 @@
 package vn.edu.tdtu.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.edu.tdtu.dtos.MutualFriend;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @AllArgsConstructor

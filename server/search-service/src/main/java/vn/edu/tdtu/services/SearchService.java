@@ -9,13 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.tdtu.dtos.ResDTO;
 import vn.edu.tdtu.dtos.response.SearchResponse;
 import vn.edu.tdtu.model.SearchHistory;
-import vn.edu.tdtu.model.User;
 import vn.edu.tdtu.repository.SearchHistoryRepository;
 import vn.edu.tdtu.utils.JwtUtils;
-import vn.edu.tdtu.utils.StringUtils;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +36,6 @@ public class SearchService {
 
             repository.save(searchHistory);
         }
-        key = StringUtils.toSlug(key);
 
         SearchResponse data = new SearchResponse();
         data.setUsers(userService.findByNameContaining(token, key));
@@ -52,8 +51,6 @@ public class SearchService {
 
     @Cacheable(key = "T(java.util.Objects).hash(#p1)", value = "fetch-result", unless = "#result.data.users.isEmpty() and #result.data.posts.isEmpty()")
     public ResDTO<?> fetchResult(String token, String key){
-        key = StringUtils.toSlug(key);
-
         SearchResponse data = new SearchResponse();
         data.setUsers(userService.findByNameContaining(token, key));
         data.setPosts(postService.findByContentContaining(token, key));
@@ -90,6 +87,7 @@ public class SearchService {
         repository.deleteByUserIdAndId(jwtUtils.getUserIdFromJwtToken(token), id);
         response.setMessage("success");
         response.setCode(200);
+
         return response;
     }
 
@@ -100,6 +98,7 @@ public class SearchService {
         repository.deleteByUserId(jwtUtils.getUserIdFromJwtToken(token));
         response.setMessage("success");
         response.setCode(200);
+
         return response;
     }
 }

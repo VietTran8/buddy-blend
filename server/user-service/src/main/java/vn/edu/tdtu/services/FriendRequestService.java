@@ -255,7 +255,7 @@ public class FriendRequestService {
         notification.setContent(newRequest.getFromUser().getUserFullName() + " đã gửi cho bạn lời mời kết bạn");
         notification.setTitle("Yêu cầu kết bạn");
 
-        kafkaMsgService.pushFriendRequestNoti(notification);
+        kafkaMsgService.pubFriendRequestNoti(notification);
 
         response.setData(data);
         response.setMessage("Đã gửi lời mời kết bạn");

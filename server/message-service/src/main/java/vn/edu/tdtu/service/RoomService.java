@@ -12,7 +12,6 @@ import vn.edu.tdtu.repository.RoomRepository;
 import vn.edu.tdtu.utils.JwtUtils;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @RequiredArgsConstructor

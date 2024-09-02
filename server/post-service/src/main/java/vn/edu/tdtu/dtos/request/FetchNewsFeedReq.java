@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import vn.edu.tdtu.utils.CustomLocalDateTimeDeserialize;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor

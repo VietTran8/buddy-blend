@@ -80,13 +80,12 @@ public class FirebaseService {
 
                 httpPost.setEntity(new StringEntity(jsonBody, StandardCharsets.UTF_8));
 
+                notiService.save(interactNotification);
+
                 return httpClient.execute(httpPost, response -> {
                     int status = response.getStatusLine().getStatusCode();
                     if (status == 200) {
                         log.info("Notification sent successfully.");
-
-                        notiService.save(interactNotification);
-
                         return true;
                     } else {
                         String responseBody = EntityUtils.toString(response.getEntity());

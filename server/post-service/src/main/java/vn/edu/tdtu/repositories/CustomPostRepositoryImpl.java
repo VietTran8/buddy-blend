@@ -1,12 +1,10 @@
 package vn.edu.tdtu.repositories;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import vn.edu.tdtu.enums.EPrivacy;
 import vn.edu.tdtu.models.Post;
 

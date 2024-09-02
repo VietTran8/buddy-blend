@@ -13,11 +13,9 @@ import vn.edu.tdtu.dtos.response.ReportResponse;
 import vn.edu.tdtu.mappers.response.ReportResponseMapper;
 import vn.edu.tdtu.models.Report;
 import vn.edu.tdtu.repositories.PostRepository;
-import vn.edu.tdtu.repositories.PostShareRepository;
 import vn.edu.tdtu.repositories.ReportRepository;
 import vn.edu.tdtu.utils.JwtUtils;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service

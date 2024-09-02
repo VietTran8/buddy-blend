@@ -4,13 +4,14 @@ package vn.edu.tdtu.controllers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.dtos.ResDTO;
-import vn.edu.tdtu.dtos.request.*;
+import vn.edu.tdtu.dtos.request.CreatePostRequest;
+import vn.edu.tdtu.dtos.request.FindByIdsReq;
+import vn.edu.tdtu.dtos.request.SharePostRequest;
+import vn.edu.tdtu.dtos.request.UpdatePostContentRequest;
 import vn.edu.tdtu.services.PostService;
-import vn.edu.tdtu.utils.DateUtils;
 
 @RestController
 @Slf4j
@@ -104,6 +105,4 @@ public class PostController {
         ResDTO<?> response = postService.findUserPosts(token, userId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
-
-
 }

@@ -3,7 +3,6 @@ package vn.edu.tdtu.mapper.response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dtos.request.FindByIdsReq;
-import vn.edu.tdtu.dtos.request.FindByIdsReqDTO;
 import vn.edu.tdtu.dtos.response.UserFavouriteDetailResp;
 import vn.edu.tdtu.models.UserFavourite;
 import vn.edu.tdtu.services.PostService;

@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import vn.edu.tdtu.dtos.ResDTO;
 import vn.edu.tdtu.dtos.request.FileReq;
 import vn.edu.tdtu.enums.EFileType;
+import vn.edu.tdtu.repositories.httpclient.FileClient;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,89 +27,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class FileService {
-    @Value("${service.file-service.host}")
-    private String host;
-    private final RestTemplate restTemplate;
+    private final FileClient fileClient;
 
     public String upload(MultipartFile file, EFileType type) throws Exception {
-        String url = host + "/api/v1/file/upload/" + type.getType();
+        ResDTO<Map<String, String>> response = fileClient.uploadFile(type.getType(), file);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", new ByteArrayResource(file.getBytes()) {
-            @Override
-            public String getFilename() {
-                return file.getOriginalFilename();
-            }
-        });
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<ResDTO> response = restTemplate.postForEntity(url, requestEntity, ResDTO.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            ResDTO<Map<String, String>> responseBody = response.getBody();
-            if (responseBody != null && responseBody.getCode() == HttpServletResponse.SC_CREATED) {
-                Map<String, String> data = responseBody.getData();
-                if (data != null) {
-                    return data.get("url");
-                }
-            }
-        }
-        throw new RuntimeException("failed to upload file to FileService");
-    }
-
-    public boolean delete(String url, EFileType type) {
-        String serviceUrl = host + "/api/v1/file/delete/" + type.getType();
-
-
-        FileReq request = new FileReq();
-        request.setUrl(url);
-
-        ResponseEntity<ResDTO> response;
-        try {
-            response = restTemplate.postForEntity(serviceUrl, request, ResDTO.class);
-        } catch (RestClientException e) {
-            log.error("error when calling file deletion service: " + e.getMessage());
-            return false;
-        }
-
-        if (response.getStatusCode() == HttpStatus.ACCEPTED) {
-            return true;
-        } else {
-            log.error("failed to delete file: " + response.getBody().getMessage());
-            return false;
-        }
-    }
-
-    public String update(String oldUrl, MultipartFile newFile, EFileType type) throws IOException {
-        String updateUrl = host + "/api/v1/file/update/" + type.getType();
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("url", oldUrl);
-        body.add("newFile", new FileSystemResource(convertMultiPartToFile(newFile)));
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<ResDTO> response = restTemplate.postForEntity(updateUrl, requestEntity, ResDTO.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            ResDTO<Map<String, String>> responseBody = response.getBody();
-            return responseBody.getData().get("url");
-        } else {
-            throw new IOException("Failed to update file. Status: " + response.getStatusCode());
-        }
-    }
-
-    private File convertMultiPartToFile(MultipartFile file) throws IOException {
-        File convFile = new File(file.getOriginalFilename());
-        FileOutputStream fos = new FileOutputStream(convFile);
-        fos.write(file.getBytes());
-        fos.close();
-        return convFile;
+        return response.getData().get("url");
     }
 }

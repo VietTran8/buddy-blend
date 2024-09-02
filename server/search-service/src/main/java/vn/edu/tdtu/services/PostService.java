@@ -1,58 +1,48 @@
 package vn.edu.tdtu.services;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-import vn.edu.tdtu.dtos.ResDTO;
+import vn.edu.tdtu.dtos.request.FindByIdsReq;
+import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.model.Post;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.es.SyncPost;
+import vn.edu.tdtu.repository.EsPostRepository;
+import vn.edu.tdtu.repository.httpclient.PostClient;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class PostService {
-    @Value("${service.post-service.host}")
-    private String postServiceHost;
-    private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
+    private final PostClient postClient;
+    private final EsPostRepository postRepository;
 
+    public void savePost(SyncPost post) {
+        postRepository.save(post);
+    }
+
+    public void updatePost(SyncPost post) {
+        postRepository.findById(post.getId()).ifPresentOrElse(
+                foundPost -> {
+                    foundPost.setContent(post.getContent());
+                    postRepository.save(post);
+                }, () -> {
+                    throw new BadRequestException("Post not found with id: " + post.getId());
+                }
+        );
+    }
+    
+    public void deletePost(SyncPost post) {
+        postRepository.deleteById(post.getId());
+    }
+    
     public List<Post> findByContentContaining(String token, String key) {
-        String url = UriComponentsBuilder
-                .fromHttpUrl(postServiceHost + "api/v1/posts/search")
-                .queryParam("key", key)
-                .toUriString();
+        List<String> matchPostIds = postRepository.findByContent(key).stream().map(SyncPost::getId).toList();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", token);
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        try {
-            ResponseEntity<ResDTO> response = restTemplate.exchange(url, HttpMethod.GET, entity, ResDTO.class);
-            List<Post> postObjects = new ArrayList<>();
-            if (response.getBody() != null && response.getBody().getData() != null) {
-                postObjects = objectMapper.convertValue(response.getBody().getData(), new TypeReference<List<Post>>() {});
-                System.out.println("[Fetched] response data: " + response.getBody().getData());
-            }
-            return postObjects;
-        } catch (HttpClientErrorException e) {
-            System.err.println("HTTP Error: " + e.getMessage());
-            return Collections.emptyList();
-        } catch (Exception e) {
-            System.err.println("General Error: " + e.getMessage());
-            return Collections.emptyList();
-        }
+        return postClient
+                .findAll(token, new FindByIdsReq(matchPostIds))
+                .getData();
     }
 }

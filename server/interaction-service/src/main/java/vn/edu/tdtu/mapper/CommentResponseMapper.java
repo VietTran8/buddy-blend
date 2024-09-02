@@ -9,7 +9,6 @@ import vn.edu.tdtu.services.UserService;
 import vn.edu.tdtu.utils.DateUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor

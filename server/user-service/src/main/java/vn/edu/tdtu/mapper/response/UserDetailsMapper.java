@@ -121,6 +121,7 @@ public class UserDetailsMapper {
                 .filter(userFriends::contains)
                 .map(friend -> {
                     MutualFriend mutualFriend = new MutualFriend();
+
                     mutualFriend.setFullName(friend.getUserFullName());
                     mutualFriend.setId(friend.getId());
                     mutualFriend.setProfileImage(friend.getProfilePicture());
@@ -135,6 +136,7 @@ public class UserDetailsMapper {
         return getListFriends(userId).stream()
                 .map(friend -> {
                     MutualFriend mutualFriend = new MutualFriend();
+
                     mutualFriend.setFullName(friend.getUserFullName());
                     mutualFriend.setId(friend.getId());
                     mutualFriend.setProfileImage(friend.getProfilePicture());

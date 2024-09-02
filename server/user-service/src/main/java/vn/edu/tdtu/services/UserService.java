@@ -12,6 +12,7 @@ import vn.edu.tdtu.dtos.response.MinimizedUserResponse;
 import vn.edu.tdtu.dtos.response.SaveUserResponse;
 import vn.edu.tdtu.dtos.response.UserDetailsResponse;
 import vn.edu.tdtu.enums.EFileType;
+import vn.edu.tdtu.enums.ESyncType;
 import vn.edu.tdtu.enums.EUserRole;
 import vn.edu.tdtu.mapper.request.SaveUserReqMapper;
 import vn.edu.tdtu.mapper.response.MinimizedUserMapper;
@@ -20,7 +21,6 @@ import vn.edu.tdtu.models.User;
 import vn.edu.tdtu.repositories.UserRepository;
 import vn.edu.tdtu.utils.JwtUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +36,7 @@ public class UserService {
     private final FirebaseService firebaseService;
     private final MinimizedUserMapper minimizedUserMapper;
     private final UserDetailsMapper userDetailsMapper;
+    private final SendKafkaMsgService kafkaMsgService;
 
     public ResDTO<?> findAll(){
         ResDTO<List<User>> response = new ResDTO<>();
@@ -161,6 +162,8 @@ public class UserService {
                     .email(savedUser.getEmail())
                     .build());
 
+            kafkaMsgService.pubSyncUserData(savedUser, ESyncType.TYPE_CREATE);
+
         }else{
             response.setData(null);
             response.setCode(HttpServletResponse.SC_BAD_REQUEST);
@@ -201,6 +204,9 @@ public class UserService {
             response.setMessage("Cập nhật thành công!");
             response.setCode(HttpServletResponse.SC_OK);
             response.setData(userRepository.save(user));
+
+            kafkaMsgService.pubSyncUserData(user, ESyncType.TYPE_UPDATE);
+
         }else{
             response.setMessage("Không tìm thấy người dùng với id " + userId);
             response.setCode(HttpServletResponse.SC_BAD_REQUEST);
@@ -269,6 +275,9 @@ public class UserService {
             response.setMessage("Đã vô hiệu hóa tài khoản");
             response.setCode(HttpServletResponse.SC_OK);
             response.setData(userRepository.save(user));
+
+            kafkaMsgService.pubSyncUserData(user, ESyncType.TYPE_DELETE);
+
         }else{
             response.setMessage("Không tìm thấy người dùng với id: " + account.getUserId());
             response.setCode(HttpServletResponse.SC_BAD_REQUEST);

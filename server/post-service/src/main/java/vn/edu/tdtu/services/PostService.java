@@ -10,14 +10,14 @@ import vn.edu.tdtu.dtos.request.*;
 import vn.edu.tdtu.dtos.response.InteractNotification;
 import vn.edu.tdtu.dtos.response.PostResponse;
 import vn.edu.tdtu.dtos.response.ShareInfo;
-import vn.edu.tdtu.enums.EFileType;
-import vn.edu.tdtu.enums.ENotificationType;
-import vn.edu.tdtu.enums.EPostType;
-import vn.edu.tdtu.enums.EPrivacy;
+import vn.edu.tdtu.enums.*;
 import vn.edu.tdtu.mappers.request.PostPostRequestMapper;
 import vn.edu.tdtu.mappers.request.UpdatePostRequestMapper;
 import vn.edu.tdtu.mappers.response.PostResponseMapper;
-import vn.edu.tdtu.models.*;
+import vn.edu.tdtu.models.Post;
+import vn.edu.tdtu.models.PostShare;
+import vn.edu.tdtu.models.PostTag;
+import vn.edu.tdtu.models.User;
 import vn.edu.tdtu.repositories.BannedWordRepository;
 import vn.edu.tdtu.repositories.CustomPostRepository;
 import vn.edu.tdtu.repositories.PostRepository;
@@ -278,6 +278,8 @@ public class PostService {
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(postResponse);
 
+        kafkaMsgService.pubSyncPostMessage(post, ESyncType.TYPE_CREATE);
+
         return response;
     }
 
@@ -310,6 +312,8 @@ public class PostService {
                 response.setMessage("Đã cập nhật bài viết");
                 response.setCode(HttpServletResponse.SC_OK);
                 response.setData(postResponseMapper.mapToDto(token, foundPost.getId(), foundPost));
+
+                kafkaMsgService.pubSyncPostMessage(foundPost, ESyncType.TYPE_UPDATE);
 
                 return response;
             }
@@ -370,6 +374,8 @@ public class PostService {
                 response.setCode(HttpServletResponse.SC_OK);
                 response.setData(data);
 
+                kafkaMsgService.pubSyncPostMessage(foundPost, ESyncType.TYPE_DELETE);
+
                 return response;
 
             }
@@ -421,29 +427,11 @@ public class PostService {
                             User foundUser = userService.findById(token, userId);
 
                             if(foundUser != null) {
-                                PostShare postShare = new PostShare();
-
-                                postShare.setPrivacy(request.getPrivacy());
-                                postShare.setSharedAt(LocalDateTime.now());
-                                postShare.setSharedUserId(foundUser.getId());
-                                postShare.setStatus(request.getStatus());
-                                postShare.setSharedPostId(post.getId());
-                                postShare.setNormalizedStatus(StringUtils.toSlug(request.getStatus()));
-
+                                PostShare postShare = getPostShare(request, post, foundUser);
                                 postShareService.save(postShare);
 
-                                InteractNotification notification = new InteractNotification();
-                                notification.setAvatarUrl(foundUser.getProfilePicture());
-                                notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
-                                notification.setContent(notification.getUserFullName() + " đã chia sẻ bài viết của bạn");
-                                notification.setPostId(request.getPostId());
-                                notification.setTitle("Có người tương tác nè!");
-                                notification.setFromUserId(userId);
-                                notification.setToUserId(post.getUserId());
-                                notification.setType(ENotificationType.SHARE);
-                                notification.setCreateAt(new Date());
-
-                                kafkaMsgService.pushSharePostMessage(notification);
+                                InteractNotification notification = getInteractNotification(request, post, foundUser, userId);
+                                kafkaMsgService.pubSharePostMessage(notification);
 
                                 response.setMessage("Đã chia sẻ bài viết");
                                 response.setCode(HttpServletResponse.SC_OK);
@@ -462,6 +450,35 @@ public class PostService {
                 );
 
         return response;
+    }
+
+    private static PostShare getPostShare(SharePostRequest request, Post post, User foundUser) {
+        PostShare postShare = new PostShare();
+
+        postShare.setPrivacy(request.getPrivacy());
+        postShare.setSharedAt(LocalDateTime.now());
+        postShare.setSharedUserId(foundUser.getId());
+        postShare.setStatus(request.getStatus());
+        postShare.setSharedPostId(post.getId());
+        postShare.setNormalizedStatus(StringUtils.toSlug(request.getStatus()));
+
+        return postShare;
+    }
+
+    private static InteractNotification getInteractNotification(SharePostRequest request, Post post, User foundUser, String userId) {
+        InteractNotification notification = new InteractNotification();
+
+        notification.setAvatarUrl(foundUser.getProfilePicture());
+        notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
+        notification.setContent(notification.getUserFullName() + " đã chia sẻ bài viết của bạn");
+        notification.setPostId(request.getPostId());
+        notification.setTitle("Có người tương tác nè!");
+        notification.setFromUserId(userId);
+        notification.setToUserId(post.getUserId());
+        notification.setType(ENotificationType.SHARE);
+        notification.setCreateAt(new Date());
+
+        return notification;
     }
 
     public ResDTO<?> findUserPosts(String token, String uId){

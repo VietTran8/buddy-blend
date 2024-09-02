@@ -3,18 +3,14 @@ package vn.tdtu.edu.utils;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import vn.tdtu.edu.dtos.ResDTO;
 
 import java.security.Key;
 
 @Component
-@Slf4j
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
     @Value("${security.secret}")
@@ -28,19 +24,21 @@ public class JwtUtils {
         return getTokenSubject(token);
     }
 
-    public String getTokenSubject(String token){
-       String[] parts = token.split(" ");
-       log.info(token);
-       if(parts.length == 2)
-            if (validateJwtToken(parts[1])){
-                try{
-                    return Jwts.parserBuilder().setSigningKey(key()).build()
-                            .parseClaimsJws(parts[1]).getBody().getSubject();
-                }catch (ExpiredJwtException e){
-                    return e.getClaims().getSubject();
-                }
-            }
-        return null;
+    public String getTokenSubject(String bearerToken){
+        if(bearerToken == null || !bearerToken.startsWith("Bearer "))
+            throw new IllegalArgumentException("Invalid JWT token format");
+
+        String token = bearerToken.substring(7);
+
+        if (!validateJwtToken(token))
+            throw new JwtException("JWT token is invalid");
+
+        try{
+            return Jwts.parserBuilder().setSigningKey(key()).build()
+                    .parseClaimsJws(token).getBody().getSubject();
+        }catch (ExpiredJwtException e){
+            return e.getClaims().getSubject();
+        }
     }
 
     public boolean validateJwtToken(String authToken) {

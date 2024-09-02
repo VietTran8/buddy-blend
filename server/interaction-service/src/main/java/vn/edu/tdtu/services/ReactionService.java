@@ -1,9 +1,6 @@
 package vn.edu.tdtu.services;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dtos.ResDTO;
 import vn.edu.tdtu.dtos.requests.DoReactRequest;

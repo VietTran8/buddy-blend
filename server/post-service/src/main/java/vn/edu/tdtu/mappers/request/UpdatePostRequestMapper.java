@@ -5,15 +5,12 @@ import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dtos.request.UpdatePostContentRequest;
 import vn.edu.tdtu.enums.EFileType;
 import vn.edu.tdtu.models.Post;
-import vn.edu.tdtu.models.PostTag;
 import vn.edu.tdtu.services.FileService;
 import vn.edu.tdtu.utils.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor

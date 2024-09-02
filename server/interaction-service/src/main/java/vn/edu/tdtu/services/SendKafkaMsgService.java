@@ -6,8 +6,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dtos.response.InteractNotification;
 
-import java.util.Date;
-
 @Service
 @RequiredArgsConstructor
 public class SendKafkaMsgService {

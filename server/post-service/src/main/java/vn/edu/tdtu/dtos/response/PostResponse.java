@@ -2,7 +2,6 @@ package vn.edu.tdtu.dtos.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.edu.tdtu.enums.EPostType;
@@ -11,11 +10,8 @@ import vn.edu.tdtu.enums.EReactionType;
 import vn.edu.tdtu.models.User;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Data
 @NoArgsConstructor

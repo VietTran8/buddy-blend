@@ -1,6 +1,5 @@
 package vn.edu.tdtu.mapper;
 
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dtos.requests.DoCommentReactRequest;
 import vn.edu.tdtu.models.CommentReactions;

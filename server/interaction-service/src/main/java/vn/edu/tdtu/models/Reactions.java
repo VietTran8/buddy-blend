@@ -7,7 +7,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import vn.edu.tdtu.enums.EReactionType;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -19,7 +18,6 @@ public class Reactions {
     private String id;
     private EReactionType type;
     private LocalDateTime createdAt;
-
     private String userId;
     private String postId;
 }

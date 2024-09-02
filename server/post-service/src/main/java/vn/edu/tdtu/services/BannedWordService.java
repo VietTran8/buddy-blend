@@ -2,7 +2,6 @@ package vn.edu.tdtu.services;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dtos.ResDTO;
 import vn.edu.tdtu.dtos.request.CreateBannedWordReq;

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dtos.response.PostResponse;
 import vn.edu.tdtu.mappers.response.SharePostResponseMapper;
-import vn.edu.tdtu.models.Post;
 import vn.edu.tdtu.models.PostShare;
 import vn.edu.tdtu.repositories.CustomPostShareRepository;
 import vn.edu.tdtu.repositories.PostRepository;

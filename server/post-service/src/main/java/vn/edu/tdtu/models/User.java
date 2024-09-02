@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import vn.edu.tdtu.dtos.response.MutualFriend;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 @AllArgsConstructor

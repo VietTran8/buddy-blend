@@ -2,12 +2,10 @@ package vn.edu.tdtu.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.dtos.ResDTO;
 import vn.edu.tdtu.dtos.requests.DoCommentReactRequest;
 import vn.edu.tdtu.dtos.requests.DoReactRequest;
-import vn.edu.tdtu.dtos.response.InteractNotification;
 import vn.edu.tdtu.services.CommentReactionService;
 import vn.edu.tdtu.services.ReactionService;
 

@@ -71,7 +71,7 @@ public class MinimizedUserMapper {
         User foundUser = userRepository.findByIdAndActive(userId, true).orElse(null);
         List<User> friends = new ArrayList<>();
 
-        if(foundUser != null){
+        if(foundUser != null) {
             List<FriendRequest> friendRequests = friendRequestRepository.findByFromUserAndStatusOrToUserAndStatus(foundUser, EFriendReqStatus.ACCEPTED, foundUser, EFriendReqStatus.ACCEPTED);
             friends = friendRequests.stream().map(request -> {
                 if (request.getFromUser().getId().equals(userId)) {

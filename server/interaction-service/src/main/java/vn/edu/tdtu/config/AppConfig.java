@@ -12,15 +12,18 @@ import org.springframework.web.client.RestTemplate;
 public class AppConfig {
     @Value("${kafka.topic.interact-noti.name}")
     private String notificationName;
+
     @Bean
     @LoadBalanced
     public RestTemplate restTemplate(){
         return new RestTemplate();
     }
+
     @Bean
     public ObjectMapper objectMapper(){
         return new ObjectMapper();
     }
+
     @Bean
     public NewTopic interactNoti(){
         return new NewTopic(notificationName, 2, (short) 1);

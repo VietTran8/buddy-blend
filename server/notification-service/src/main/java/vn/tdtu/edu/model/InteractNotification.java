@@ -1,6 +1,5 @@
 package vn.tdtu.edu.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,8 +8,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import vn.tdtu.edu.enums.ENotificationType;
-
-import java.util.Date;
 
 @Document
 @Data

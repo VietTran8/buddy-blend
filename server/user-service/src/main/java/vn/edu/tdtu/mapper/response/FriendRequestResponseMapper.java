@@ -1,14 +1,9 @@
 package vn.edu.tdtu.mapper.response;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dtos.response.FriendRequestResponse;
 import vn.edu.tdtu.models.FriendRequest;
-import vn.edu.tdtu.services.UserService;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor

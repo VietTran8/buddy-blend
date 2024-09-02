@@ -1,19 +1,18 @@
 package vn.edu.tdtu.controllers;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.dtos.ResDTO;
 import vn.edu.tdtu.dtos.requests.AddCommentRequest;
 import vn.edu.tdtu.dtos.requests.UpdateCommentRequest;
-import vn.edu.tdtu.models.Comments;
 import vn.edu.tdtu.services.CommentsService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/comments")
 @RequiredArgsConstructor
+@Slf4j
 public class CommentController {
     private final CommentsService commentsService;
 
@@ -21,7 +20,7 @@ public class CommentController {
     public ResponseEntity<?> addComment(@RequestHeader("Authorization") String token,
                                         @RequestBody AddCommentRequest comment) {
         ResDTO<?> response = commentsService.addComment(token, comment);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/update/{id}")

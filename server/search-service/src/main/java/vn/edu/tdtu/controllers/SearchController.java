@@ -2,7 +2,6 @@ package vn.edu.tdtu.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.dtos.ResDTO;
@@ -38,7 +37,10 @@ public class SearchController {
     }
 
     @PostMapping("/history/delete/{id}")
-    public ResponseEntity<?> deleteSearchHistory(@RequestHeader("Authorization") String token, @PathVariable("id") String historyId) {
+    public ResponseEntity<?> deleteSearchHistory(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("id") String historyId
+    ) {
         ResDTO<?> response = searchService.deleteSearchHistory(token, historyId);
 
         return ResponseEntity.status(response.getCode()).body(response);

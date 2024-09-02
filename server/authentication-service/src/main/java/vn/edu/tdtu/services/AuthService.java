@@ -17,8 +17,6 @@ import vn.edu.tdtu.dtos.response.SignUpResponse;
 import vn.edu.tdtu.models.User;
 import vn.edu.tdtu.utils.JwtUtils;
 
-import java.util.Base64;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -34,9 +32,11 @@ public class AuthService {
         try{
             log.info("Password: " + password);
             log.info("Username: " + email);
+
             Authentication authentication = authenticationProvider.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
+
             if(authentication.isAuthenticated()){
                 User foundUser = userService.getUserInfo(email);
 

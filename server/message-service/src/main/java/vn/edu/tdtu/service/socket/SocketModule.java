@@ -5,13 +5,10 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.JoinRoomMessage;
 import vn.edu.tdtu.dto.SendMessage;
-import vn.edu.tdtu.model.Room;
-import vn.edu.tdtu.service.RoomService;
 
 @Component
 @Slf4j

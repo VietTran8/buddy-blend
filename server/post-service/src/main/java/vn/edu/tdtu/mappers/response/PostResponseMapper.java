@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dtos.response.PostResponse;
-import vn.edu.tdtu.dtos.response.ShareInfo;
 import vn.edu.tdtu.dtos.response.TopReacts;
 import vn.edu.tdtu.enums.EReactionType;
 import vn.edu.tdtu.models.*;
@@ -61,6 +60,8 @@ public class PostResponseMapper {
         if(token != null && !token.isEmpty()){
             log.info(token);
             userId = jwtUtils.getUserIdFromJwtToken(token);
+
+            postResponse.setMine(userId.equals(post.getUserId()));
         }else{
             userId = "";
         }

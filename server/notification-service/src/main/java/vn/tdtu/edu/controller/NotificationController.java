@@ -11,6 +11,7 @@ import vn.tdtu.edu.service.InteractNotiService;
 @RequiredArgsConstructor
 public class NotificationController {
     private final InteractNotiService interactNotiService;
+
     @GetMapping()
     public ResponseEntity<?> getAllNotifications(@RequestHeader("Authorization") String token) {
         ResDTO<?> response = interactNotiService.findAllByToken(token);

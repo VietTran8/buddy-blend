@@ -24,7 +24,7 @@ public class FileController {
     private final IFileService fileService;
 
     @PostMapping("/upload/{type}")
-    public ResponseEntity<?> uploadFile(@RequestParam("file")MultipartFile file, @PathVariable("type") String type){
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file, @PathVariable("type") String type){
         ResDTO<Map<String, String>> response = new ResDTO<>();
         Map<String, String> data = new HashMap<>();
         data.put("url", null);
@@ -77,6 +77,8 @@ public class FileController {
 
     @PostMapping("/delete/{type}")
     public ResponseEntity<?> deleteFile(@RequestBody FileReq request, @PathVariable("type") String type){
+        log.info("Delete file method called");
+
         ResDTO<Map<String, String>> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_BAD_REQUEST);
         response.setData(null);

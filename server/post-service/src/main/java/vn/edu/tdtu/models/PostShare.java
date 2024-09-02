@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import vn.edu.tdtu.enums.EPrivacy;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Document

@@ -1,7 +1,6 @@
 package vn.edu.tdtu.mapper.request;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dtos.request.SaveUserReqDTO;
 import vn.edu.tdtu.enums.EUserRole;

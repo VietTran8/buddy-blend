@@ -2,7 +2,6 @@ package vn.edu.tdtu.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,7 +10,6 @@ import vn.edu.tdtu.dtos.request.*;
 import vn.edu.tdtu.services.FriendRequestService;
 import vn.edu.tdtu.services.UserFavouriteService;
 import vn.edu.tdtu.services.UserService;
-import vn.edu.tdtu.utils.JwtUtils;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -21,6 +19,7 @@ public class UserController {
     private final UserService userService;
     private final FriendRequestService friendRequestService;
     private final UserFavouriteService userFavouriteService;
+
     @GetMapping("")
     public ResponseEntity<?> findAll(){
         ResDTO<?> response = userService.findAll();
