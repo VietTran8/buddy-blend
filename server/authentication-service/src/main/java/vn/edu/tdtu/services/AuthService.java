@@ -14,7 +14,12 @@ import vn.edu.tdtu.dtos.request.LoginRequest;
 import vn.edu.tdtu.dtos.request.SignUpRequest;
 import vn.edu.tdtu.dtos.response.LoginResponse;
 import vn.edu.tdtu.dtos.response.SignUpResponse;
+import vn.edu.tdtu.enums.EUserRole;
+import vn.edu.tdtu.exception.BadRequestException;
+import vn.edu.tdtu.exception.UnauthorizedException;
+import vn.edu.tdtu.models.AuthInfo;
 import vn.edu.tdtu.models.User;
+import vn.edu.tdtu.repository.AuthInfoRepository;
 import vn.edu.tdtu.utils.JwtUtils;
 
 @Service
@@ -25,6 +30,7 @@ public class AuthService {
     private final JwtUtils jwtUtils;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthInfoRepository authInfoRepository;
     public ResDTO<?> loginUser(LoginRequest loginRequest){
         String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
@@ -55,26 +61,34 @@ public class AuthService {
                 );
                 return responseDto;
             }
-        }catch (AuthenticationException e){
+        } catch (AuthenticationException e) {
             log.error(e.getMessage());
         }
 
-        ResDTO<?> responseDto = new ResDTO<>();
-        responseDto.setCode(HttpServletResponse.SC_UNAUTHORIZED);
-        responseDto.setMessage("Sai tên đăng nhập hoặc mật khẩu!");
-        responseDto.setData(null);
-        return responseDto;
+        throw new UnauthorizedException("Sai tên đăng nhập hoặc mật khẩu!");
     }
 
     public ResDTO<?> signUpUser(SignUpRequest request){
+        if(authInfoRepository.existsByEmail(request.getEmail())) {
+            throw new BadRequestException("Email này đã tồn tại!");
+        }
+
         ResDTO<SignUpResponse> response = new ResDTO<>();
-        request.setPassword(passwordEncoder.encode(request.getPassword()));
 
         SignUpResponse data = userService.saveUser(request);
 
+        AuthInfo authInfo = new AuthInfo();
+        authInfo.setActive(true);
+        authInfo.setRole(EUserRole.ROLE_USER);
+        authInfo.setUserId(data.getId());
+        authInfo.setEmail(request.getEmail());
+        authInfo.setHashedPassword(passwordEncoder.encode(request.getPassword()));
+
+        authInfoRepository.save(authInfo);
+
         response.setData(data);
-        response.setMessage(data != null ? "Đăng ký tài khoản thành công" : "Email đã tồn tại!");
-        response.setCode(data != null ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST);
+        response.setMessage("Đăng ký tài khoản thành công");
+        response.setCode(HttpServletResponse.SC_CREATED);
 
         return response;
     }

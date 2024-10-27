@@ -20,8 +20,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String email;
-    @JsonIgnore
-    private String hashPassword;
     private String firstName;
     private String lastName;
     private String middleName;

@@ -3,7 +3,9 @@ package vn.edu.tdtu.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.dtos.ResDTO;
@@ -96,6 +98,17 @@ public class PostController {
             @RequestBody SharePostRequest request
             ){
         ResDTO<?> response = postService.sharePost(token, request);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @GetMapping("/group/{groupId}")
+    public ResponseEntity<?> getGroupPosts(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("groupId") String groupId,
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int limit
+    ){
+        ResDTO<?> response = postService.getGroupPosts(token, groupId, page, limit);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 

@@ -20,6 +20,7 @@ public class PostPostRequestMapper {
         post.setVideoUrls(request.getVideoUrls());
         post.setType(request.getType());
         post.setCreatedAt(LocalDateTime.now());
+        post.setGroupId(request.getGroupId());
         post.setUpdatedAt(LocalDateTime.now());
         post.setNormalizedContent(StringUtils.toSlug(post.getContent()));
 

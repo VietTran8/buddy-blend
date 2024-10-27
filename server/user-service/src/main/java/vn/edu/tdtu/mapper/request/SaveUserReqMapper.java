@@ -24,7 +24,6 @@ public class SaveUserReqMapper {
         user.setMiddleName(dto.getMiddleName());
         user.setLastName(dto.getLastName());
         user.setProfilePicture(dto.getProfilePicture());
-        user.setHashPassword(dto.getPassword());
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         user.setNormalizedName(StringUtils.toSlug(user.getFirstName().concat(user.getMiddleName()).concat(user.getLastName())));

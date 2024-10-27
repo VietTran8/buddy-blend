@@ -40,6 +40,12 @@ public class GatewayConfig {
                 .route("notification-service", r -> r.path("/api/v1/notifications/**")
                         .filters(f -> f.filter(filter))
                         .uri("lb://notification-service"))
+                .route("group-service", r -> r.path("/api/v1/groups/**")
+                        .filters(f -> f.filter(filter))
+                        .uri("lb://group-service"))
+                .route("story-service", r -> r.path("/api/v1/stories/**")
+                        .filters(f -> f.filter(filter))
+                        .uri("lb://story-service"))
                 .build();
     }
 }

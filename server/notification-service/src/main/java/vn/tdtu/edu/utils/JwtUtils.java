@@ -20,8 +20,8 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    public String getUserIdFromJwtToken(String token) {
-        return getTokenSubject(token);
+    public String getUserIdFromJwtToken(String bearerToken) {
+        return getTokenSubject(bearerToken);
     }
 
     public String getTokenSubject(String bearerToken){

@@ -1,23 +1,26 @@
 package vn.edu.tdtu.security;
 
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import vn.edu.tdtu.models.AuthInfo;
 import vn.edu.tdtu.models.User;
 
 import java.util.Collection;
 import java.util.List;
 
+@Getter
 public class UserDetailsImpl implements UserDetails {
     private String id;
     private String email;
     private String password;
     private List<GrantedAuthority> roles;
     private Boolean active;
-    public static UserDetailsImpl build(User user){
+    public static UserDetailsImpl build(AuthInfo user){
         UserDetailsImpl userDetails = new UserDetailsImpl();
         userDetails.email = user.getEmail();
-        userDetails.password = user.getPassword();
+        userDetails.password = user.getHashedPassword();
         userDetails.id = user.getId();
         userDetails.active = user.getActive();
         userDetails.roles = List.of(new SimpleGrantedAuthority(user.getRole().name()));

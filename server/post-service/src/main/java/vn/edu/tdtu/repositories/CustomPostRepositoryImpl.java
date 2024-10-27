@@ -16,10 +16,11 @@ import java.util.List;
 public class CustomPostRepositoryImpl implements CustomPostRepository{
     private final MongoTemplate mongoTemplate;
     @Override
-    public List<Post> findNewsFeed(String userId, List<String> friendIds, LocalDateTime startTime) {
+    public List<Post> findNewsFeed(String userId, List<String> friendIds, List<String> groupIds, LocalDateTime startTime) {
         Criteria criteria = new Criteria().orOperator(
                 Criteria.where("userId").in(friendIds).and("privacy").in(EPrivacy.PUBLIC, EPrivacy.ONLY_FRIENDS).and("createdAt").lte(startTime),
-                Criteria.where("userId").is(userId).and("createdAt").lte(startTime)
+                Criteria.where("userId").is(userId).and("createdAt").lte(startTime),
+                Criteria.where("groupId").in(friendIds).and("createdAt").lte(startTime)
         );
         Query query = Query.query(criteria);
         return mongoTemplate.find(query, Post.class);

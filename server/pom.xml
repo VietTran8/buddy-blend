@@ -20,6 +20,8 @@
     <module>notification-service</module>
     <module>authentication-service</module>
     <module>api-gateway</module>
+    <module>group-service</module>
+    <module>story-service</module>
   </modules>
 
   <properties>

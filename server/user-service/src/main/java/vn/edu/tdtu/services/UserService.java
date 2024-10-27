@@ -79,14 +79,13 @@ public class UserService {
             response.setMessage("User fetched successfully");
             response.setData(AuthUserResponse.builder()
                             .id(foundUser.getId())
-                            .password(foundUser.getHashPassword())
                             .email(foundUser.getEmail())
                             .active(foundUser.isActive())
                             .userAvatar(foundUser.getProfilePicture())
                             .userFullName(foundUser.getUserFullName())
                             .role(foundUser.getRole() == null ? EUserRole.ROLE_USER : foundUser.getRole())
                     .build());
-        }else{
+        } else {
             response.setCode(HttpServletResponse.SC_BAD_REQUEST);
             response.setMessage("User not found with email: " + email);
             response.setData(null);

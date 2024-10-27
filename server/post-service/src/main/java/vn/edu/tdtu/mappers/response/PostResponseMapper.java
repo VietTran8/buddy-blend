@@ -3,11 +3,13 @@ package vn.edu.tdtu.mappers.response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import vn.edu.tdtu.dtos.response.GroupInfo;
 import vn.edu.tdtu.dtos.response.PostResponse;
 import vn.edu.tdtu.dtos.response.TopReacts;
 import vn.edu.tdtu.enums.EReactionType;
 import vn.edu.tdtu.models.*;
 import vn.edu.tdtu.repositories.PostShareRepository;
+import vn.edu.tdtu.services.GroupService;
 import vn.edu.tdtu.services.InteractionService;
 import vn.edu.tdtu.services.UserService;
 import vn.edu.tdtu.utils.DateUtils;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PostResponseMapper {
     private final UserService userService;
+    private final GroupService groupService;
     private final InteractionService interactionService;
     private final PostShareRepository postShareRepository;
     private final JwtUtils jwtUtils;
@@ -29,6 +32,8 @@ public class PostResponseMapper {
     public PostResponse mapToDto(String token, String postId, Post post){
         User postedUser = userService.findById(token, post.getUserId());
         List<User> taggedUsers = post.getPostTags().stream().map(PostTag::getTaggedUser).toList();
+
+        GroupInfo foundGroup = groupService.getGroupById(post.getGroupId());
 
         PostResponse postResponse = new PostResponse();
 
@@ -42,6 +47,7 @@ public class PostResponseMapper {
         postResponse.setUpdatedAt(DateUtils.localDateTimeToDate(post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now()));
         postResponse.setNoShared(postShareRepository.findBySharedPostId(post.getId()).size());
         postResponse.setUser(postedUser);
+        postResponse.setGroupInfo(foundGroup);
         postResponse.setTaggedUsers(taggedUsers);
 
         Map<EReactionType, List<Reacts>> reactionsMap = interactionService.findReactionsByPostId(token, postId);

@@ -29,6 +29,7 @@ public class Post {
     private LocalDateTime updatedAt;
     private EPrivacy privacy;
     private Boolean active;
+    private String groupId;
     @Indexed
     private EPostType type;
     @Indexed

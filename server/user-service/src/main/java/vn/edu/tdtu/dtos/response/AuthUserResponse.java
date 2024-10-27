@@ -13,7 +13,6 @@ import vn.edu.tdtu.enums.EUserRole;
 public class AuthUserResponse {
     private String id;
     private String email;
-    private String password;
     private EUserRole role;
     private Boolean active;
     private String userFullName;

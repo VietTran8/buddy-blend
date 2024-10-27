@@ -4,12 +4,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dtos.ResDTO;
 import vn.edu.tdtu.dtos.request.*;
-import vn.edu.tdtu.dtos.response.InteractNotification;
-import vn.edu.tdtu.dtos.response.PostResponse;
-import vn.edu.tdtu.dtos.response.ShareInfo;
+import vn.edu.tdtu.dtos.response.*;
 import vn.edu.tdtu.enums.*;
 import vn.edu.tdtu.mappers.request.PostPostRequestMapper;
 import vn.edu.tdtu.mappers.request.UpdatePostRequestMapper;
@@ -43,6 +43,7 @@ public class PostService {
     private final JwtUtils jwtUtils;
     private final FileService fileService;
     private final UserService userService;
+    private final GroupService groupService;
     private final ReportRepository reportRepository;
     private final PostShareService postShareService;
     private final BannedWordRepository bannedWordRepository;
@@ -133,7 +134,33 @@ public class PostService {
         return postResponseMapper.mapToDto(token, post.getId(), post);
     }
 
-    @Cacheable(key = "T(java.util.Objects).hash(#a1, #a2, #a3)", value = "news-feed", unless = "#result.data['posts'].isEmpty() or #result.data['posts'] == null")
+    public ResDTO<?> getGroupPosts(String token, String groupId, int page, int limit) {
+        ResDTO<PaginationResponse<PostResponse>> response = new ResDTO<>();
+        response.setMessage("Group posts fetched successfully");
+        response.setCode(HttpServletResponse.SC_OK);
+
+        Page<Post> groupPosts = postRepository.findByGroupId(groupId, PageRequest.of(page, limit));
+
+        String userId = jwtUtils.getUserIdFromJwtToken(token);
+
+        response.setData(new PaginationResponse<>(
+                page,
+                limit,
+                groupPosts.getTotalPages(),
+                groupPosts.stream().map(
+                        post -> {
+                            PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post);
+                            postResponse.setMine(post.getUserId().equals(userId));
+
+                            return postResponse;
+                        }
+                ).toList()
+        ));
+
+        return response;
+    }
+
+//    @Cacheable(key = "T(java.util.Objects).hash(#a1, #a2, #a3)", value = "news-feed", unless = "#result.data['posts'].isEmpty() or #result.data['posts'] == null")
     public ResDTO<?> getNewsFeed(String token, int page, int size, String startTime) {
         FetchNewsFeedReq req = new FetchNewsFeedReq();
         req.setPage(page);
@@ -149,9 +176,14 @@ public class PostService {
                 .map(User::getId)
                 .toList();
 
+        List<String> groupIds = groupService.getMyGroups(token)
+                .stream()
+                .map(GroupInfo::getId)
+                .toList();;
+
         String userId = jwtUtils.getUserIdFromJwtToken(token);
 
-        List<PostResponse> posts = customPostRepository.findNewsFeed(userId, friendIds, req.getStartTime())
+        List<PostResponse> posts = customPostRepository.findNewsFeed(userId, friendIds, groupIds, req.getStartTime())
                 .stream().map(
                         post -> {
                             PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post);

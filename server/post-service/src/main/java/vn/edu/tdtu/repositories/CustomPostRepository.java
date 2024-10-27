@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface CustomPostRepository {
-    List<Post> findNewsFeed(String userId, List<String> friendIds, LocalDateTime startTime);
+    List<Post> findNewsFeed(String userId, List<String> friendIds, List<String> groupId, LocalDateTime startTime);
 }

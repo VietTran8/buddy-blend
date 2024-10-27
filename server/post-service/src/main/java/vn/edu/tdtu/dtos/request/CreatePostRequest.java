@@ -18,5 +18,6 @@ public class CreatePostRequest {
     private EPrivacy privacy;
     private Boolean active;
     private EPostType type;
+    private String groupId;
     private List<PostTagReqDTO> postTags;
 }

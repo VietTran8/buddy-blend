@@ -8,21 +8,25 @@ import vn.tdtu.edu.dtos.FriendRequestNoti;
 import vn.tdtu.edu.dtos.Message;
 import vn.tdtu.edu.model.InteractNotification;
 import vn.tdtu.edu.service.FirebaseService;
+import vn.tdtu.edu.service.SocketModule;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class KafkaEventListener {
     private final FirebaseService firebaseService;
+    private final SocketModule socketModule;
 
     @KafkaListener(groupId = "InteractNotification", topics = "${kafka.topic.interact-noti.name}")
     public void consumeInteractTopic(InteractNotification notification){
         log.info("Interaction message: " + notification.toString());
         boolean sendResult = firebaseService.sendInteractNotification(notification);
+        socketModule.emitNotification(notification);
+
         if (sendResult)
-            log.info("Message sent to target user");
+            log.info("Notification sent to target user");
         else
-            log.info("Can not send message to the target user");
+            log.info("Can not send notification to the target user");
     }
 
     @KafkaListener(groupId = "ChattingNotification", topics = "${kafka.topic.chatting.name}")
