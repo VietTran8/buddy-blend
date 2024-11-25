@@ -31,9 +31,15 @@ public class ReactionController {
     }
 
     @PostMapping("/cmt")
-    public ResponseEntity<?> doCmtReact(@RequestHeader("Authorization") String token,
-                                     @RequestBody DoCommentReactRequest request){
-        ResDTO<?> response = commentReactionService.doReact(token, request);
+    public ResponseEntity<?> doCmtReact(@RequestBody DoCommentReactRequest request){
+        ResDTO<?> response = commentReactionService.doReact(request);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @GetMapping("/cmt")
+    public ResponseEntity<?> findByCmt(@RequestHeader(name = "Authorization") String token,
+                                        @RequestParam("cmtId") String cmtId){
+        ResDTO<?> response = commentReactionService.getReactsByCmtId(token, cmtId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 

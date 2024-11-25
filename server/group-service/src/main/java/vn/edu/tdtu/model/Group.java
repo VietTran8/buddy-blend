@@ -28,7 +28,7 @@ public class Group {
     private String cover;
     @JsonIgnore
     private boolean isDeleted;
-    @JsonFormat(pattern = "HH:mm:ss dd/MM/yyyy")
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDateTime createdAt;
     @JsonIgnore
     private String createdBy;

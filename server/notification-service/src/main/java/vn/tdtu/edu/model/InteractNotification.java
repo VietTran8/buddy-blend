@@ -9,6 +9,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import vn.tdtu.edu.enums.ENotificationType;
 
+import java.util.List;
+
 @Document
 @Data
 @NoArgsConstructor
@@ -22,9 +24,9 @@ public class InteractNotification {
     private String avatarUrl;
     private String content;
     private String title;
-    private String postId;
+    private String refId;
     private String fromUserId;
-    private String toUserId;
+    private List<String> toUserIds;
     private ENotificationType type;
     private String createAt;
 }

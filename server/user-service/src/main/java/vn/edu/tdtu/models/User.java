@@ -26,6 +26,8 @@ public class User {
     @JsonIgnore
     private String normalizedName;
     private String gender;
+    private String phone;
+    private String fromCity;
     private String profilePicture;
     private String cover;
     private String bio;
@@ -34,7 +36,9 @@ public class User {
     private LocalDateTime createdAt;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime updatedAt;
+    @JsonIgnore
     private boolean active;
+    @JsonIgnore
     private EUserRole role;
     @JsonIgnore
     @OneToMany(mappedBy = "fromUser")

@@ -11,9 +11,9 @@ import vn.edu.tdtu.model.User;
 
 import java.util.List;
 
-@FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class)
+@FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class, path = "/api/v1/users")
 public interface UserClient {
 
-    @PostMapping("/api/v1/users/by-ids")
+    @PostMapping("/by-ids")
     public ResDTO<List<User>> findByIds(@RequestHeader("Authorization") String accessToken, @RequestBody FindByUserIdsReq request);
 }

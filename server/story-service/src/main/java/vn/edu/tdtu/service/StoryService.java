@@ -2,10 +2,12 @@ package vn.edu.tdtu.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.constant.Message;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.CreateStoryRequest;
+import vn.edu.tdtu.dto.response.LatestStoriesResponse;
 import vn.edu.tdtu.dto.response.StoryIdResponse;
 import vn.edu.tdtu.dto.response.StoryResponse;
 import vn.edu.tdtu.dto.response.ViewerResponse;
@@ -16,17 +18,20 @@ import vn.edu.tdtu.model.Story;
 import vn.edu.tdtu.model.Viewer;
 import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.repository.StoryRepository;
+import vn.edu.tdtu.repository.ViewerRepository;
 import vn.edu.tdtu.utils.SecurityContextUtils;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StoryService {
     private final StoryRepository storyRepository;
+    private final ViewerRepository viewerRepository;
     private final UserService userService;
     private final StoryMapper storyMapper;
     private final ViewerMapper viewerMapper;
@@ -40,6 +45,12 @@ public class StoryService {
         story.setPrivacy(payload.getPrivacy());
         story.setMediaUrl(payload.getMediaUrl());
         story.setUserId(userId);
+        story.setThumbnailUrl(payload.getThumbnailUrl());
+        story.setMediaType(payload.getMediaType());
+        story.setFont(payload.getFont());
+        story.setContent(payload.getContent());
+        story.setBackground(payload.getBackground());
+        story.setStoryType(payload.getStoryType());
 
         storyRepository.save(story);
 
@@ -98,18 +109,56 @@ public class StoryService {
                 .orElseThrow(() -> new BadRequestException(Message.STORY_FETCHED_MSG));
 
         List<Viewer> viewers = foundStory.getViewers();
-        List<User> userViewers = userService.getUsersByIds(
-                accessToken,
-                viewers.stream().map(Viewer::getUserId).toList()
-        );
 
-        List<ViewerResponse> viewerResponses = viewerMapper.mapToDtos(viewers, userViewers);
+        Map<String, User> userMap = userService.getUsersByIds(
+                        accessToken,
+                        viewers.stream().map(Viewer::getUserId).toList()
+                )
+                .stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(
+                        User::getId,
+                        user -> user
+                ));
+
+        List<ViewerResponse> viewerResponses = viewerMapper.mapToDtos(viewers, userMap);
 
         return new ResDTO<>(
                 Message.VIEWER_NOT_FOUND_MSG,
                 viewerResponses,
                 HttpServletResponse.SC_OK
         );
+    }
+
+    public ResDTO<?> getUserStory(String accessTokenHeader, String userId) {
+        User foundUser = userService.getUserById(accessTokenHeader, userId);
+
+        List<User> friends = userService.getUserFriends(accessTokenHeader);
+
+        if(foundUser == null)
+            throw new BadRequestException(Message.USER_NOT_FOUND_MSG);
+
+        List<StoryResponse> stories = storyRepository.findUserStory(
+                        userId,
+                        SecurityContextUtils.getUserId(),
+                        friends.stream().map(User::getId).toList(),
+                        LocalDateTime.now()
+                )
+                .stream().map(story -> {
+                    StoryResponse storyResponse = storyMapper.mapToDto(story);
+                    storyResponse.setUser(foundUser);
+
+                    return storyResponse;
+                })
+                .toList();
+
+        ResDTO<List<StoryResponse>> response = new ResDTO<>();
+
+        response.setData(stories);
+        response.setMessage(Message.STORY_FETCHED_MSG);
+        response.setCode(HttpServletResponse.SC_OK);
+
+        return response;
     }
 
     public ResDTO<?> getStories(String accessToken) {
@@ -122,9 +171,34 @@ public class StoryService {
                 friends.stream().map(User::getId).toList()
         );
 
-        Map<String, List<StoryResponse>> storyResponses = stories.stream()
-                .map(story -> storyMapper.mapToDto(accessToken, story))
-                .collect(Collectors.groupingBy(StoryResponse::getUserId));
+        Map<String, User> userMap = stories
+                .stream()
+                .map(Story::getUserId)
+                .distinct()
+                .collect(Collectors.toMap(
+                        ownId -> ownId, anotherOwnId -> userService.getUserById(accessToken, anotherOwnId)
+                ));
+
+        List<LatestStoriesResponse> storyResponses = stories.stream()
+                .collect(Collectors.groupingBy(Story::getUserId))
+                .values()
+                .stream()
+                .map(storyList -> storyList.stream()
+                        .max(Comparator.comparing(Story::getCreatedAt))
+                        .map(latestStory -> {
+                            StoryResponse response = storyMapper.mapToDto(latestStory);
+                            response.setUser(userMap.get(response.getUserId()));
+
+                            LatestStoriesResponse latestStoriesResponse = new LatestStoriesResponse();
+                            latestStoriesResponse.setLatestStory(response);
+                            latestStoriesResponse.setUser(response.getUser());
+                            latestStoriesResponse.setSeenAll(!latestStory.getUserId().equals(userId) && viewerRepository.countByUserIdAndStoryIn(userId, storyList) == storyList.size());
+
+                            return latestStoriesResponse;
+                        })
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .toList();
 
         return new ResDTO<>(
                 Message.STORY_FETCHED_MSG,

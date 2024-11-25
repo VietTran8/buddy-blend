@@ -35,6 +35,7 @@ public class PostResponse implements Serializable {
     private List<TopReacts> topReacts;
     private EReactionType reacted;
     private ShareInfo shareInfo;
+    private GroupInfo groupInfo;
     private List<MinimizedUserResponse> taggedUsers;
     private boolean isMine;
 }

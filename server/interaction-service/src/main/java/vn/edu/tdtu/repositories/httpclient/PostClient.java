@@ -8,8 +8,8 @@ import vn.edu.tdtu.config.openfeign.FeignConfig;
 import vn.edu.tdtu.dtos.ResDTO;
 import vn.edu.tdtu.models.Post;
 
-@FeignClient(name = "${service.post-service.name}", configuration = FeignConfig.class)
+@FeignClient(name = "${service.post-service.name}", configuration = FeignConfig.class, path = "/api/v1/posts")
 public interface PostClient {
-    @GetMapping("api/v1/posts/{postId}")
+    @GetMapping("/{postId}")
     public ResDTO<Post> findById(@RequestHeader("Authorization") String accessToken, @PathVariable("postId") String postId);
 }

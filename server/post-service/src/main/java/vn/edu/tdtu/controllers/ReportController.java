@@ -13,9 +13,8 @@ import vn.edu.tdtu.services.ReportService;
 public class ReportController {
     private final ReportService reportService;
     @PostMapping()
-    public ResponseEntity<?> report(@RequestHeader("Authorization") String token,
-                                    @RequestBody ReportRequest requestBody){
-        ResDTO<?> response = reportService.reportPost(token, requestBody);
+    public ResponseEntity<?> report(@RequestBody ReportRequest requestBody){
+        ResDTO<?> response = reportService.reportPost(requestBody);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 

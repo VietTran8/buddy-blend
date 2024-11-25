@@ -8,6 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class JoinRoomMessage {
-    private String fromUserId;
     private String toUserId;
 }

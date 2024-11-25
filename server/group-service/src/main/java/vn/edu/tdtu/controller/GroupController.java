@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.dto.ResDTO;
-import vn.edu.tdtu.dto.request.CreateGroupRequest;
-import vn.edu.tdtu.dto.request.ModerateMemberRequest;
-import vn.edu.tdtu.dto.request.UpdateGroupRequest;
+import vn.edu.tdtu.dto.request.*;
+import vn.edu.tdtu.enums.EGetMemberOption;
+import vn.edu.tdtu.enums.EHandleLeaveType;
 import vn.edu.tdtu.service.GroupMemberService;
 import vn.edu.tdtu.service.GroupService;
 
@@ -24,7 +24,7 @@ public class GroupController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    @GetMapping("/{groupId}/min")
+    @GetMapping("/min/{groupId}")
     public ResponseEntity<?> getGroupByIdForPost(@PathVariable("groupId") String groupId){
         ResDTO<?> response = groupService.getGroupByIdForPost(groupId);
 
@@ -38,9 +38,67 @@ public class GroupController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    @GetMapping("/{groupId}/member/pending")
+    @GetMapping("/{groupId}/members")
+    public ResponseEntity<?> getAllMembersList(
+            @RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId,
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size
+    ) {
+        ResDTO<?> response = groupService.getGroupMembers(accessTokenHeader, groupId, page, size, EGetMemberOption.ALL_MEMBERS);
+
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @GetMapping("/{groupId}/members/new")
+    public ResponseEntity<?> getNewMembersList(
+            @RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId,
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size
+    ) {
+        ResDTO<?> response = groupService.getGroupMembers(accessTokenHeader, groupId, page, size, EGetMemberOption.NEW_MEMBERS);
+
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @GetMapping("/{groupId}/members/admin")
+    public ResponseEntity<?> getAdminMembersList(
+            @RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId,
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size
+    ) {
+        ResDTO<?> response = groupService.getGroupMembers(accessTokenHeader, groupId, page, size, EGetMemberOption.ADMIN_MEMBERS);
+
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @GetMapping("/{groupId}/members/friend")
+    public ResponseEntity<?> getFriendMembersList(
+            @RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId,
+            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size
+    ) {
+        ResDTO<?> response = groupService.getGroupMembers(accessTokenHeader, groupId, page, size, EGetMemberOption.FRIEND_MEMBERS);
+
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @GetMapping("/{groupId}/members/friend/all")
+    public ResponseEntity<?> getFriendMembersList(@RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId) {
+        ResDTO<?> response = groupService.getAllFriendGroupMemberUserIds(accessTokenHeader, groupId);
+
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @GetMapping("/{groupId}/members/pending")
     public ResponseEntity<?> getPendingMembersList(@RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId) {
         ResDTO<?> response = groupService.getPendingMembersList(accessTokenHeader, groupId);
+
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @GetMapping("/{groupId}/allow-fetch-post")
+    public ResponseEntity<?> getAllowFetchPost(@PathVariable("groupId") String groupId) {
+        ResDTO<?> response = groupService.isPrivateGroupOrUserJoined(groupId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -59,9 +117,33 @@ public class GroupController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    @PostMapping("/member/invite")
+    public ResponseEntity<?> inviteUsers(
+            @RequestHeader("Authorization") String tokenHeader,
+            @RequestBody InviteUsersRequest payload
+    ) {
+        groupService.inviteUsers(tokenHeader, payload);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/member/moderate")
     public ResponseEntity<?> moderateMember(@RequestBody ModerateMemberRequest payload){
         ResDTO<?> response = groupService.moderateMember(payload);
+
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @PostMapping("/member/leave")
+    public ResponseEntity<?> leaveGroup(@RequestBody LeaveGroupRequest payload){
+        ResDTO<?> response = groupService.handleCancelPendingAndLeaveGroup(payload, EHandleLeaveType.LEAVE);
+
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @PostMapping("/member/cancel-pending")
+    public ResponseEntity<?> cancelPendingGroup(@RequestBody LeaveGroupRequest payload){
+        ResDTO<?> response = groupService.handleCancelPendingAndLeaveGroup(payload, EHandleLeaveType.CANCEL_PENDING);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }

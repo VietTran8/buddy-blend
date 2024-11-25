@@ -3,19 +3,16 @@ package vn.edu.tdtu.service;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.webjars.NotFoundException;
 import vn.edu.tdtu.constant.Message;
 import vn.edu.tdtu.dto.ResDTO;
-import vn.edu.tdtu.dto.request.CreateGroupRequest;
-import vn.edu.tdtu.dto.request.FindByIdsRequest;
-import vn.edu.tdtu.dto.request.ModerateMemberRequest;
-import vn.edu.tdtu.dto.request.UpdateGroupRequest;
-import vn.edu.tdtu.dto.response.GroupIdResponse;
-import vn.edu.tdtu.dto.response.GroupMemberResponse;
-import vn.edu.tdtu.dto.response.GroupResponse;
-import vn.edu.tdtu.enums.EGroupPrivacy;
-import vn.edu.tdtu.enums.EMemberAcceptation;
+import vn.edu.tdtu.dto.request.*;
+import vn.edu.tdtu.dto.response.*;
+import vn.edu.tdtu.enums.*;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.mapper.GroupMapper;
@@ -23,6 +20,7 @@ import vn.edu.tdtu.model.Group;
 import vn.edu.tdtu.model.GroupMember;
 import vn.edu.tdtu.model.Member;
 import vn.edu.tdtu.model.data.User;
+import vn.edu.tdtu.publisher.InviteUserPublisher;
 import vn.edu.tdtu.repository.GroupMemberRepository;
 import vn.edu.tdtu.repository.GroupRepository;
 import vn.edu.tdtu.repository.MemberRepository;
@@ -30,9 +28,11 @@ import vn.edu.tdtu.repository.http.UserClient;
 import vn.edu.tdtu.utils.SecurityContextUtils;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +46,7 @@ public class GroupService {
 
     private final GroupMapper groupMapper;
     private final UserClient userClient;
+    private final InviteUserPublisher kafkaPublisher;
 
     public ResDTO<GroupIdResponse> createGroup(CreateGroupRequest payload) {
         String userId = SecurityContextUtils.getUserId();
@@ -131,9 +132,8 @@ public class GroupService {
     }
 
     public ResDTO<?> joinGroup(String groupId) {
-        ResDTO<GroupIdResponse> response = new ResDTO<>();
+        ResDTO<JoinGroupResponse> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_OK);
-        response.setData(new GroupIdResponse(groupId));
 
         Group group = groupRepository.findByIdAndIsDeleted(groupId, false).
                 orElseThrow(() -> new BadRequestException(Message.GROUP_NOT_FOUND_MSG));
@@ -166,6 +166,33 @@ public class GroupService {
         group.getGroupMembers().add(newGroupMember);
 
         groupRepository.save(group);
+
+        response.setData(new JoinGroupResponse(groupId, group.getPrivacy().equals(EGroupPrivacy.PRIVACY_PRIVATE) ? EJoinGroupStatus.PENDING : EJoinGroupStatus.SUCCESS));
+
+        return response;
+    }
+
+    @Transactional
+    public ResDTO<?> handleCancelPendingAndLeaveGroup(LeaveGroupRequest payload, EHandleLeaveType type){
+        String userId = SecurityContextUtils.getUserId();
+
+        GroupMember foundMember = type.equals(EHandleLeaveType.CANCEL_PENDING) ?  groupMemberRepository.findPendingMemberInGroup(payload.getGroupId(), payload.getMemberId())
+                .orElseThrow(() -> new BadRequestException(Message.GROUP_MEMBER_NOT_FOUND_MSG)) :
+                groupMemberRepository.findByGroupIdAndMemberId(payload.getGroupId(), payload.getMemberId())
+                .orElseThrow(() -> new BadRequestException(Message.GROUP_MEMBER_NOT_FOUND_MSG));
+
+        if(!foundMember.getMember().getUserId().equals(userId))
+            throw new BadRequestException(Message.GROUP_NOT_PERMITTED_MSG);
+
+        groupMemberService.removeGroupMemberById(foundMember.getId());
+
+        ResDTO<?> response = new ResDTO<>();
+
+        response.setData(null);
+        response.setCode(HttpServletResponse.SC_OK);
+        response.setMessage(type.equals(EHandleLeaveType.CANCEL_PENDING) ?
+                Message.GROUP_PENDING_CANCELLED_MSG :
+                Message.GROUP_LEAVED_MSG);
 
         return response;
     }
@@ -232,6 +259,31 @@ public class GroupService {
         );
     }
 
+    public void inviteUsers(String accessToken, InviteUsersRequest payload){
+        Notification notification = new Notification();
+        String userId = SecurityContextUtils.getUserId();
+
+        User foundUser = userClient.findById(accessToken, userId).getData();
+
+        if(foundUser == null)
+            throw new UnauthorizedException("You are not authenticated");
+
+        Group foundGroup = groupRepository.findByIdAndIsDeleted(payload.getGroupId(), false)
+                .orElseThrow(() -> new BadRequestException(Message.GROUP_NOT_FOUND_MSG));
+
+        notification.setAvatarUrl(foundUser.getProfilePicture());
+        notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
+        notification.setContent(notification.getUserFullName() + " mời bạn tham gia nhóm " + foundGroup.getName());
+        notification.setRefId(foundGroup.getId());
+        notification.setTitle("Lời mời tham gia nhóm");
+        notification.setFromUserId(userId);
+        notification.setToUserIds(payload.getUserIds());
+        notification.setType(ENotificationType.INVITE_USERS);
+        notification.setCreateAt(new Date());
+
+        kafkaPublisher.publishInviteUsers(notification);
+    }
+
     public ResDTO<?> getPendingMembersList(String accessToken, String groupId) {
         ResDTO<List<GroupMemberResponse>> response = new ResDTO<>();
         response.setMessage(Message.GROUP_MEMBER_FETCHED_SUCCESS_MSG);
@@ -246,13 +298,102 @@ public class GroupService {
 
         List<User> users = userClient.findByIds(accessToken, new FindByIdsRequest(memberUserIds)).getData();
 
+        Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getId, user -> user));
+
         response.setData(
-                IntStream.range(0, pendingMembers.size())
-                        .mapToObj((index) -> new GroupMemberResponse(pendingMembers.get(index), users.get(index)))
+                pendingMembers.stream()
+                        .map(member -> new GroupMemberResponse(member, userMap.get(member.getMember().getUserId())))
                         .toList()
         );
 
         return response;
+    }
+
+    public ResDTO<?> getGroupMembers(String accessToken, String groupId, int page, int size, EGetMemberOption option) {
+        ResDTO<PaginationResponse<GroupMemberResponse>> response = new ResDTO<>();
+        Page<GroupMember> memberPage;
+
+        switch (option) {
+            case ADMIN_MEMBERS -> {
+                memberPage = groupMemberRepository.findAdminMembersByGroupId(groupId, PageRequest.of(page - 1, size));
+                break;
+            }
+            case NEW_MEMBERS -> {
+                LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
+                memberPage = groupMemberRepository.findNewMembersByGroupId(groupId, threeDaysAgo, PageRequest.of(page - 1, size));
+                break;
+            }
+            case FRIEND_MEMBERS -> {
+                List<User> userFriends = userClient.findUserFriendIdsByUserToken(accessToken).getData();
+
+                memberPage = groupMemberRepository.findFriendMembersByGroupId(groupId, userFriends.stream().map(User::getId).toList(), PageRequest.of(page - 1, size));
+                break;
+            }
+            default -> {
+                memberPage = groupMemberRepository.findAllMembersByGroupId(groupId, PageRequest.of(page - 1, size));
+                break;
+            }
+        }
+
+        List<GroupMember> memberList = memberPage.get().toList();
+
+        List<String> userIds = memberList.stream().map(member -> member.getMember().getUserId()).toList();
+        List<User> users = userClient.findByIds(accessToken, new FindByIdsRequest(userIds)).getData();
+        Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getId, user -> user));
+
+        response.setData(new PaginationResponse<>(
+                page,
+                size,
+                memberPage.getTotalPages(),
+                (int) memberPage.getTotalElements(),
+                memberPage.get().map(member -> new GroupMemberResponse(member, userMap.get(member.getMember().getUserId()))).toList()
+        ));
+        response.setCode(HttpServletResponse.SC_OK);
+        response.setMessage(Message.GROUP_MEMBER_FETCHED_SUCCESS_MSG);
+
+        return response;
+    }
+
+    public ResDTO<?> getAllFriendGroupMemberUserIds(String accessToken, String groupId) {
+        ResDTO<List<String>> response = new ResDTO<>();
+
+        List<User> userFriends = userClient.findUserFriendIdsByUserToken(accessToken).getData();
+        List<GroupMember> memberList = groupMemberRepository.findFriendMembersByGroupId(groupId, userFriends.stream().map(User::getId).toList());
+
+        List<String> userIds = memberList.stream().map(member -> member.getMember().getUserId()).toList();
+
+        response.setData(userIds);
+        response.setCode(HttpServletResponse.SC_OK);
+        response.setMessage(Message.GROUP_MEMBER_FETCHED_SUCCESS_MSG);
+
+        return response;
+    }
+
+    public ResDTO<?> isPrivateGroupOrUserJoined(String groupId) {
+        String userId = SecurityContextUtils.getUserId();
+
+        if(groupRepository.getIsJoinedToGroup(groupId, userId))
+            return new ResDTO<>(
+                    Message.GROUP_MEMBER_JOINED_MSG,
+                    true,
+                    HttpServletResponse.SC_OK
+            );
+
+        Group foundGroup = groupRepository.findByIdAndIsDeleted(groupId, false)
+                .orElseThrow(() -> new NotFoundException(Message.GROUP_NOT_FOUND_MSG));
+
+        if(foundGroup.getPrivacy().equals(EGroupPrivacy.PRIVACY_PUBLIC))
+            return new ResDTO<>(
+                    Message.GROUP_IS_PUBLIC_MSG,
+                    true,
+                    HttpServletResponse.SC_OK
+            );
+
+        return new ResDTO<>(
+                Message.GROUP_IS_PRIVATE_MSG,
+                false,
+                HttpServletResponse.SC_OK
+        );
     }
 
     private List<GroupMember> getPendingGroupMembers(String groupId) {

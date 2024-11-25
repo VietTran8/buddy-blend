@@ -52,6 +52,7 @@ public class AuthService {
                 responseDto.setData(
                         LoginResponse.builder()
                                 .id(foundUser.getId())
+                                .email(foundUser.getEmail())
                                 .username(foundUser.getEmail())
                                 .token(jwtUtils.generateJwtToken(foundUser.getId()))
                                 .tokenType("Bearer")

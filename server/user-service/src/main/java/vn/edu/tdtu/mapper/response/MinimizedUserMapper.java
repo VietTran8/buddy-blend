@@ -43,6 +43,7 @@ public class MinimizedUserMapper {
             minimizedUser.setFirstName(user.getFirstName());
             minimizedUser.setMiddleName(user.getMiddleName());
             minimizedUser.setLastName(user.getLastName());
+            minimizedUser.setFirstThreeFriends(userFriends.stream().limit(3).map(friend -> friend.getProfilePicture() != null ? friend.getProfilePicture() : "").toList());
             minimizedUser.setProfilePicture(user.getProfilePicture() != null ? user.getProfilePicture() : "");
             minimizedUser.setNotificationKey(user.getNotificationKey());
 

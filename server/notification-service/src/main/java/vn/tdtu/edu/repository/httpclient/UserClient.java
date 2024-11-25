@@ -11,12 +11,12 @@ import vn.tdtu.edu.model.User;
 
 import java.util.List;
 
-@FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class)
+@FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class, path = "/api/v1/users")
 public interface UserClient {
 
-    @GetMapping("/api/v1/users/{userId}")
+    @GetMapping("/{userId}")
     public ResDTO<User> findById(@PathVariable("userId") String userId);
 
-    @GetMapping("/api/v1/users/by-ids")
+    @GetMapping("/by-ids")
     public ResDTO<List<User>> findByIds(@RequestBody FindByIdsRequest request);
 }

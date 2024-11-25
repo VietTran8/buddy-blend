@@ -22,6 +22,7 @@ public class MinimizedUserResponse {
     private LocalDateTime createdAt;
     private String userFullName;
     private String notificationKey;
+    private List<String> firstThreeFriends;
     private boolean isFriend;
     private int friendsCount;
     private List<MutualFriend> mutualFriends;

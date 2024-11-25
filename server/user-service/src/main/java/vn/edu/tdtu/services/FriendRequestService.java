@@ -9,8 +9,10 @@ import vn.edu.tdtu.dtos.request.FQAcceptationDTO;
 import vn.edu.tdtu.dtos.request.FriendReqDTO;
 import vn.edu.tdtu.dtos.response.FriendRequestNoti;
 import vn.edu.tdtu.dtos.response.FriendRequestResponse;
+import vn.edu.tdtu.dtos.response.HandleFriendRequestResponse;
 import vn.edu.tdtu.dtos.response.MinimizedUserResponse;
 import vn.edu.tdtu.enums.EFriendReqStatus;
+import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.request.AddFriendReqMapper;
 import vn.edu.tdtu.mapper.response.FriendRequestResponseMapper;
 import vn.edu.tdtu.mapper.response.MinimizedUserMapper;
@@ -19,6 +21,7 @@ import vn.edu.tdtu.models.User;
 import vn.edu.tdtu.repositories.FriendRequestRepository;
 import vn.edu.tdtu.repositories.UserRepository;
 import vn.edu.tdtu.utils.JwtUtils;
+import vn.edu.tdtu.utils.SecurityContextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,72 +40,63 @@ public class FriendRequestService {
     private final MinimizedUserMapper minimizedUserMapper;
     private final FriendRequestResponseMapper friendRequestResponseMapper;
 
-    public ResDTO<?> handleFriendRequest(String token, FriendReqDTO request){
-        String fromUserId = jwtUtils.getUserIdFromJwtToken(token);
-        ResDTO<Map<String, String>> response = new ResDTO<>();
+    public ResDTO<?> handleFriendRequest(FriendReqDTO request){
+        String fromUserId = SecurityContextUtils.getUserId();
+        ResDTO<HandleFriendRequestResponse> response = new ResDTO<>();
 
         log.info(fromUserId);
-        if(fromUserId != null){
-            if(!fromUserId.equals(request.getToUserId())){
-                FriendRequest newRequest = addFriendReqMapper.mapToObject(fromUserId, request);
-
-                if(newRequest.getFromUser() != null){
-                    if(newRequest.getToUser() != null){
-                        User fromUser = newRequest.getFromUser(),
-                                toUser = newRequest.getToUser();
-
-                        if(friendRequestRepository
-                                .findByToUserAndFromUserOrFromUserAndToUser(toUser, fromUser, toUser, fromUser)
-                                .stream().anyMatch(req -> fromUserId.equals(req.getToUser().getId()) && req.getStatus().equals(EFriendReqStatus.PENDING))) {
-
-                            throw new RuntimeException("Can not send friend request to user id: " + request.getToUserId());
-                        }
-
-                        List<User> toUserListFriends = getListFriends(toUser.getId());
-                        List<User> toUserFriendRequestList = getFromUsersViaRequests(
-                                getListFriendRequest(toUser.getId())
-                        );
-
-                        boolean isFriendOrAlreadySentReq = toUserListFriends.contains(fromUser)
-                                || toUserFriendRequestList.contains(fromUser);
-                        boolean isFriend = toUserListFriends.contains(fromUser);
-
-                        if(!isFriendOrAlreadySentReq)
-                            sendFriendRequest(newRequest, response);
-                        else{
-                            Map<String, String> data = new HashMap<>();
-
-                            if(isFriend)
-                                unfriend(data, response, fromUser, toUser);
-                            else
-                                cancelFriendRequest(data, response, fromUser,toUser);
-                        }
-                    }else{
-                        response.setData(null);
-                        response.setMessage("Không tìm thấy người dùng với id: " + request.getToUserId());
-                        response.setCode(HttpServletResponse.SC_BAD_REQUEST);
-                    }
-                }else{
-                    response.setData(null);
-                    response.setMessage("Không tìm thấy người dùng với id: " + fromUserId);
-                    response.setCode(HttpServletResponse.SC_BAD_REQUEST);
-                }
-            }
-            else{
-                response.setData(null);
-                response.setMessage("Không thể gửi lời mời kết bạn");
-                response.setCode(HttpServletResponse.SC_BAD_REQUEST);
-            }
-        }else{
-            response.setData(null);
-            response.setMessage("Chưa đăng nhập");
-            response.setCode(HttpServletResponse.SC_BAD_REQUEST);
+        if(fromUserId == null) {
+            throw new BadRequestException("Chưa đăng nhập");
         }
 
+        if(fromUserId.equals(request.getToUserId())) {
+            throw new BadRequestException("Không thể gửi lời mời kết bạn");
+        }
+
+        FriendRequest newRequest = addFriendReqMapper.mapToObject(fromUserId, request);
+
+        if(newRequest.getFromUser() == null) {
+            throw new BadRequestException("Không tìm thấy người dùng với id: " + fromUserId);
+        }
+
+        if(newRequest.getToUser() == null) {
+            throw new BadRequestException("Không tìm thấy người dùng với id: " + request.getToUserId());
+        }
+
+        User fromUser = newRequest.getFromUser(),
+                toUser = newRequest.getToUser();
+
+        if(friendRequestRepository
+                .findByToUserAndFromUserOrFromUserAndToUser(toUser, fromUser, toUser, fromUser)
+                .stream().anyMatch(req -> fromUserId.equals(req.getToUser().getId()) && req.getStatus().equals(EFriendReqStatus.PENDING))) {
+
+            throw new BadRequestException("Can not send friend request to user id: " + request.getToUserId());
+        }
+
+        List<User> toUserListFriends = getListFriends(toUser.getId());
+        List<User> toUserFriendRequestList = getFromUsersViaRequests(
+                getListFriendRequest(toUser.getId())
+        );
+
+        boolean isFriendOrAlreadySentReq = toUserListFriends.contains(fromUser)
+                || toUserFriendRequestList.contains(fromUser);
+        boolean isFriend = toUserListFriends.contains(fromUser);
+
+        HandleFriendRequestResponse responseData = new HandleFriendRequestResponse();
+
+        if(!isFriendOrAlreadySentReq) {
+            sendFriendRequest(newRequest, responseData, response);
+            return response;
+        }
+
+        if(isFriend) {
+            unfriend(responseData, response, fromUser, toUser);
+            return response;
+        }
+
+        cancelFriendRequest(responseData, response, fromUser,toUser);
         return response;
     }
-
-
 
     public List<User> getListFriends(String userId){
         User foundUser = userRepository.findByIdAndActive(userId, true).orElse(null);
@@ -121,9 +115,9 @@ public class FriendRequestService {
         return friends;
     }
 
-    public ResDTO<?> getListFriendsResp(String token){
+    public ResDTO<?> getListFriendsResp(String token, String id){
         ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        String userId = id == null ? SecurityContextUtils.getUserId() : id;
 
         List<MinimizedUserResponse> minimizedUsers = getListFriends(userId).stream().map(
                 u -> minimizedUserMapper.mapToDTO(token, u)
@@ -154,7 +148,7 @@ public class FriendRequestService {
 
     public ResDTO<?> getListFriendRequestResp(String token){
         ResDTO<List<FriendRequestResponse>> response = new ResDTO<>();
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        String userId = SecurityContextUtils.getUserId();
 
         if(userId != null){
             response.setMessage("friend request list fetched successfully");
@@ -182,7 +176,7 @@ public class FriendRequestService {
         Map<String, String> data = new HashMap<>();
         friendRequestRepository.findById(request.getFriendReqId()).ifPresentOrElse(
                 (fRequest) -> {
-                    if(fRequest.getToUser().getId().equals(jwtUtils.getUserIdFromJwtToken(token))){
+                    if(fRequest.getToUser().getId().equals(SecurityContextUtils.getUserId())){
                         data.put("requestId", fRequest.getId());
                         data.put("status", fRequest.getStatus().name());
 
@@ -241,12 +235,11 @@ public class FriendRequestService {
                 .anyMatch(req -> req.getStatus().equals(EFriendReqStatus.PENDING));
     }
 
-    private void sendFriendRequest(FriendRequest newRequest, ResDTO<Map<String, String>> response){
+    private void sendFriendRequest(FriendRequest newRequest, HandleFriendRequestResponse responseData, ResDTO<HandleFriendRequestResponse> response){
         friendRequestRepository.save(newRequest);
 
-        Map<String, String> data = new HashMap<>();
-        data.put("requestId", newRequest.getId());
-        data.put("status", newRequest.getStatus().name());
+        responseData.setRequestId(newRequest.getId());
+        responseData.setStatus(newRequest.getStatus());
 
         FriendRequestNoti notification = new FriendRequestNoti();
         notification.setAvatarUrl(newRequest.getFromUser().getProfilePicture());
@@ -257,18 +250,18 @@ public class FriendRequestService {
 
         kafkaMsgService.pubFriendRequestNoti(notification);
 
-        response.setData(data);
+        response.setData(responseData);
         response.setMessage("Đã gửi lời mời kết bạn");
         response.setCode(HttpServletResponse.SC_OK);
     }
 
-    private void unfriend(Map<String, String> data, ResDTO<Map<String, String>> response, User fromUser, User toUser){
+    private void unfriend(HandleFriendRequestResponse data, ResDTO<HandleFriendRequestResponse> response, User fromUser, User toUser){
         List<FriendRequest> friendRequests = friendRequestRepository.findByToUserAndFromUserOrFromUserAndToUser(toUser, fromUser, toUser, fromUser).stream().filter(req -> req.isActive() && req.getStatus().equals(EFriendReqStatus.ACCEPTED)).toList();
         FriendRequest friendRequest = friendRequests.stream().findFirst().orElse(null);
         if(friendRequest != null){
             friendRequestRepository.delete(friendRequest);
-            data.put("requestId", friendRequest.getId());
-            data.put("status", EFriendReqStatus.CANCELLED.name());
+            data.setRequestId(friendRequest.getId());
+            data.setStatus(EFriendReqStatus.CANCELLED);
 
             response.setData(data);
             response.setMessage("Đã hủy kết bạn");
@@ -280,13 +273,13 @@ public class FriendRequestService {
         }
     }
 
-    private void cancelFriendRequest(Map<String, String> data, ResDTO<Map<String, String>> response, User fromUser, User toUser){
+    private void cancelFriendRequest(HandleFriendRequestResponse data, ResDTO<HandleFriendRequestResponse> response, User fromUser, User toUser){
         List<FriendRequest> friendRequests = friendRequestRepository.findByToUserAndFromUserOrFromUserAndToUser(toUser, fromUser, toUser, fromUser).stream().filter(req -> req.isActive() && req.getStatus().equals(EFriendReqStatus.PENDING)).toList();
         FriendRequest friendRequest = friendRequests.stream().findFirst().orElse(null);
         if(friendRequest != null){
             friendRequestRepository.delete(friendRequest);
-            data.put("requestId", friendRequest.getId());
-            data.put("status", EFriendReqStatus.CANCELLED.name());
+            data.setRequestId(friendRequest.getId());
+            data.setStatus(EFriendReqStatus.CANCELLED);
 
             response.setData(data);
             response.setMessage("Đã hủy gửi lời mời kết bạn");

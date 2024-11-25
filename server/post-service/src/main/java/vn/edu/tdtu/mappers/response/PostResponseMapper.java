@@ -29,11 +29,17 @@ public class PostResponseMapper {
     private final PostShareRepository postShareRepository;
     private final JwtUtils jwtUtils;
 
-    public PostResponse mapToDto(String token, String postId, Post post){
-        User postedUser = userService.findById(token, post.getUserId());
+    public PostResponse mapToDto(String token, String postId, Post post, boolean bulkFetch){
+        User postedUser = new User();
+        if(!bulkFetch)
+            postedUser =  userService.findById(token, post.getUserId());
+
         List<User> taggedUsers = post.getPostTags().stream().map(PostTag::getTaggedUser).toList();
 
-        GroupInfo foundGroup = groupService.getGroupById(post.getGroupId());
+        GroupInfo foundGroup = null;
+
+        if(post.getGroupId() != null && !post.getGroupId().isEmpty())
+            foundGroup = groupService.getGroupById(token, post.getGroupId());
 
         PostResponse postResponse = new PostResponse();
 
@@ -46,9 +52,10 @@ public class PostResponseMapper {
         postResponse.setCreatedAt(DateUtils.localDateTimeToDate(post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now()));
         postResponse.setUpdatedAt(DateUtils.localDateTimeToDate(post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now()));
         postResponse.setNoShared(postShareRepository.findBySharedPostId(post.getId()).size());
-        postResponse.setUser(postedUser);
         postResponse.setGroupInfo(foundGroup);
         postResponse.setTaggedUsers(taggedUsers);
+        postResponse.setHiddenCreatedAt(DateUtils.localDateTimeToDate((post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now())));
+        postResponse.setUser(postedUser);
 
         Map<EReactionType, List<Reacts>> reactionsMap = interactionService.findReactionsByPostId(token, postId);
 
@@ -56,15 +63,14 @@ public class PostResponseMapper {
                 .mapToInt(List::size)
                 .sum() : 0;
 
-        List<Comment> comments = interactionService.findCommentsByPostId(token, postId);
+        long commentsCount = interactionService.countCommentByPostId(token, postId);
 
         postResponse.setTopReacts(findTopReact(reactionsMap != null ? reactionsMap : new HashMap<>()));
         postResponse.setNoReactions(totalElements);
-        postResponse.setNoComments(comments != null ? comments.size() : 0);
+        postResponse.setNoComments(commentsCount);
 
         String userId;
         if(token != null && !token.isEmpty()){
-            log.info(token);
             userId = jwtUtils.getUserIdFromJwtToken(token);
 
             postResponse.setMine(userId.equals(post.getUserId()));

@@ -23,6 +23,16 @@ public class StoryController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUserStory(
+            @RequestHeader("Authorization") String accessTokenHeader,
+            @PathVariable("userId") String userId
+    ) {
+        ResDTO<?> response = storyService.getUserStory(accessTokenHeader, userId);
+
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
     @GetMapping("/views/{storyId}")
     public ResponseEntity<?> getViews(
             @RequestHeader("Authorization") String accessTokenHeader,
@@ -48,7 +58,7 @@ public class StoryController {
     }
 
     @PostMapping("/react")
-    public ResponseEntity<?> countDoReaction(@RequestHeader("Authorization") String tokenHeader, @RequestBody DoReactRequest payload) {
+    public ResponseEntity<?> doReaction(@RequestHeader("Authorization") String tokenHeader, @RequestBody DoReactRequest payload) {
         ResDTO<?> response = reactionService.doReact(tokenHeader, payload);
 
         return ResponseEntity.status(response.getCode()).body(response);

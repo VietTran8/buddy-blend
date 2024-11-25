@@ -2,6 +2,7 @@ package vn.edu.tdtu.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dtos.ResDTO;
 import vn.edu.tdtu.dtos.response.GroupInfo;
@@ -15,8 +16,9 @@ import java.util.List;
 public class GroupService {
     private final GroupClient groupClient;
 
-    public GroupInfo getGroupById(String groupId) {
-        ResDTO<GroupInfo> response = groupClient.getGroupInfoById(groupId);
+    @Cacheable(key = "T(java.util.Objects).hash(#a0, #a1)", value = "single-group", unless = "#result == null")
+    public GroupInfo getGroupById(String accessToken, String groupId) {
+        ResDTO<GroupInfo> response = groupClient.getGroupInfoById(accessToken, groupId);
         log.info("getGroupById: " + response.toString());
 
         return response.getData();
@@ -27,5 +29,12 @@ public class GroupService {
         log.info("getMyGroups: " + response.toString());
 
         return response.getData();
+    }
+
+    public boolean allowFetchPost(String accessToken, String groupId) {
+        ResDTO<Boolean> allowResponse = groupClient.allowFetchPost(accessToken, groupId);
+        log.info("getAllowFetch: " + allowResponse.toString());
+
+        return allowResponse.getData();
     }
 }

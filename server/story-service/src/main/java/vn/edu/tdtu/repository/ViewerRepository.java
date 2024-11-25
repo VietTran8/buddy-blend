@@ -5,9 +5,11 @@ import org.springframework.stereotype.Repository;
 import vn.edu.tdtu.model.Story;
 import vn.edu.tdtu.model.Viewer;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @Repository
 public interface ViewerRepository extends JpaRepository<Viewer, String> {
-    Optional<Viewer> findByStoryAndUserId(Story story, String userId);
+    Optional<Viewer> findTopByStoryAndUserId(Story story, String userId);
+    long countByUserIdAndStoryIn(String userId, Collection<Story> story);
 }

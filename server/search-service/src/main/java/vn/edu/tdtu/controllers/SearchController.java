@@ -37,18 +37,15 @@ public class SearchController {
     }
 
     @PostMapping("/history/delete/{id}")
-    public ResponseEntity<?> deleteSearchHistory(
-            @RequestHeader("Authorization") String token,
-            @PathVariable("id") String historyId
-    ) {
-        ResDTO<?> response = searchService.deleteSearchHistory(token, historyId);
+    public ResponseEntity<?> deleteSearchHistory(@PathVariable("id") String historyId) {
+        ResDTO<?> response = searchService.deleteSearchHistory(historyId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/history/clear")
-    public ResponseEntity<?> clearSearchHistory(@RequestHeader("Authorization") String token) {
-        ResDTO<?> response = searchService.deleteAllSearchHistory(token);
+    public ResponseEntity<?> clearSearchHistory() {
+        ResDTO<?> response = searchService.deleteAllSearchHistory();
 
         return ResponseEntity.status(response.getCode()).body(response);
     }

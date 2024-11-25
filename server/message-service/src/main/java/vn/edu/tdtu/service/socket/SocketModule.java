@@ -1,24 +1,28 @@
 package vn.edu.tdtu.service.socket;
 
 import com.corundumstudio.socketio.AckRequest;
+import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.JoinRoomMessage;
 import vn.edu.tdtu.dto.SendMessage;
+import vn.edu.tdtu.exception.UnauthorizedException;
+import vn.edu.tdtu.utils.JwtUtils;
 
 @Component
 @Slf4j
 public class SocketModule {
-    private final SocketIOServer server;
     private final SocketService socketService;
+    private final JwtUtils jwtUtils;
 
-    public SocketModule(SocketIOServer server, SocketService socketService){
-        this.server = server;
+    public SocketModule(SocketIOServer server, JwtUtils jwtUtils, SocketService socketService){
         this.socketService = socketService;
+        this.jwtUtils = jwtUtils;
 
         server.addConnectListener(onConnected());
         server.addEventListener("send_message", SendMessage.class, onMessageReceived());
@@ -29,7 +33,26 @@ public class SocketModule {
         return new ConnectListener() {
             @Override
             public void onConnect(SocketIOClient client) {
-                log.info("Socket ID[{}] Connected to chat module through", client.getSessionId().toString());
+                HandshakeData handshakeData = client.getHandshakeData();
+                String bearerToken = handshakeData.getHttpHeaders().get("Authorization");
+
+                if(bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+                    client.disconnect();
+                    throw new IllegalArgumentException("Invalid JWT token format");
+                }
+
+                String token = bearerToken.split(" ")[1];
+
+                if(!jwtUtils.validateJwtToken(token)) {
+                    client.disconnect();
+                    throw new UnauthorizedException("You are not authenticated");
+                }
+
+                String userId = jwtUtils.getUserIdFromJwtToken(bearerToken);
+
+                client.set("userId", userId);
+
+                log.info("User [{}] with session id {} has connected to chat module", userId, client.getSessionId().toString());
             }
         };
     }

@@ -11,6 +11,7 @@ import vn.edu.tdtu.models.User;
 import vn.edu.tdtu.models.UserFavourite;
 import vn.edu.tdtu.repositories.UserFavouriteRepository;
 import vn.edu.tdtu.utils.JwtUtils;
+import vn.edu.tdtu.utils.SecurityContextUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class UserFavouriteService {
     private final FavDetailResponseMapper favDetailResponseMapper;
 
     public ResDTO<?> getUserFavById(String token, String favId) {
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        String userId = SecurityContextUtils.getUserId();
         ResDTO<UserFavouriteDetailResp> response = new ResDTO<>();
 
         User foundUser = userService.findById(userId);
@@ -50,8 +51,8 @@ public class UserFavouriteService {
         return response;
     }
 
-    public ResDTO<?> getUserFavourites(String token) {
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+    public ResDTO<?> getUserFavourites() {
+        String userId = SecurityContextUtils.getUserId();
         ResDTO<List<UserFavouriteResponse>> response = new ResDTO<>();
 
         User foundUser = userService.findById(userId);
@@ -62,6 +63,7 @@ public class UserFavouriteService {
                         userFavouriteResponse.setId(fav.getId());
                         userFavouriteResponse.setName(fav.getName());
                         userFavouriteResponse.setCreatedAt(fav.getCreatedAt());
+                        userFavouriteResponse.setPostCount(fav.getPostIds().size());
 
                         return userFavouriteResponse;
                     }).toList());
@@ -74,10 +76,10 @@ public class UserFavouriteService {
         throw new RuntimeException("User not found with id: " + userId);
     }
 
-    public ResDTO<?> saveUserFavorite(String token, SaveUserFavouriteDTO request){
+    public ResDTO<?> saveUserFavorite(SaveUserFavouriteDTO request){
         AtomicReference<String> message = new AtomicReference<>();
         AtomicReference<String> savedId = new AtomicReference<>();
-        User foundUser = userService.findById(jwtUtils.getUserIdFromJwtToken(token));
+        User foundUser = userService.findById(SecurityContextUtils.getUserId());
 
         userFavouriteRepository.findByNameAndUser(request.getName(), foundUser)
                 .ifPresentOrElse(

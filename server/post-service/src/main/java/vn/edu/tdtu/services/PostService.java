@@ -3,7 +3,6 @@ package vn.edu.tdtu.services;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -11,6 +10,7 @@ import vn.edu.tdtu.dtos.ResDTO;
 import vn.edu.tdtu.dtos.request.*;
 import vn.edu.tdtu.dtos.response.*;
 import vn.edu.tdtu.enums.*;
+import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mappers.request.PostPostRequestMapper;
 import vn.edu.tdtu.mappers.request.UpdatePostRequestMapper;
 import vn.edu.tdtu.mappers.response.PostResponseMapper;
@@ -21,9 +21,8 @@ import vn.edu.tdtu.models.User;
 import vn.edu.tdtu.repositories.BannedWordRepository;
 import vn.edu.tdtu.repositories.CustomPostRepository;
 import vn.edu.tdtu.repositories.PostRepository;
-import vn.edu.tdtu.repositories.ReportRepository;
 import vn.edu.tdtu.utils.DateUtils;
-import vn.edu.tdtu.utils.JwtUtils;
+import vn.edu.tdtu.utils.SecurityContextUtils;
 import vn.edu.tdtu.utils.StringUtils;
 
 import java.time.LocalDateTime;
@@ -40,11 +39,9 @@ public class PostService {
     private final PostPostRequestMapper postPostRequestMapper;
     private final UpdatePostRequestMapper updatePostRequestMapper;
     private final CustomPostRepository customPostRepository;
-    private final JwtUtils jwtUtils;
     private final FileService fileService;
     private final UserService userService;
     private final GroupService groupService;
-    private final ReportRepository reportRepository;
     private final PostShareService postShareService;
     private final BannedWordRepository bannedWordRepository;
     private final SendKafkaMsgService kafkaMsgService;
@@ -61,7 +58,7 @@ public class PostService {
                 .ifPresentOrElse(
                         post -> {
                             response.setMessage("success");
-                            response.setData(postResponseMapper.mapToDto(token, post.getId(), post));
+                            response.setData(postResponseMapper.mapToDto(token, post.getId(), post, false));
                             response.setCode(HttpServletResponse.SC_OK);
                         }, () -> {
                             PostResponse postResponse = postShareService.findPostRespById(token, postId);
@@ -78,26 +75,45 @@ public class PostService {
         return response;
     }
 
-    public ResDTO<?> findPostRespByIds(String token, FindByIdsReq req){
-        ResDTO<List<PostResponse>> response = new ResDTO<>();
-        List<PostResponse> postResponses = new ArrayList<>();
+    public ResDTO<List<PostResponse>> findPostRespByIds(String token, FindByIdsReq req){
+        String userId = SecurityContextUtils.getUserId();
 
-        req.getIds().forEach(postId -> {
-            postRepository.findById(postId)
-                    .ifPresentOrElse(
-                            post -> {
-                                postResponses.add(postResponseMapper.mapToDto(token, post.getId(), post));
-                            }, () -> {
-                                PostResponse postResponse = postShareService.findPostRespById(token, postId);
-                                if(postResponse != null) {
-                                    postResponses.add(postResponse);
-                                }
-                            }
-                    );
-        });
+        ResDTO<List<PostResponse>> response = new ResDTO<>();
+        List<String> ids = req.getIds();
+
+        List<Post> foundPosts = postRepository.findByIdIn(ids);
+        List<PostShare> foundSharePosts = postShareService.findByIds(ids);
+
+        List<String> sharedPostIds = foundSharePosts.stream().map(PostShare::getSharedPostId).toList();
+        Map<String, String> userIdsMap = postRepository.findAllById(sharedPostIds).stream().collect(Collectors.toMap(
+                Post::getId, Post::getUserId
+        ));
+
+        List<String> postedUserIdsDistinct = Stream.concat(
+                        foundPosts.stream().map(Post::getUserId),
+                        Stream.concat(
+                                foundSharePosts.stream().map(PostShare::getSharedUserId),
+                                foundSharePosts.stream().map(post -> userIdsMap.get(post.getSharedPostId()))
+                        )
+                )
+                .distinct()
+                .toList();
+
+        Map<String, User> postedUserMap = userService.findByIds(token, postedUserIdsDistinct)
+                .stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+
+        List<PostResponse> posts = foundPosts.stream().map(
+                post -> {
+                    PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post, true);
+                    postResponse.setUser(postedUserMap.get(post.getUserId()));
+                    postResponse.setMine(post.getUserId().equals(userId));
+                    return postResponse;
+                }
+        ).toList();
 
         response.setCode(200);
-        response.setData(postResponses);
+        response.setData(posts);
         response.setMessage("success");
 
         return response;
@@ -131,26 +147,37 @@ public class PostService {
     }
 
     public PostResponse mapToPostResponse (String token, Post post) {
-        return postResponseMapper.mapToDto(token, post.getId(), post);
+        return postResponseMapper.mapToDto(token, post.getId(), post, false);
     }
 
     public ResDTO<?> getGroupPosts(String token, String groupId, int page, int limit) {
+        if(!groupService.allowFetchPost(token, groupId))
+            throw new BadRequestException("This group is private and you are not joined it");
+
         ResDTO<PaginationResponse<PostResponse>> response = new ResDTO<>();
         response.setMessage("Group posts fetched successfully");
         response.setCode(HttpServletResponse.SC_OK);
 
-        Page<Post> groupPosts = postRepository.findByGroupId(groupId, PageRequest.of(page, limit));
+        Page<Post> groupPosts = postRepository.findByGroupIdOrderByCreatedAtDesc(groupId, PageRequest.of(page - 1, limit));
+        List<String> postedUserIds = groupPosts.map(Post::getUserId).stream().distinct().toList();
 
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        Map<String, User> postedUserMap = userService.findByIds(token, postedUserIds)
+                .stream().collect(Collectors.toMap(
+                        User::getId, user -> user
+                ));
+
+        String userId = SecurityContextUtils.getUserId();
 
         response.setData(new PaginationResponse<>(
                 page,
                 limit,
                 groupPosts.getTotalPages(),
-                groupPosts.stream().map(
+                groupPosts.stream()
+                        .map(
                         post -> {
-                            PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post);
+                            PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post, true);
                             postResponse.setMine(post.getUserId().equals(userId));
+                            postResponse.setUser(postedUserMap.get(post.getUserId()));
 
                             return postResponse;
                         }
@@ -169,7 +196,7 @@ public class PostService {
 
         int startIndex = (req.getPage() - 1) * req.getSize();
 
-        ResDTO<Map<String, Object>> response = new ResDTO<>();
+        ResDTO<PaginationResponse<PostResponse>> response = new ResDTO<>();
 
         List<String> friendIds = userService.findUserFriendIdsByUserToken(token)
                 .stream()
@@ -179,22 +206,46 @@ public class PostService {
         List<String> groupIds = groupService.getMyGroups(token)
                 .stream()
                 .map(GroupInfo::getId)
-                .toList();;
+                .toList();
 
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        String userId = SecurityContextUtils.getUserId();
 
-        List<PostResponse> posts = customPostRepository.findNewsFeed(userId, friendIds, groupIds, req.getStartTime())
-                .stream().map(
-                        post -> {
-                            PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post);
-                            postResponse.setMine(post.getUserId().equals(userId));
-                            return postResponse;
-                        }
-                ).toList();
+        List<Post> fetchedPosts = customPostRepository.findNewsFeed(userId, friendIds, groupIds, req.getStartTime());
+        List<PostShare> fetchedSharedPost = postShareService.findSharedPostByFriendIds(friendIds, userId, req.getStartTime());
+
+        List<String> postIds = fetchedSharedPost.stream().map(PostShare::getSharedPostId).toList();
+        Map<String, String> userIdsMap = postRepository.findAllById(postIds).stream().collect(Collectors.toMap(
+                Post::getId, Post::getUserId
+        ));
+
+        //New codes
+        List<String> postedUserIdsDistinct = Stream.concat(
+                        fetchedPosts.stream().map(Post::getUserId),
+                        Stream.concat(
+                                fetchedSharedPost.stream().map(PostShare::getSharedUserId),
+                                fetchedSharedPost.stream().map(post -> userIdsMap.get(post.getSharedPostId()))
+                        )
+                )
+                .distinct()
+                .toList();
+
+        Map<String, User> postedUserMap = userService.findByIds(token, postedUserIdsDistinct)
+                .stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+        //End new codes
 
         //Todo: Find shared posts then combine all of them with pagination
 
-        List<PostResponse> sharedPosts = postShareService.findSharedPostByFriendIds(friendIds, userId, req.getStartTime())
+        List<PostResponse> posts = fetchedPosts.stream().map(
+                post -> {
+                    PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post, true);
+                    postResponse.setUser(postedUserMap.get(post.getUserId()));
+                    postResponse.setMine(post.getUserId().equals(userId));
+                    return postResponse;
+                }
+        ).toList();
+
+        List<PostResponse> sharedPosts = fetchedSharedPost
                 .stream()
                         .filter(postShare -> {
                             if(postShare.getPrivacy().equals(EPrivacy.PRIVATE)){
@@ -205,52 +256,61 @@ public class PostService {
                         })
                         .map(
                         postShare -> {
-                            Post foundPost = findPostById(postShare.getSharedPostId());
-                            if(foundPost != null){
-                                PostResponse postResponse = postResponseMapper.mapToDto(token, postShare.getId(), foundPost);
-                                postResponse.setMine(foundPost.getUserId().equals(userId));
-                                postResponse.setType(EPostType.SHARE);
-
-                                ShareInfo shareInfo = new ShareInfo();
-                                shareInfo.setStatus(postShare.getStatus());
-                                shareInfo.setSharedUser(userService.findById(token, postShare.getSharedUserId()));
-                                shareInfo.setSharedAt(DateUtils.localDateTimeToDate(postShare.getSharedAt()));
-                                shareInfo.setId(postShare.getId());
-                                shareInfo.setPrivacy(postShare.getPrivacy());
-
-                                postResponse.setShareInfo(shareInfo);
-                                postResponse.setCreatedAt(DateUtils.localDateTimeToDate(postShare.getSharedAt()));
-
-                                return postResponse;
-                            }
-                            return null;
+                            return getPostShareResponse(token, postedUserMap, postShare, userId);
                         }
                 )
                 .filter(Objects::nonNull)
                 .toList();
 
         Stream<PostResponse> combinedPosts = Stream.concat(posts.stream(), sharedPosts.stream())
-                .sorted(Comparator.comparing(PostResponse::getCreatedAt).reversed());
+                .sorted(Comparator.comparing(PostResponse::getHiddenCreatedAt).reversed());
 
         List<PostResponse> allPost = combinedPosts.toList();
 
-        Map<String, Object> data = new HashMap<>();
+        PaginationResponse<PostResponse> paginationResponse = new PaginationResponse<>();
 
-        data.put("totalPages", allPost.size() / req.getSize());
-        data.put("posts", allPost.stream().skip(startIndex)
-                .limit(req.getSize()).toList());
+        paginationResponse.setData(
+                allPost.stream().skip(startIndex)
+                .limit(req.getSize()).toList()
+        );
+        paginationResponse.setPage(page);
+        paginationResponse.setLimit(size);
+        paginationResponse.setTotalPages((int) Math.ceil(allPost.size() * 1.0 / req.getSize()));
 
-        response.setData(data);
+        response.setData(paginationResponse);
         response.setCode(HttpServletResponse.SC_OK);
         response.setMessage("success");
 
         return response;
     }
 
+    private PostResponse getPostShareResponse(String token, Map<String, User> postedUserMap, PostShare postShare, String userId) {
+        Post foundPost = findPostById(postShare.getSharedPostId());
+        if(foundPost != null){
+            PostResponse postResponse = postResponseMapper.mapToDto(token, postShare.getId(), foundPost, true);
+            postResponse.setUser(postedUserMap.get(foundPost.getUserId()));
+            postResponse.setMine(postShare.getSharedUserId().equals(userId));
+            postResponse.setType(EPostType.SHARE);
+            postResponse.setHiddenCreatedAt(DateUtils.localDateTimeToDate(postShare.getSharedAt()));
+
+            ShareInfo shareInfo = new ShareInfo();
+            shareInfo.setStatus(postShare.getStatus());
+            shareInfo.setSharedUser(postedUserMap.get(postShare.getSharedUserId()));
+            shareInfo.setSharedAt(DateUtils.localDateTimeToDate(postShare.getSharedAt()));
+            shareInfo.setId(postShare.getId());
+            shareInfo.setPrivacy(postShare.getPrivacy());
+
+            postResponse.setShareInfo(shareInfo);
+
+            return postResponse;
+        }
+        return null;
+    }
+
     public ResDTO<?> findByContentContaining(String token, String key){
         ResDTO<List<PostResponse>> response = new ResDTO<>();
         response.setData(Stream.concat(postRepository.findByContent(key).stream().map(
-                p -> postResponseMapper.mapToDto(token, p.getId(), p)
+                p -> postResponseMapper.mapToDto(token, p.getId(), p, false)
         ), postShareService.searchSharePost(token, key).stream()).toList());
         response.setMessage("success");
         response.setCode(HttpServletResponse.SC_OK);
@@ -299,11 +359,11 @@ public class PostService {
                 ).toList()
         );
 
-        post.setUserId(jwtUtils.getUserIdFromJwtToken(token));
+        post.setUserId(SecurityContextUtils.getUserId());
         post = postRepository.save(post);
 
-        PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post);
-        postResponse.setMine(post.getUserId().equals(jwtUtils.getUserIdFromJwtToken(token)));
+        PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post, false);
+        postResponse.setMine(post.getUserId().equals(SecurityContextUtils.getUserId()));
 
         ResDTO<PostResponse> response = new ResDTO<>();
         response.setMessage("Đã đăng bài viết");
@@ -316,42 +376,38 @@ public class PostService {
     }
 
     public ResDTO<?> updatePostContent(String token, UpdatePostContentRequest request){
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        String userId = SecurityContextUtils.getUserId();
 
         Post foundPost = findPostById(request.getId());
         ResDTO<PostResponse> response = new ResDTO<>();
 
         if(foundPost != null){
-            if(foundPost.getUserId().equals(userId)){
-                updatePostRequestMapper.bindToObject(request, foundPost);
+            if(!foundPost.getUserId().equals(userId))
+                throw new BadRequestException("Không thể cập nhật bài viết của người khác");
 
-                List<User> taggedUser = userService.findByIds(token, request.getTaggingUsers());
+            updatePostRequestMapper.bindToObject(request, foundPost);
 
-                foundPost.setPostTags(
-                        taggedUser.stream().map(
-                                user -> {
-                                    PostTag postTag = new PostTag();
-                                    postTag.setId(UUID.randomUUID().toString());
-                                    postTag.setCreatedAt(LocalDateTime.now());
-                                    postTag.setTaggedUser(user);
-                                    return postTag;
-                                }
-                        ).toList()
-                );
+            List<User> taggedUser = userService.findByIds(token, request.getTaggingUsers());
 
-                postRepository.save(foundPost);
+            foundPost.setPostTags(
+                    taggedUser.stream().map(
+                            user -> {
+                                PostTag postTag = new PostTag();
+                                postTag.setId(UUID.randomUUID().toString());
+                                postTag.setCreatedAt(LocalDateTime.now());
+                                postTag.setTaggedUser(user);
+                                return postTag;
+                            }
+                    ).toList()
+            );
 
-                response.setMessage("Đã cập nhật bài viết");
-                response.setCode(HttpServletResponse.SC_OK);
-                response.setData(postResponseMapper.mapToDto(token, foundPost.getId(), foundPost));
+            postRepository.save(foundPost);
 
-                kafkaMsgService.pubSyncPostMessage(foundPost, ESyncType.TYPE_UPDATE);
+            response.setMessage("Đã cập nhật bài viết");
+            response.setCode(HttpServletResponse.SC_OK);
+            response.setData(postResponseMapper.mapToDto(token, foundPost.getId(), foundPost, false));
 
-                return response;
-            }
-            response.setMessage("Không thể cập nhật bài viết của người khác");
-            response.setCode(HttpServletResponse.SC_BAD_REQUEST);
-            response.setData(null);
+            kafkaMsgService.pubSyncPostMessage(foundPost, ESyncType.TYPE_UPDATE);
 
             return response;
         }
@@ -363,36 +419,28 @@ public class PostService {
     }
 
     private void updateSharePost(String token, UpdatePostContentRequest request, String userId, ResDTO<PostResponse> response) {
-        postShareService.findById(request.getId()).ifPresentOrElse(
-                postShare -> {
-                    if(postShare.getSharedUserId().equals(userId)){
-                        postShare.setPrivacy(request.getPrivacy());
-                        postShare.setStatus(request.getContent());
-                        postShare.setNormalizedStatus(StringUtils.toSlug(request.getContent()));
+        PostShare postShare = postShareService.findById(request.getId())
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy bài viết có id: " + request.getId()));
 
-                        postShareService.save(postShare);
+        if(!postShare.getSharedUserId().equals(userId))
+            throw new BadRequestException("Không thể cập nhật bài viết của người khác");
 
-                        response.setMessage("Đã cập nhật bài viết");
-                        response.setCode(HttpServletResponse.SC_OK);
-                        response.setData(postShareService.mapToPostResponse(token, postShare));
-                    }else {
-                        response.setMessage("Không thể cập nhật bài viết của người khác");
-                        response.setCode(HttpServletResponse.SC_BAD_REQUEST);
-                        response.setData(null);
-                    }
-                },
-                () -> {
-                    response.setMessage("Không tìm thấy bài viết có id: " + request.getId());
-                    response.setCode(HttpServletResponse.SC_BAD_REQUEST);
-                    response.setData(null);
-                }
-        );
+        postShare.setPrivacy(request.getPrivacy());
+        postShare.setStatus(request.getContent());
+        postShare.setNormalizedStatus(StringUtils.toSlug(request.getContent()));
+
+        postShareService.save(postShare);
+
+        response.setMessage("Đã cập nhật bài viết");
+        response.setCode(HttpServletResponse.SC_OK);
+        response.setData(postShareService.mapToPostResponse(token, postShare));
     }
 
-    public ResDTO<?> deletePost(String token, String postId){
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+    public ResDTO<?> deletePost(String postId){
+        String userId = SecurityContextUtils.getUserId();
 
         Post foundPost = findPostById(postId);
+
         ResDTO<Map<String, String>> response = new ResDTO<>();
         Map<String, String> data = new HashMap<>();
 
@@ -425,61 +473,43 @@ public class PostService {
     }
 
     private void deleteSharePost(String postId, String userId, Map<String, String> data, ResDTO<Map<String, String>> response) {
-        postShareService.findById(postId).ifPresentOrElse(
-                postShare -> {
-                    if(postShare.getSharedUserId().equals(userId)){
-                        postShareService.delete(postShare);
+        PostShare postShare = postShareService.findById(postId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy bài viết có id: " + postId));
 
-                        data.put("deletedId", postShare.getId());
+        if(!postShare.getSharedUserId().equals(userId))
+            throw new BadRequestException("Không thể xóa bài viết của người khác");
 
-                        response.setMessage("Đã xoá bài viết");
-                        response.setCode(HttpServletResponse.SC_OK);
-                        response.setData(data);
-                    } else {
-                        response.setMessage("Không thể xóa bài viết của người khác");
-                        response.setCode(HttpServletResponse.SC_BAD_REQUEST);
-                        response.setData(null);
-                    }
-                },
-                () -> {
-                    response.setMessage("Không tìm thấy bài viết có id: " + postId);
-                    response.setCode(HttpServletResponse.SC_BAD_REQUEST);
-                    response.setData(null);
-                }
-        );
+        postShareService.delete(postShare);
+
+        data.put("deletedId", postShare.getId());
+
+        response.setMessage("Đã xoá bài viết");
+        response.setCode(HttpServletResponse.SC_OK);
+        response.setData(data);
     }
 
     public ResDTO<?> sharePost(String token, SharePostRequest request){
         ResDTO<PostResponse> response = new ResDTO<>();
 
-        postRepository.findById(request.getPostId())
-                .ifPresentOrElse(
-                        (post) -> {
-                            String userId = jwtUtils.getUserIdFromJwtToken(token);
-                            User foundUser = userService.findById(token, userId);
+        Post post = postRepository.findById(request.getPostId())
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy bài viết"));
 
-                            if(foundUser != null) {
-                                PostShare postShare = getPostShare(request, post, foundUser);
-                                postShareService.save(postShare);
+        String userId = SecurityContextUtils.getUserId();
+        User foundUser = userService.findById(token, userId);
 
-                                InteractNotification notification = getInteractNotification(request, post, foundUser, userId);
-                                kafkaMsgService.pubSharePostMessage(notification);
+        if(foundUser == null) {
+            throw new BadRequestException("Không tìm thấy người dùng");
+        }
 
-                                response.setMessage("Đã chia sẻ bài viết");
-                                response.setCode(HttpServletResponse.SC_OK);
-                                response.setData(postResponseMapper.mapToDto(token, post.getId(), post));
-                            }else{
-                                response.setMessage("Không tìm thấy người dùng");
-                                response.setCode(HttpServletResponse.SC_BAD_REQUEST);
-                                response.setData(null);
-                            }
+        PostShare postShare = getPostShare(request, post, foundUser);
+        postShareService.save(postShare);
 
-                        }, () -> {
-                            response.setMessage("Không tìm thấy bài viết");
-                            response.setCode(HttpServletResponse.SC_BAD_REQUEST);
-                            response.setData(null);
-                        }
-                );
+        InteractNotification notification = getInteractNotification(request, post, foundUser, userId);
+        kafkaMsgService.pubSharePostMessage(notification);
+
+        response.setMessage("Đã chia sẻ bài viết");
+        response.setCode(HttpServletResponse.SC_OK);
+        response.setData(postResponseMapper.mapToDto(token, post.getId(), post, false));
 
         return response;
     }
@@ -503,31 +533,54 @@ public class PostService {
         notification.setAvatarUrl(foundUser.getProfilePicture());
         notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
         notification.setContent(notification.getUserFullName() + " đã chia sẻ bài viết của bạn");
-        notification.setPostId(request.getPostId());
+        notification.setRefId(request.getPostId());
         notification.setTitle("Có người tương tác nè!");
         notification.setFromUserId(userId);
-        notification.setToUserId(post.getUserId());
+        notification.setToUserIds(List.of(post.getUserId()));
         notification.setType(ENotificationType.SHARE);
         notification.setCreateAt(new Date());
 
         return notification;
     }
 
-    public ResDTO<?> findUserPosts(String token, String uId){
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+    public ResDTO<PaginationResponse<PostResponse>> findUserPosts(String token, String uId, int page, int size){
+        String userId = SecurityContextUtils.getUserId();
 
         if(uId.isEmpty())
-            return findPostsByUserId(token, userId);
+            return findPostsByUserId(token, userId, page, size);
 
-        return findPostsByUserId(token, uId);
+        return findPostsByUserId(token, uId, page, size);
     }
 
-    private ResDTO<List<PostResponse>> findPostsByUserId(String token, String userId) {
-        List<Post> posts = postRepository.findByUserIdOrPostTagsTaggedUserId(userId, userId);
+    private ResDTO<PaginationResponse<PostResponse>> findPostsByUserId(String token, String userId, int page, int size) {
+        List<Post> fetchedPosts = postRepository.findByUserIdOrPostTagsTaggedUserId(userId, userId);
+        List<PostShare> fetchedSharedPost = postShareService.findSharedPostByUserId(userId);
 
-        List<PostResponse> myPosts = posts.stream().map(post -> {
-            PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post);
+        List<String> postIds = fetchedSharedPost.stream().map(PostShare::getSharedPostId).toList();
+        Map<String, String> userIdsMap = postRepository.findAllById(postIds).stream().collect(Collectors.toMap(
+                Post::getId, Post::getUserId
+        ));
+
+        //New codes
+        List<String> postedUserIdsDistinct = Stream.concat(
+                        fetchedPosts.stream().map(Post::getUserId),
+                        Stream.concat(
+                                fetchedSharedPost.stream().map(PostShare::getSharedUserId),
+                                fetchedSharedPost.stream().map(post -> userIdsMap.get(post.getSharedPostId()))
+                        )
+                )
+                .distinct()
+                .toList();
+
+        Map<String, User> postedUserMap = userService.findByIds(token, postedUserIdsDistinct)
+                .stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+        //End new codes
+
+        List<PostResponse> myPosts = fetchedPosts.stream().map(post -> {
+            PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post, true);
             postResponse.setMine(post.getUserId().equals(userId));
+            postResponse.setUser(postedUserMap.get(post.getUserId()));
 
             return postResponse;
 
@@ -535,42 +588,36 @@ public class PostService {
 
         //TODO: Find my share post
 
-        List<PostResponse> sharedPosts = postShareService.findSharedPostByUserId(userId)
+        List<PostResponse> sharedPosts = fetchedSharedPost
                 .stream().map(
                         postShare -> {
-                            Post foundPost = findPostById(postShare.getSharedPostId());
-                            if(foundPost != null){
-                                PostResponse postResponse = postResponseMapper.mapToDto(token, postShare.getId(), foundPost);
-                                postResponse.setMine(foundPost.getUserId().equals(userId));
-                                postResponse.setType(EPostType.SHARE);
-                                postResponse.setCreatedAt(DateUtils.localDateTimeToDate(postShare.getSharedAt()));
-
-                                ShareInfo shareInfo = new ShareInfo();
-                                shareInfo.setStatus(postShare.getStatus());
-                                shareInfo.setSharedUser(userService.findById(token, postShare.getSharedUserId()));
-                                shareInfo.setSharedAt(DateUtils.localDateTimeToDate(postShare.getSharedAt()));
-                                shareInfo.setId(postShare.getId());
-                                shareInfo.setPrivacy(postShare.getPrivacy());
-
-                                postResponse.setShareInfo(shareInfo);
-
-                                return postResponse;
-                            }
-                            return null;
+                            return getPostShareResponse(token, postedUserMap, postShare, userId);
                         }
                 )
                 .filter(p -> p != null && p.getPrivacy().equals(EPrivacy.PUBLIC))
                 .toList();
 
-        List<PostResponse> combinedPosts = Stream.concat(myPosts.stream(), sharedPosts.stream())
-                .sorted(Comparator.comparing(PostResponse::getCreatedAt).reversed())
+        List<PostResponse> allPost = Stream.concat(myPosts.stream(), sharedPosts.stream())
+                .sorted(Comparator.comparing(PostResponse::getHiddenCreatedAt).reversed())
                 .toList();
 
-        ResDTO<List<PostResponse>> response = new ResDTO<>();
-        response.setData(combinedPosts);
+        ResDTO<PaginationResponse<PostResponse>> response = new ResDTO<>();
 
-        response.setMessage("success");
+        PaginationResponse<PostResponse> paginationResponse = new PaginationResponse<>();
+
+        int startIndex = (page - 1) * size;
+
+        paginationResponse.setData(
+                allPost.stream().skip(startIndex)
+                        .limit(size).toList()
+        );
+        paginationResponse.setPage(page);
+        paginationResponse.setLimit(size);
+        paginationResponse.setTotalPages((int) Math.ceil(allPost.size() * 1.0 / size));
+
+        response.setData(paginationResponse);
         response.setCode(HttpServletResponse.SC_OK);
+        response.setMessage("success");
 
         return response;
     }

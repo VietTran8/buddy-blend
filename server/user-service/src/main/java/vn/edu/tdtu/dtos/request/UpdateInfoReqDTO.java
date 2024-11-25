@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class UpdateGenderReqDTO {
-//    private String userId;
+public class UpdateInfoReqDTO {
     private String gender;
+    private String phone;
+    private String fromCity;
 }

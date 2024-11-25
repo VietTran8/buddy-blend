@@ -25,7 +25,7 @@ public class SharePostResponseMapper {
 
         Post foundPost = postRepository.findById(postShare.getSharedPostId()).orElse(null);
         if(foundPost != null){
-            PostResponse postResponse = postResponseMapper.mapToDto(token, postShare.getId(), foundPost);
+            PostResponse postResponse = postResponseMapper.mapToDto(token, postShare.getId(), foundPost, false);
             postResponse.setMine(foundPost.getUserId().equals(userId));
             postResponse.setType(EPostType.SHARE);
 

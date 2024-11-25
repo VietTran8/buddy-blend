@@ -14,6 +14,12 @@ import vn.edu.tdtu.dtos.request.FindByIdsReq;
 import vn.edu.tdtu.dtos.request.SharePostRequest;
 import vn.edu.tdtu.dtos.request.UpdatePostContentRequest;
 import vn.edu.tdtu.services.PostService;
+import vn.edu.tdtu.services.SavePostService;
+
+
+//**
+// some changes: added pagination on fetch user posts
+// **//
 
 @RestController
 @Slf4j
@@ -21,6 +27,7 @@ import vn.edu.tdtu.services.PostService;
 @RequestMapping("/api/v1/posts")
 public class PostController {
     private final PostService postService;
+    private final SavePostService savePostService;
 
     @GetMapping("/news-feed")
     public ResponseEntity<?> getNewFeeds(
@@ -57,6 +64,18 @@ public class PostController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    @PostMapping("/save/{postId}")
+    public ResponseEntity<?> handleSavePost(@PathVariable("postId") String postId){
+        ResDTO<?> response = savePostService.handleSavePost(postId);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @GetMapping("/save/posts")
+    public ResponseEntity<?> getUserSavedPosts(@RequestHeader("Authorization") String tokenHeader){
+        ResDTO<?> response = savePostService.getUserSavedPost(tokenHeader);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
     @GetMapping("/user/{id}")
     public ResponseEntity<?> getUserIdByPost(@PathVariable("id") String id){
         ResDTO<?> response = postService.getUserIdByPostId(id);
@@ -83,11 +102,8 @@ public class PostController {
 
     @PostMapping("/delete/{id}")
     @CacheEvict(cacheNames = "news-feed", allEntries = true)
-    public ResponseEntity<?> delete(
-            @RequestHeader("Authorization") String token,
-            @PathVariable("id") String id
-    ){
-        ResDTO<?> response = postService.deletePost(token, id);
+    public ResponseEntity<?> delete(@PathVariable("id") String id){
+        ResDTO<?> response = postService.deletePost(id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -114,8 +130,10 @@ public class PostController {
 
     @GetMapping()
     public ResponseEntity<?> getMyPost(@RequestHeader("Authorization") String token,
-                                       @RequestParam(name = "userId", required = false, defaultValue = "") String userId){
-        ResDTO<?> response = postService.findUserPosts(token, userId);
+                                       @RequestParam(name = "userId", required = false, defaultValue = "") String userId,
+                                       @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                       @RequestParam(name = "size", required = false, defaultValue = "10") int size){
+        ResDTO<?> response = postService.findUserPosts(token, userId, page, size);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 }

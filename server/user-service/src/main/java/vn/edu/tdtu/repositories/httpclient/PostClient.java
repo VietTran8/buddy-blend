@@ -11,10 +11,10 @@ import vn.edu.tdtu.dtos.response.PostResponse;
 
 import java.util.List;
 
-@FeignClient(name = "${service.post-service.name}", configuration = FeignConfig.class)
+@FeignClient(name = "${service.post-service.name}", configuration = FeignConfig.class, path = "/api/v1/posts")
 public interface PostClient {
 
-    @PostMapping("api/v1/posts/find-all")
+    @PostMapping("/find-all")
     public ResDTO<List<PostResponse>> findAll(@RequestHeader("Authorization") String accessToken, @RequestBody FindByIdsReq requestBody);
 
 }

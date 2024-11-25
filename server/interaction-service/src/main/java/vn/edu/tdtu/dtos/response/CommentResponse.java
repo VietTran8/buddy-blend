@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import vn.edu.tdtu.enums.EReactionType;
 import vn.edu.tdtu.models.User;
 
 import java.util.Date;
@@ -22,6 +23,9 @@ public class CommentResponse {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private Date updatedAt;
     private User user;
+    private List<TopReacts> topReacts;
+    private int noReactions;
+    private EReactionType reacted;
     private List<CommentResponse> children;
     private boolean isMine;
 }

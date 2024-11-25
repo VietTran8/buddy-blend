@@ -10,11 +10,14 @@ import vn.edu.tdtu.dtos.response.GroupInfo;
 
 import java.util.List;
 
-@FeignClient(name = "${service.group-service.name}", configuration = FeignConfig.class)
+@FeignClient(name = "${service.group-service.name}", configuration = FeignConfig.class, path = "/api/v1/groups")
 public interface GroupClient {
-    @GetMapping("/api/v1/groups/{groupId}/min")
-    public ResDTO<GroupInfo> getGroupInfoById(@PathVariable("groupId") String groupId);
+    @GetMapping("/min/{groupId}")
+    public ResDTO<GroupInfo> getGroupInfoById(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
 
-    @GetMapping("/api/v1/groups")
+    @GetMapping("")
     public ResDTO<List<GroupInfo>> getMyGroups(@RequestHeader("Authorization") String accessToken);
+
+    @GetMapping("/{groupId}/allow-fetch-post")
+    public ResDTO<Boolean> allowFetchPost(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
 }

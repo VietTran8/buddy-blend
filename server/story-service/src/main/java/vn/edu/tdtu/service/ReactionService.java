@@ -21,6 +21,7 @@ import vn.edu.tdtu.utils.SecurityContextUtils;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +40,7 @@ public class ReactionService {
         if(foundStory.getUserId().equals(userId))
             throw new BadRequestException(Message.STORY_CAN_NOT_SELF_REACT_MSG);
 
-        Viewer foundViewer = viewerRepository.findByStoryAndUserId(foundStory, userId)
+        Viewer foundViewer = viewerRepository.findTopByStoryAndUserId(foundStory, userId)
                 .orElseThrow(() -> new BadRequestException(Message.VIEWER_NOT_FOUND_MSG));
 
         foundViewer.getReactions().add(newReaction(foundViewer, userId, payload));
@@ -64,10 +65,10 @@ public class ReactionService {
             notification.setUserFullName(foundUser.getUserFullName());
             notification.setAvatarUrl(foundUser.getProfilePicture());
             notification.setContent(notification.getUserFullName() + " đã bày tỏ cảm xúc về tin của bạn.");
-            notification.setPostId(foundStory.getId());
+            notification.setRefId(foundStory.getId());
             notification.setTitle("Có người tương tác nè!");
             notification.setFromUserId(userId);
-            notification.setToUserId(foundStory.getUserId());
+            notification.setToUserIds(List.of(foundStory.getUserId()));
             notification.setType(ENotificationType.valueOf(payload.getType().name()));
             notification.setCreateAt(new Date().getTime() + "");
 

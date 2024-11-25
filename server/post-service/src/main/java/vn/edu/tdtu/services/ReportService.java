@@ -15,6 +15,7 @@ import vn.edu.tdtu.models.Report;
 import vn.edu.tdtu.repositories.PostRepository;
 import vn.edu.tdtu.repositories.ReportRepository;
 import vn.edu.tdtu.utils.JwtUtils;
+import vn.edu.tdtu.utils.SecurityContextUtils;
 
 import java.util.*;
 
@@ -28,8 +29,8 @@ public class ReportService {
     private final ReportResponseMapper reportResponseMapper;
 
     @CacheEvict(cacheNames = "reports", allEntries = true)
-    public ResDTO<?> reportPost(String token, ReportRequest request){
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+    public ResDTO<?> reportPost(ReportRequest request){
+        String userId = SecurityContextUtils.getUserId();
 
         ResDTO<Map<String, String>> response = new ResDTO<>();
         Map<String, String> data = new HashMap<>();

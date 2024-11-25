@@ -12,7 +12,5 @@ import java.util.List;
 public class SendMessage {
     private String content;
     private List<String> imageUrls;
-    private String fromUserId;
     private String toUserId;
-//    private String roomId;
 }

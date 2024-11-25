@@ -7,9 +7,9 @@ import vn.edu.tdtu.config.openfeign.FeignConfig;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.model.User;
 
-@FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class)
+@FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class, path = "/api/v1/users")
 public interface UserClient {
 
-    @GetMapping("/api/v1/users/{userId}")
+    @GetMapping("/{userId}")
     public ResDTO<User> findById(@PathVariable("userId") String userId);
 }

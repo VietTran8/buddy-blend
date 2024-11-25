@@ -77,6 +77,8 @@ public class UserDetailsMapper {
             userDetails.setBio(user.getBio());
             userDetails.setCoverPicture(user.getCover());
             userDetails.setGender(user.getGender());
+            userDetails.setPhone(user.getPhone() != null ? user.getPhone() : "Chưa cập nhật...");
+            userDetails.setFromCity(user.getFromCity() != null ? user.getFromCity() : "Chưa cập nhật...");
 
             List<MutualFriend> mutualFriends = getMutualFriends(myFriends, userFriends);
 

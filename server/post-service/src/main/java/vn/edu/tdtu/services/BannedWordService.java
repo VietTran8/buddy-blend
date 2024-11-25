@@ -37,17 +37,14 @@ public class BannedWordService {
     public ResDTO<?> removeBannedWord(CreateBannedWordReq request){
         ResDTO<?> response = new ResDTO<>();
 
-        bannedWordRepository.findByWord(request.getWord().toLowerCase()).ifPresentOrElse(
-                word -> {
-                    bannedWordRepository.delete(word);
+        BannedWord word = bannedWordRepository.findByWord(request.getWord().toLowerCase())
+                        .orElseThrow(() -> new IllegalArgumentException(String.format("'%s' can not be found in banned words", request.getWord())));
 
-                    response.setCode(HttpServletResponse.SC_OK);
-                    response.setData(null);
-                    response.setMessage("deleted");
-                }, () -> {
-                    throw new IllegalArgumentException(String.format("'%s' can not be found in banned words", request.getWord()));
-                }
-        );
+        bannedWordRepository.delete(word);
+
+        response.setCode(HttpServletResponse.SC_OK);
+        response.setData(null);
+        response.setMessage("deleted");
 
         return response;
     }

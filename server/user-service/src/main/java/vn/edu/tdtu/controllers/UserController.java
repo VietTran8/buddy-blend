@@ -44,6 +44,15 @@ public class UserController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    @GetMapping("/suggestions/group/{groupId}")
+    public ResponseEntity<?> findFriendNotInGroup(
+            @RequestHeader("Authorization") String tokenHeader,
+            @PathVariable("groupId") String groupId
+    ){
+        ResDTO<?> response = userService.getUserSuggestionForGroup(tokenHeader, groupId);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
     @PostMapping("/by-ids")
     public ResponseEntity<?> findByIds(@RequestHeader(name = "Authorization", required = false, defaultValue = "") String token, @RequestBody FindByIdsReqDTO request){
         ResDTO<?> response = userService.findResByIds(token, request);
@@ -74,27 +83,27 @@ public class UserController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    @PostMapping("/gender/update")
-    public ResponseEntity<?> updateBio(@RequestHeader("Authorization") String token, @RequestBody UpdateGenderReqDTO request){
-        ResDTO<?> response = userService.updateGender(token, request);
+    @PostMapping("/info/update")
+    public ResponseEntity<?> updateBio(@RequestBody UpdateInfoReqDTO request){
+        ResDTO<?> response = userService.updateInfo(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/name/update")
-    public ResponseEntity<?> updateUserName(@RequestHeader("Authorization") String token, @RequestBody RenameReqDTO request){
-        ResDTO<?> response = userService.renameUser(token, request);
+    public ResponseEntity<?> updateUserName(@RequestBody RenameReqDTO request){
+        ResDTO<?> response = userService.renameUser(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/profile/update")
-    public ResponseEntity<?> updateProfilePic(@RequestHeader("Authorization") String token, @RequestParam("file") MultipartFile file){
-        ResDTO<?> response = userService.updatePicture(token, file, true);
+    public ResponseEntity<?> updateProfilePic(@RequestParam("file") MultipartFile file){
+        ResDTO<?> response = userService.updatePicture(file, true);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/cover/update")
-    public ResponseEntity<?> updateCover(@RequestHeader("Authorization") String token, @RequestParam("file") MultipartFile file){
-        ResDTO<?> response = userService.updatePicture(token, file, false);
+    public ResponseEntity<?> updateCover(@RequestParam("file") MultipartFile file){
+        ResDTO<?> response = userService.updatePicture(file, false);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -105,8 +114,8 @@ public class UserController {
     }
 
     @PostMapping("/friend-req")
-    public ResponseEntity<?> handle(@RequestBody FriendReqDTO request, @RequestHeader(name = "Authorization") String token){
-        ResDTO<?> response = friendRequestService.handleFriendRequest(token, request);
+    public ResponseEntity<?> handle(@RequestBody FriendReqDTO request){
+        ResDTO<?> response = friendRequestService.handleFriendRequest(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -123,21 +132,23 @@ public class UserController {
     }
 
     @GetMapping("/friends")
-    public ResponseEntity<?> getFriends(@RequestHeader(name = "Authorization") String token){
-        ResDTO<?> response = friendRequestService.getListFriendsResp(token);
+    public ResponseEntity<?> getFriends(
+            @RequestHeader(name = "Authorization") String token,
+            @RequestParam(name = "id", required = false) String userId
+    ){
+        ResDTO<?> response = friendRequestService.getListFriendsResp(token, userId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/favourite")
-    public ResponseEntity<?> saveUserFavourite(@RequestHeader(name = "Authorization") String token,
-                                               @RequestBody SaveUserFavouriteDTO request){
-        ResDTO<?> response = userFavouriteService.saveUserFavorite(token, request);
+    public ResponseEntity<?> saveUserFavourite(@RequestBody SaveUserFavouriteDTO request){
+        ResDTO<?> response = userFavouriteService.saveUserFavorite(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/favourite")
-    public ResponseEntity<?> getUserFavourite(@RequestHeader(name = "Authorization") String token){
-        ResDTO<?> response = userFavouriteService.getUserFavourites(token);
+    public ResponseEntity<?> getUserFavourite(){
+        ResDTO<?> response = userFavouriteService.getUserFavourites();
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -155,17 +166,15 @@ public class UserController {
     }
 
     @PostMapping("/registration/save")
-    public ResponseEntity<?> saveRegistrationId(@RequestHeader(name = "Authorization") String token,
-                                                @RequestBody SaveUserResIdReq request){
-        ResDTO<?> response = userService.saveUserRegistrationId(token, request);
+    public ResponseEntity<?> saveRegistrationId(@RequestBody SaveUserResIdReq request){
+        ResDTO<?> response = userService.saveUserRegistrationId(request);
         log.info("Registration ID: " + request.getRegistrationId());
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/registration/remove")
-    public ResponseEntity<?> removeRegistrationId(@RequestHeader(name = "Authorization") String token,
-                                                @RequestBody SaveUserResIdReq request){
-        ResDTO<?> response = userService.removeUserRegistrationId(token, request);
+    public ResponseEntity<?> removeRegistrationId(@RequestBody SaveUserResIdReq request){
+        ResDTO<?> response = userService.removeUserRegistrationId(request);
         log.info("Registration ID: " + request.getRegistrationId());
         return ResponseEntity.status(response.getCode()).body(response);
     }

@@ -12,6 +12,7 @@ import vn.edu.tdtu.model.Group;
 @Setter
 public class GroupWithPendingResponse extends Group {
     private boolean isPending;
+    private long memberCount;
 
     public GroupWithPendingResponse(Group group, boolean isPending) {
         super(
@@ -28,5 +29,6 @@ public class GroupWithPendingResponse extends Group {
                 group.getContributions()
         );
         this.isPending = isPending;
+        this.memberCount = group.getGroupMembers().stream().filter(member -> !member.isPending()).count();
     }
 }

@@ -9,14 +9,14 @@ import vn.edu.tdtu.model.data.User;
 
 import java.util.List;
 
-@FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class)
+@FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class, path = "/api/v1/users")
 public interface UserClient {
-    @GetMapping("/api/v1/users/{userId}")
+    @GetMapping("/{userId}")
     public ResDTO<User> findById(@RequestHeader("Authorization") String accessToken, @PathVariable("userId") String userId);
 
-    @GetMapping("/api/v1/users/by-ids")
+    @GetMapping("/by-ids")
     public ResDTO<List<User>> findByIds(@RequestHeader("Authorization") String accessToken, @RequestBody FindByIdsRequest request);
 
-    @GetMapping("/api/v1/users/friends")
+    @GetMapping("/friends")
     public ResDTO<List<User>> findUserFriendIdsByUserToken(@RequestHeader("Authorization") String accessToken);
 }

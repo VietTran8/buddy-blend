@@ -31,7 +31,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(configurer -> configurer.configurationSource(corsConfigurationSource()))
+//                .cors(configurer -> configurer.configurationSource(corsConfigurationSource()))
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -48,7 +48,7 @@ public class SecurityConfig {
                     PrintWriter printWriter = response.getWriter();
 
                     printWriter.write(jsonParser.stringify(new ResDTO<>(
-                            "You are not authenticated",
+                            "You are not authenticated!",
                             null,
                             HttpServletResponse.SC_UNAUTHORIZED
                     )));

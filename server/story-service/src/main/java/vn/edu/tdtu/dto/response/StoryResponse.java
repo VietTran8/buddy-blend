@@ -17,4 +17,6 @@ public class StoryResponse extends Story {
     private User user;
     private boolean isMine;
     private int storyCount;
+    private boolean seen;
+    private Long viewCount;
 }

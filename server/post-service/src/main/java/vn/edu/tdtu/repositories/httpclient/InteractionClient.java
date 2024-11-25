@@ -2,6 +2,7 @@ package vn.edu.tdtu.repositories.httpclient;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.tdtu.config.openfeign.FeignConfig;
@@ -26,5 +27,11 @@ public interface InteractionClient {
     public ResDTO<Map<EReactionType, List<Reacts>>> findReactionsByPostId(
             @RequestHeader("Authorization") String accessToken,
             @RequestParam("postId") String postId
+    );
+
+    @GetMapping("/api/v1/comments/count/post/{id}")
+    public ResDTO<Long> countCommentByPostId(
+            @RequestHeader("Authorization") String accessToken,
+            @PathVariable("id") String id
     );
 }

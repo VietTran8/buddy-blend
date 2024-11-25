@@ -25,6 +25,13 @@ public class InteractionService {
         return response.getData();
     }
 
+    public long countCommentByPostId(String token ,String postId){
+        ResDTO<Long> response = interactionClient.countCommentByPostId(token, postId);
+        log.info(response.toString());
+
+        return response.getData();
+    }
+
     public Map<EReactionType, List<Reacts>> findReactionsByPostId(String token, String postId){
         ResDTO<Map<EReactionType, List<Reacts>>> response = interactionClient.findReactionsByPostId(token, postId);
         log.info(response.toString());

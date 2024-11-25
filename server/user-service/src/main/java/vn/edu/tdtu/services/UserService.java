@@ -20,6 +20,7 @@ import vn.edu.tdtu.mapper.response.UserDetailsMapper;
 import vn.edu.tdtu.models.User;
 import vn.edu.tdtu.repositories.UserRepository;
 import vn.edu.tdtu.utils.JwtUtils;
+import vn.edu.tdtu.utils.SecurityContextUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,9 +35,11 @@ public class UserService {
     private final FileService fileService;
     private final JwtUtils jwtUtils;
     private final FirebaseService firebaseService;
+    private final FriendRequestService friendRequestService;
     private final MinimizedUserMapper minimizedUserMapper;
     private final UserDetailsMapper userDetailsMapper;
     private final SendKafkaMsgService kafkaMsgService;
+    private final GroupService groupService;
 
     public ResDTO<?> findAll(){
         ResDTO<List<User>> response = new ResDTO<>();
@@ -46,13 +49,8 @@ public class UserService {
         return response;
     }
 
-    public MinimizedUserResponse mapToResponse(String token, User user) {
-        return minimizedUserMapper.mapToDTO(token, user);
-    }
-
     public ResDTO<?> findByToken(String token, String id){
-
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        String userId = SecurityContextUtils.getUserId();
         ResDTO<UserDetailsResponse> response = new ResDTO<>();
 
         User foundUser = userRepository.findByIdAndActive(id.isEmpty() ? userId : id, true).orElse(null);
@@ -68,6 +66,12 @@ public class UserService {
         }
 
         return response;
+    }
+
+    public ResDTO<List<MinimizedUserResponse>> getUserSuggestionForGroup(String tokenHeader, String groupId) {
+        List<String> friendUserIdsInGroup = groupService.getFriendUserIdsInGroup(tokenHeader, groupId);
+
+        return findFriendsByNotInIds(tokenHeader, new FindByIdsReqDTO(friendUserIdsInGroup));
     }
 
     public ResDTO<?> findByEmailResp(String email){
@@ -110,11 +114,31 @@ public class UserService {
         return response;
     }
 
-    public ResDTO<?> findResByIds(String token, FindByIdsReqDTO request){
+    public ResDTO<List<MinimizedUserResponse>> findResByIds(String token, FindByIdsReqDTO request){
         ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
 
         List<MinimizedUserResponse> users = userRepository.findByIdInAndActive(request.getUserIds(), true)
                 .stream().map(u -> minimizedUserMapper.mapToDTO(token, u))
+                .toList();
+
+        response.setCode(HttpServletResponse.SC_OK);
+        response.setMessage("users fetched successfully");
+        response.setData(users);
+
+        return response;
+    }
+
+    public ResDTO<List<MinimizedUserResponse>> findFriendsByNotInIds(String token, FindByIdsReqDTO request){
+        ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
+
+        String userId = SecurityContextUtils.getUserId();
+
+        List<User> userFriends = friendRequestService.getListFriends(userId);
+
+        List<MinimizedUserResponse> users = userFriends
+                .stream()
+                .filter(u -> request.getUserIds().stream().noneMatch(id -> id.equals(u.getId())))
+                .map(u -> minimizedUserMapper.mapToDTO(token, u))
                 .toList();
 
         response.setCode(HttpServletResponse.SC_OK);
@@ -135,7 +159,6 @@ public class UserService {
         response.setData(userRepository.existsById(id));
         return response;
     }
-
     public ResDTO<?> searchByName(String token, String name){
         ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
 
@@ -173,7 +196,7 @@ public class UserService {
     }
 
     public ResDTO<?> updateBio(String token, UpdateBioReqDTO userBio){
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        String userId = SecurityContextUtils.getUserId();
         User user = findById(userId);
         ResDTO<User> response = new ResDTO<>();
         if(user != null){
@@ -191,8 +214,8 @@ public class UserService {
         return response;
     }
 
-    public ResDTO<?> renameUser(String token, RenameReqDTO request){
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+    public ResDTO<?> renameUser( RenameReqDTO request){
+        String userId = SecurityContextUtils.getUserId();
         User user = findById(userId);
         ResDTO<User> response = new ResDTO<>();
         if(user != null){
@@ -215,8 +238,8 @@ public class UserService {
         return response;
     }
 
-    public ResDTO<?> updatePicture(String token, MultipartFile pic, boolean isProfilePic){
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+    public ResDTO<?> updatePicture(MultipartFile pic, boolean isProfilePic){
+        String userId = SecurityContextUtils.getUserId();
         User foundUser = findById(userId);
         ResDTO<User> response = new ResDTO<>();
 
@@ -246,12 +269,14 @@ public class UserService {
         return response;
     }
 
-    public ResDTO<?> updateGender(String token, UpdateGenderReqDTO userGender){
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+    public ResDTO<?> updateInfo(UpdateInfoReqDTO request){
+        String userId = SecurityContextUtils.getUserId();
         User user = findById(userId);
         ResDTO<User> response = new ResDTO<>();
         if(user != null){
-            user.setGender(userGender.getGender());
+            user.setGender(request.getGender());
+            user.setFromCity(request.getFromCity());
+            user.setPhone(request.getPhone());
 
             response.setMessage("Cập nhật thành công");
             response.setCode(HttpServletResponse.SC_OK);
@@ -286,8 +311,8 @@ public class UserService {
         return response;
     }
 
-    public ResDTO<?> saveUserRegistrationId(String token, SaveUserResIdReq requestBody){
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+    public ResDTO<?> saveUserRegistrationId(SaveUserResIdReq requestBody){
+        String userId = SecurityContextUtils.getUserId();
         User foundUser = findById(userId);
         Map<String, String> data = new HashMap<>();
         data.put("notificationKey", "");
@@ -313,8 +338,8 @@ public class UserService {
         return response;
     }
 
-    public ResDTO<?> removeUserRegistrationId(String token, SaveUserResIdReq requestBody){
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+    public ResDTO<?> removeUserRegistrationId(SaveUserResIdReq requestBody){
+        String userId = SecurityContextUtils.getUserId();
         User foundUser = findById(userId);
         Map<String, String> data = new HashMap<>();
         data.put("notificationKey", "");

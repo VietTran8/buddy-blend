@@ -5,8 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.edu.tdtu.model.Message;
+import vn.edu.tdtu.model.ChatMessage;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @AllArgsConstructor
@@ -22,7 +23,7 @@ public class MessageNoti {
     private String fromUserId;
     private String toUserId;
 
-    public MessageNoti(Message message){
+    public MessageNoti(ChatMessage message){
         this.id = message.getId();
         this.createdAt = message.getCreatedAt();
         this.content = message.getContent();

@@ -32,9 +32,8 @@ public class CommentController {
     }
 
     @PostMapping("/delete/{id}")
-    public ResponseEntity<?> deleteComment(@RequestHeader("Authorization") String token,
-                                           @PathVariable("id") String id) {
-        ResDTO<?> response = commentsService.deleteComment(token, id);
+    public ResponseEntity<?> deleteComment(@PathVariable("id") String id) {
+        ResDTO<?> response = commentsService.deleteComment(id);
         return ResponseEntity.ok(response);
     }
 
@@ -44,15 +43,22 @@ public class CommentController {
         ResDTO<?> response = commentsService.findCommentById(token, id);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/count/post/{id}")
+    public ResponseEntity<?> countComments(@PathVariable("id") String id) {
+        ResDTO<?> response = commentsService.countCommentByPostId(id);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping
     public ResponseEntity<?> findAllComments(@RequestHeader(name = "Authorization") String token,
                                              @RequestParam(name = "postId", required = false) String postId) {
         if (postId != null) {
             ResDTO<?> response = commentsService.findCommentsByPostId(token, postId);
             return ResponseEntity.ok(response);
-        } else {
-            ResDTO<?> response = commentsService.findAllComments(token);
-            return ResponseEntity.ok(response);
         }
+
+        ResDTO<?> response = commentsService.findAllComments(token);
+        return ResponseEntity.ok(response);
     }
 }

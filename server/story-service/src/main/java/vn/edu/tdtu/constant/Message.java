@@ -17,4 +17,8 @@ public class Message {
 
     //Reaction messages
     public static final String REACTION_CREATED_MSG = "Reaction created successfully";
+
+    //User messages
+    public static final String USER_NOT_FOUND_MSG = "User not found";
+
 }

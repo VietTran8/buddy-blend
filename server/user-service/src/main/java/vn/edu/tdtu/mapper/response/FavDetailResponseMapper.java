@@ -21,6 +21,7 @@ public class FavDetailResponseMapper {
         resp.setPosts(
                 postService.findByIds(token, new FindByIdsReq(userFavourite.getPostIds()))
         );
+        resp.setPostCount(resp.getPosts().size());
 
         return resp;
     }

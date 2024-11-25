@@ -13,6 +13,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     List<User> findByActive(boolean active);
     Optional<User> findByIdAndActive(String id, boolean active);
     List<User> findByIdInAndActive(List<String> id, boolean active);
+    List<User> findByIdNotInAndActive(List<String> id, boolean active);
     Boolean existsByEmailAndActive(String email, boolean active);
     Boolean existsByEmail(String email);
     Optional<User> findByEmailAndActive(String email, boolean active);

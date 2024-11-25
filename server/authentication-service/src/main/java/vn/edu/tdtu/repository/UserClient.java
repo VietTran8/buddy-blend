@@ -11,12 +11,12 @@ import vn.edu.tdtu.dtos.request.SignUpRequest;
 import vn.edu.tdtu.dtos.response.SignUpResponse;
 import vn.edu.tdtu.models.User;
 
-@FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class)
+@FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class, path = "/api/v1/users")
 public interface UserClient {
 
-    @GetMapping("/api/v1/users/{email}/for-auth")
+    @GetMapping("/{email}/for-auth")
     public ResDTO<User> getUserInfo(@PathVariable("email") String email);
 
-    @PostMapping("/api/v1/users/save")
+    @PostMapping("/save")
     public ResDTO<SignUpResponse> saveUser(@RequestBody SignUpRequest requestBody);
 }

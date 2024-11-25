@@ -23,9 +23,10 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class FirebaseService {
+public class NotificationService {
     private final UserService userService;
     private final InteractNotiService notiService;
+    private final SocketModule socketModule;
     private final static String SCOPES = "https://www.googleapis.com/auth/firebase.messaging";
     @Value("${fcm.project.id}")
     private String projectId;
@@ -45,9 +46,11 @@ public class FirebaseService {
     }
 
     public boolean sendInteractNotification(InteractNotification interactNotification){
+        socketModule.emitNotification(interactNotification);
+
         String SEND_NOTI_URL = "https://fcm.googleapis.com/v1/projects/"+ projectId +"/messages:send";
 
-        User foundUser = userService.findById(interactNotification.getToUserId());
+        User foundUser = userService.findById(interactNotification.getToUserIds().get(0));
         if (foundUser != null) {
             String notificationKey = foundUser.getNotificationKey();
             if(notificationKey == null || notificationKey.isEmpty()){
@@ -76,11 +79,7 @@ public class FirebaseService {
 
                 String jsonBody = objectMapper.writeValueAsString(requestBody);
 
-                log.info("Request body: " + jsonBody);
-
                 httpPost.setEntity(new StringEntity(jsonBody, StandardCharsets.UTF_8));
-
-                notiService.save(interactNotification);
 
                 return httpClient.execute(httpPost, response -> {
                     int status = response.getStatusLine().getStatusCode();
@@ -110,73 +109,68 @@ public class FirebaseService {
         String fromUserId = message.getFromUserId();
 
         List<User> users = userService.findByIds(List.of(message.getToUserId(), message.getFromUserId()));
-        if (users != null && !users.isEmpty()) {
-            User toUser = users.stream().filter(user -> user.getId().equals(toUserId)).findFirst().orElse(null);
-            User fromUser = users.stream().filter(user -> user.getId().equals(fromUserId)).findFirst().orElse(null);
-
-            if(toUser != null){
-                String notificationKey = toUser.getNotificationKey();
-                if(notificationKey == null || notificationKey.isEmpty()){
-                    return false;
-                }
-                String token = getAccessToken();
-
-                try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-                    HttpPost httpPost = new HttpPost(SEND_NOTI_URL);
-                    httpPost.setHeader("Authorization", "Bearer " + token);
-                    httpPost.setHeader("Content-Type", "application/json");
-
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    NotificationRequestBody<Message> requestBody = new NotificationRequestBody<>();
-                    NotificationMessage<Message> notificationMessage = new NotificationMessage<>();
-                    requestBody.setMessage(notificationMessage);
-
-                    NotificationContent notificationContent = new NotificationContent();
-                    notificationContent.setTitle(getUserFullName(fromUser));
-                    notificationContent.setBody(message.getContent());
-                    notificationContent.setImage(getUserAvatar(fromUser));
-
-                    NewMessageNoti messageNoti = new NewMessageNoti();
-                    messageNoti.setId(message.getId());
-                    messageNoti.setTitle(getUserFullName(fromUser));
-                    messageNoti.setContent(message.getContent());
-                    messageNoti.setCreatedAt(message.getCreatedAt());
-                    messageNoti.setImageUrls(message.getImageUrls());
-                    messageNoti.setFromUserId(message.getFromUserId());
-                    messageNoti.setToUserId(message.getToUserId());
-
-                    notificationMessage.setNotification(notificationContent);
-                    notificationMessage.setData(messageNoti);
-                    notificationMessage.setToken(notificationKey);
-
-                    String jsonBody = objectMapper.writeValueAsString(requestBody);
-
-                    log.info("Request body: " + jsonBody);
-
-                    httpPost.setEntity(new StringEntity(jsonBody, StandardCharsets.UTF_8));
-
-                    return httpClient.execute(httpPost, response -> {
-                        int status = response.getStatusLine().getStatusCode();
-                        if (status == 200) {
-                            log.info("Notification sent successfully.");
-                            return true;
-                        } else {
-                            String responseBody = EntityUtils.toString(response.getEntity());
-                            log.info("Failed to send notification. Status code: " + status);
-                            log.info("Response Body: " + responseBody);
-                            return false;
-                        }
-                    });
-                } catch (Exception e) {
-                    log.error("Error sending notification", e);
-                    return false;
-                }
-            }else{
-                log.error("Failed to send to null user");
-            }
+        if (users == null || users.isEmpty()) {
+            return false;
         }
 
-        return false;
+        User toUser = users.stream().filter(user -> user.getId().equals(toUserId)).findFirst().orElse(null);
+        User fromUser = users.stream().filter(user -> user.getId().equals(fromUserId)).findFirst().orElse(null);
+
+        if(toUser == null){
+            log.error("Failed to send to a null user");
+            return false;
+        }
+
+        NewMessageNoti messageNoti = new NewMessageNoti(message, getUserFullName(fromUser), fromUser.getProfilePicture());
+        socketModule.emitChatNotification(messageNoti);
+
+        String notificationKey = toUser.getNotificationKey();
+        if(notificationKey == null || notificationKey.isEmpty()){
+            return false;
+        }
+
+        String token = getAccessToken();
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpPost httpPost = new HttpPost(SEND_NOTI_URL);
+            httpPost.setHeader("Authorization", "Bearer " + token);
+            httpPost.setHeader("Content-Type", "application/json");
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            NotificationRequestBody<Message> requestBody = new NotificationRequestBody<>();
+            NotificationMessage<Message> notificationMessage = new NotificationMessage<>();
+            requestBody.setMessage(notificationMessage);
+
+            NotificationContent notificationContent = new NotificationContent();
+            notificationContent.setTitle(getUserFullName(fromUser));
+            notificationContent.setBody(message.getContent());
+            notificationContent.setImage(getUserAvatar(fromUser));
+
+            notificationMessage.setNotification(notificationContent);
+            notificationMessage.setData(messageNoti);
+            notificationMessage.setToken(notificationKey);
+
+            String jsonBody = objectMapper.writeValueAsString(requestBody);
+
+            httpPost.setEntity(new StringEntity(jsonBody, StandardCharsets.UTF_8));
+
+            return httpClient.execute(httpPost, response -> {
+                int status = response.getStatusLine().getStatusCode();
+
+                if (status == 200) {
+                    log.info("Notification sent successfully.");
+                    return true;
+                }
+
+                String responseBody = EntityUtils.toString(response.getEntity());
+                log.info("Failed to send notification. Status code: " + status);
+                log.info("Response Body: " + responseBody);
+                return false;
+            });
+        } catch (Exception e) {
+            log.error("Error sending notification", e);
+            return false;
+        }
     }
 
     public boolean sendFriendRequestNotification(FriendRequestNoti message){

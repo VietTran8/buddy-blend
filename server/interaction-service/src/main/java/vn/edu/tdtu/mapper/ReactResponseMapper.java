@@ -27,14 +27,17 @@ public class ReactResponseMapper {
         return response;
     }
 
-    public ReactResponse mapToCommentDto(CommentReactions commentReactions, User reactedUser){
+    public ReactResponse mapToCommentDto(String userId, CommentReactions reaction, List<User> users){
         ReactResponse response = new ReactResponse();
 
-        response.setId(commentReactions.getId());
-        response.setMine(reactedUser.getId().equals(commentReactions.getUserId()));
-        response.setType(commentReactions.getType());
-        response.setCreatedAt(DateUtils.localDateTimeToDate(commentReactions.getCreatedAt()));
-        response.setUser(reactedUser);
+        response.setId(reaction.getId());
+        response.setMine(userId.equals(reaction.getUserId()));
+        response.setType(reaction.getType());
+        response.setCreatedAt(DateUtils.localDateTimeToDate(reaction.getCreatedAt()));
+        response.setUser(users.stream()
+                .filter(user -> user.getId().equals(reaction.getUserId()))
+                .findFirst()
+                .orElse(null));
 
         return response;
     }

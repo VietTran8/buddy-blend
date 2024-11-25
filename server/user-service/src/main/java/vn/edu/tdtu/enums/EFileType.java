@@ -6,7 +6,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum EFileType {
-    TYPE_IMG("img"), TYPE_VIDEO("video");
+    TYPE_IMG("img"), TYPE_VIDEO("vid");
 
     private final String type;
 }

@@ -1,5 +1,6 @@
 package vn.edu.tdtu.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ public class Reaction {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private EReactionType type;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime createdAt;
     @JsonIgnore
     private String userId;

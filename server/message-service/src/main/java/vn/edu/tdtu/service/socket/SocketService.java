@@ -8,11 +8,12 @@ import vn.edu.tdtu.dto.JoinRoomMessage;
 import vn.edu.tdtu.dto.MessageNoti;
 import vn.edu.tdtu.dto.SendMessage;
 import vn.edu.tdtu.mapper.RoomResponseMapper;
-import vn.edu.tdtu.model.Message;
 import vn.edu.tdtu.model.Room;
+import vn.edu.tdtu.service.ChatMessageService;
 import vn.edu.tdtu.service.RoomService;
 import vn.edu.tdtu.service.SendKafkaMsgService;
-
+import vn.edu.tdtu.model.ChatMessage;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -21,15 +22,14 @@ import java.util.*;
 public class SocketService {
     private final RoomService roomService;
     private final SendKafkaMsgService kafkaMsgService;
+    private final ChatMessageService chatMessageService;
 
-    public void sendSocketMessage(SocketIOClient senderClient, Room room, Message message){
+    public void sendSocketMessage(SocketIOClient senderClient, Room room, ChatMessage message){
         senderClient.getNamespace()
                 .getRoomOperations(room.getId())
                 .getClients()
                 .forEach(client -> {
-                    if(!client.getSessionId().equals(senderClient.getSessionId())){
-                        client.sendEvent("receive_message", message);
-                    }
+                    client.sendEvent("receive_message", RoomResponseMapper.mapMsgToMsgResponse(client.get("userId"), message));
                 });
     }
 
@@ -41,11 +41,6 @@ public class SocketService {
                     if(client.getSessionId().equals(senderClient.getSessionId())){
                         Map<String, Object> data = new HashMap<>();
                         data.put("roomId", room.getId());
-                        data.put("messages",
-                                room.getMessages().stream().map(
-                                        msg -> RoomResponseMapper.mapMsgToMsgResponse(fromUserId, msg)
-                                ).toList()
-                        );
 
                         client.sendEvent("joined", data);
                     }
@@ -53,42 +48,58 @@ public class SocketService {
     }
 
     public void saveMessage(SocketIOClient senderClient, SendMessage messageDto){
-        Message newMessage = Message.builder()
-                .id(UUID.randomUUID().toString())
-                .content(messageDto.getContent())
-                .createdAt(new Date())
-                .fromUserId(messageDto.getFromUserId())
-                .toUserId(messageDto.getToUserId())
-                .read(false)
-                .imageUrls(messageDto.getImageUrls())
-                .build();
-
-        Room foundRoom = roomService.findExistingRoom(messageDto.getFromUserId(), messageDto.getToUserId());
+        Room foundRoom = roomService.findExistingRoom(senderClient.get("userId"), messageDto.getToUserId());
 
         if(foundRoom != null) {
-            foundRoom.getMessages().add(newMessage);
+            ChatMessage newMessage = ChatMessage.builder()
+                    .id(UUID.randomUUID().toString())
+                    .content(messageDto.getContent())
+                    .createdAt(new Date())
+                    .fromUserId(senderClient.get("userId"))
+                    .toUserId(messageDto.getToUserId())
+                    .roomId(foundRoom.getId())
+                    .imageUrls(messageDto.getImageUrls())
+                    .build();
+
+            ChatMessage savedMessage = chatMessageService.saveMessage(newMessage);
+
+            foundRoom.setLatestMessage(savedMessage);
+
             roomService.saveRoom(foundRoom);
-            kafkaMsgService.publishMessageNoti(new MessageNoti(newMessage));
-            sendSocketMessage(senderClient, foundRoom, newMessage);
+
+            kafkaMsgService.publishMessageNoti(new MessageNoti(savedMessage));
+
+            sendSocketMessage(senderClient, foundRoom, savedMessage);
         }
     }
 
     public void joinRoom(SocketIOClient senderClient, JoinRoomMessage message){
-        Room room = roomService.findExistingRoom(message);
-        if(room == null){
-            room = roomService.saveRoom(Room.builder()
-                    .userId1(message.getFromUserId())
+        senderClient.getAllRooms().forEach(senderClient::leaveRoom);
+
+        Room room = roomService.findExistingRoom(senderClient.get("userId"), message.getToUserId());
+
+        if(Objects.isNull(room)){
+            room = Room.builder()
+                    .userId1(senderClient.get("userId"))
                     .userId2(message.getToUserId())
-                    .messages(new ArrayList<>())
+                    .latestMessage(null)
                     .createdAt(new Date())
-                    .build());
+                    .build();
         }
 
-        roomService.readAllUnreadMessages(room.getId());
+        if(senderClient.get("userId").equals(room.getUserId1())) {
+            room.setUser1LastSeenTime(new Date());
+        }
 
-        log.info("Socket ID[{}] Connected to room [{}]", senderClient.getSessionId().toString(), room.getId());
+        if(senderClient.get("userId").equals(room.getUserId2())) {
+            room.setUser2LastSeenTime(new Date());
+        }
+
+        roomService.saveRoom(room);
+
+        log.info("User ID[{}] with session id {} Connected to room [{}]", senderClient.get("userId"), senderClient.getSessionId().toString(), room.getId());
 
         senderClient.joinRoom(room.getId());
-        sendRoomJoinedMessage(senderClient, message.getFromUserId(), room);
+        sendRoomJoinedMessage(senderClient, senderClient.get("userId"), room);
     }
 }

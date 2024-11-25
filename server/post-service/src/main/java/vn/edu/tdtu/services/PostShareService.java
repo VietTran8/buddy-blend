@@ -26,6 +26,10 @@ public class PostShareService {
         return postShareRepository.findBySharedUserId(userId);
     }
 
+    public List<PostShare> findByIds(List<String> ids) {
+        return postShareRepository.findByIdIn(ids);
+    }
+
     public PostShare save(PostShare postShare){
         return postShareRepository.save(postShare);
     }

@@ -31,14 +31,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(configurer -> configurer.configurationSource(corsConfigurationSource()))
+//                .cors(configurer -> configurer.configurationSource(corsConfigurationSource()))
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/v1/users/profile",
                                 "/api/v1/users/search",
                                 "/api/v1/users/bio/update",
-                                "/api/v1/users/gender/update",
+                                "/api/v1/users/info/update",
                                 "/api/v1/users/name/update",
                                 "/api/v1/users/profile/update",
                                 "/api/v1/users/cover/update",

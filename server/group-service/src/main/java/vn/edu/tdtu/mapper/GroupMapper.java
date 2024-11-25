@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.request.FindByIdsRequest;
 import vn.edu.tdtu.dto.response.GroupMemberResponse;
 import vn.edu.tdtu.dto.response.GroupResponse;
+import vn.edu.tdtu.enums.EJoinGroupStatus;
 import vn.edu.tdtu.model.Group;
 import vn.edu.tdtu.model.GroupMember;
 import vn.edu.tdtu.model.data.User;
@@ -48,28 +49,45 @@ public class GroupMapper {
                 })
                 .toList();
 
+        List<GroupMember> groupMembers = group.getGroupMembers();
+
+        GroupMember currentGroupMember = groupMembers.stream()
+                .filter(member -> member.getMember().getUserId().equals(userId))
+                .findFirst()
+                .orElse(null);
+
         GroupResponse response = new GroupResponse();
-        response.setCover(group.getCover());
-        response.setId(group.getId());
-        response.setAvatar(group.getAvatar());
-
-        response.setJoined(group.getGroupMembers()
+        response.setJoined(groupMembers
                 .stream()
-                .anyMatch(member -> member.getMember().getUserId().equals(userId)));
+                .anyMatch(member -> member.getMember().getUserId().equals(userId) && !member.isPending()));
 
-        response.setAdmin(group.getGroupMembers()
+        response.setAdmin(groupMembers
                 .stream()
                 .anyMatch(member -> member.getMember().getUserId().equals(userId) && member.isAdmin()));
 
-        response.setFirstTenMembers(response10MembersList);
+        response.setMemberCount(groupMembers.stream()
+                .filter(groupMember -> !groupMember.isPending()).count());
 
+        response.setCover(group.getCover());
+        response.setId(group.getId());
+        response.setAvatar(group.getAvatar());
+        response.setFirstTenMembers(response10MembersList);
+        response.setJoinStatus(getJoinStatus(response.isJoined(), userId, groupMembers));
         response.setCreatedAt(group.getCreatedAt());
         response.setPrivacy(group.getPrivacy());
         response.setName(group.getName());
         response.setDescription(group.getDescription());
-        response.setMemberCount(group.getGroupMembers().size());
+        response.setCurrentMemberId(currentGroupMember != null ? currentGroupMember.getId() : null);
+        response.setPendingMemberCount(response.isAdmin() ? groupMembers.size() - response.getMemberCount() : null);
 
         return response;
     }
 
+    private EJoinGroupStatus getJoinStatus(Boolean joined, String userId, List<GroupMember> groupMembers) {
+        if(joined)
+            return EJoinGroupStatus.SUCCESS;
+
+        return groupMembers.stream().anyMatch(member -> member.isPending() && member.getMember().getUserId().equals(userId)) ?
+                EJoinGroupStatus.PENDING : EJoinGroupStatus.NOT_YET;
+    }
 }

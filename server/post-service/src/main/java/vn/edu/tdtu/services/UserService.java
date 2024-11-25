@@ -2,6 +2,7 @@ package vn.edu.tdtu.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dtos.ResDTO;
 import vn.edu.tdtu.dtos.request.user.FindByIdsRequest;
@@ -16,6 +17,7 @@ import java.util.List;
 public class UserService {
     private final UserClient userClient;
 
+    @Cacheable(key = "T(java.util.Objects).hash(#a0, #a1)", value = "single-user", unless = "#result == null")
     public User findById(String accessToken, String userId) {
         ResDTO<User> response = userClient.findById(accessToken, userId);
         log.info("findById: " + response.toString());

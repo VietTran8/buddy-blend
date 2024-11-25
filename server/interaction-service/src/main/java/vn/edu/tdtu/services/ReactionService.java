@@ -15,8 +15,10 @@ import vn.edu.tdtu.mapper.ReactResponseMapper;
 import vn.edu.tdtu.models.Post;
 import vn.edu.tdtu.models.Reactions;
 import vn.edu.tdtu.models.User;
+import vn.edu.tdtu.repositories.CommentReactionRepository;
 import vn.edu.tdtu.repositories.ReactionRepository;
 import vn.edu.tdtu.utils.JwtUtils;
+import vn.edu.tdtu.utils.SecurityContextUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -36,7 +38,7 @@ public class ReactionService {
 
     public ResDTO<?> doReaction(String token, DoReactRequest request){
         ResDTO<List<TopReacts>> response = new ResDTO<>();
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        String userId = SecurityContextUtils.getUserId();
         String postId = request.getPostId();
 
         Post foundPost = postService.findById(token, request.getPostId());
@@ -79,10 +81,10 @@ public class ReactionService {
                     notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
                     notification.setAvatarUrl(foundUser.getProfilePicture());
                     notification.setContent(notification.getUserFullName() + " đã bày tỏ cảm xúc về bài viết của bạn.");
-                    notification.setPostId(reaction.getPostId());
+                    notification.setRefId(reaction.getPostId());
                     notification.setTitle("Có người tương tác nè!");
                     notification.setFromUserId(userId);
-                    notification.setToUserId(foundPost.getUser().getId());
+                    notification.setToUserIds(List.of(foundPost.getUser().getId()));
                     notification.setType(ENotificationType.valueOf(reaction.getType().name()));
                     notification.setCreateAt(new Date().getTime() + "");
 
@@ -128,19 +130,13 @@ public class ReactionService {
 
     public ResDTO<Map<EReactionType, List<ReactResponse>>> getReactsByPostId(String token, String postId){
         ResDTO<Map<EReactionType, List<ReactResponse>>> response = new ResDTO<>();
-        String userId;
-
-        if(token != null && !token.isEmpty())
-            userId = jwtUtils.getUserIdFromJwtToken(token);
-        else {
-            userId = "";
-        }
+        String userId = SecurityContextUtils.getUserId();
 
         List<Reactions> reactions = reactionRepository.findReactionsByPostIdOrderByCreatedAtDesc(postId);
         List<String> userIds = reactions.stream().map(Reactions::getUserId).toList();
         List<User> users = userService.findByIds(token, userIds);
 
-        Map<EReactionType, List<ReactResponse>> reactResponses = reactionRepository.findReactionsByPostIdOrderByCreatedAtDesc(postId)
+        Map<EReactionType, List<ReactResponse>> reactResponses = reactions
                 .stream()
                 .map(r -> reactResponseMapper.mapToDto(userId, r, users))
                 .collect(Collectors.groupingBy(ReactResponse::getType));

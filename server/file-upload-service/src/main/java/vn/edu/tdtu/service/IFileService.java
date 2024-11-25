@@ -11,4 +11,5 @@ public interface IFileService {
     List<String> uploadMultipleFile(MultipartFile[] multipartFiles, EUploadFolder folder) throws IOException;
     boolean deleteFile(String url, EUploadFolder folder) throws IOException;
     String updateFile(String oldUrl, MultipartFile newFile, EUploadFolder folder) throws IOException;
+    String parsePublicId(String url, EUploadFolder folder);
 }

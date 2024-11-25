@@ -1,6 +1,7 @@
 package vn.edu.tdtu.dtos.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,7 +30,7 @@ public class PostResponse implements Serializable {
     private EPostType type;
     private User user;
     private int noShared;
-    private int noComments;
+    private long noComments;
     private int noReactions;
     private List<TopReacts> topReacts;
     private EReactionType reacted;
@@ -37,4 +38,6 @@ public class PostResponse implements Serializable {
     private GroupInfo groupInfo;
     private List<User> taggedUsers;
     private boolean isMine;
+    @JsonIgnore
+    private Date hiddenCreatedAt;
 }

@@ -1,5 +1,6 @@
 package vn.edu.tdtu.services;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import vn.edu.tdtu.models.Post;
 import vn.edu.tdtu.models.User;
 import vn.edu.tdtu.repositories.CommentsRepository;
 import vn.edu.tdtu.utils.JwtUtils;
+import vn.edu.tdtu.utils.SecurityContextUtils;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -35,7 +37,7 @@ public class CommentsService {
     public ResDTO<?> addComment(String token, AddCommentRequest request) {
         String postId = request.getPostId();
         String parentCommentId = request.getParentId();
-        String userIdFromJwtToken = jwtUtils.getUserIdFromJwtToken(token);
+        String userIdFromJwtToken = SecurityContextUtils.getUserId();
 
         User foundUser = userService.findById(token, userIdFromJwtToken);
 
@@ -75,10 +77,10 @@ public class CommentsService {
                     interactNotification.setAvatarUrl(foundUser.getProfilePicture());
                     interactNotification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
                     interactNotification.setContent(interactNotification.getUserFullName() + " đã bình luận về bài viết của bạn");
-                    interactNotification.setPostId(postId);
+                    interactNotification.setRefId(postId);
                     interactNotification.setTitle("Có người tương tác nè!");
                     interactNotification.setFromUserId(userIdFromJwtToken);
-                    interactNotification.setToUserId(foundPost.getUser().getId());
+                    interactNotification.setToUserIds(List.of(foundPost.getUser().getId()));
                     interactNotification.setType(ENotificationType.COMMENT);
                     interactNotification.setCreateAt(new Date().getTime() + "");
 
@@ -93,9 +95,16 @@ public class CommentsService {
         throw new RuntimeException("User not found with id: " + userIdFromJwtToken);
     }
 
+    public ResDTO<?> countCommentByPostId(String postId) {
+        return new ResDTO<>(
+                "Comment counted successfully",
+                commentsRepository.countByPostId(postId),
+                HttpServletResponse.SC_OK
+        );
+    }
 
     public ResDTO<?> updateComment(String token, String id, UpdateCommentRequest comment) {
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        String userId = SecurityContextUtils.getUserId();
 
         CommentResponse updatedComment = commentsRepository.findById(id)
                 .map(existingComment -> {
@@ -118,8 +127,8 @@ public class CommentsService {
     }
 
 
-    public ResDTO<?> deleteComment(String token, String id) {
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+    public ResDTO<?> deleteComment(String id) {
+        String userId = SecurityContextUtils.getUserId();
         ResDTO<?> response = new ResDTO<>();
         commentsRepository.findById(id).ifPresentOrElse(
                 cmt -> {
@@ -145,7 +154,7 @@ public class CommentsService {
 
 
     public ResDTO<?> findCommentById(String token, String id) {
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        String userId = SecurityContextUtils.getUserId();
 
         CommentResponse comment = commentsRepository.findById(id)
                 .map(cmt -> commentResponseMapper.mapToDto(token, cmt))
@@ -160,12 +169,7 @@ public class CommentsService {
 
 
     public ResDTO<?> findCommentsByPostId(String token, String postId) {
-        String userId;
-        if(token != null && !token.isEmpty()){
-           userId = jwtUtils.getUserIdFromJwtToken(token);
-        }else{
-            userId = "";
-        }
+        String userId = SecurityContextUtils.getUserId();
 
         List<Comments> comments = commentsRepository.findByPostIdAndParentIdIsNull(postId);
         List<CommentResponse> commentResponses = comments.stream().map(
@@ -184,7 +188,7 @@ public class CommentsService {
     }
 
     public ResDTO<?> findAllComments(String token) {
-        String userId = jwtUtils.getUserIdFromJwtToken(token);
+        String userId = SecurityContextUtils.getUserId();
         List<CommentResponse> commentResponses = commentsRepository.findAll().stream().map(
                 comment -> {
                     CommentResponse response = commentResponseMapper.mapToDto(token, comment);

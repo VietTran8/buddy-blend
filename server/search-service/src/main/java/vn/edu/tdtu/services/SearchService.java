@@ -11,6 +11,7 @@ import vn.edu.tdtu.dtos.response.SearchResponse;
 import vn.edu.tdtu.model.SearchHistory;
 import vn.edu.tdtu.repository.SearchHistoryRepository;
 import vn.edu.tdtu.utils.JwtUtils;
+import vn.edu.tdtu.utils.SecurityContextUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -31,7 +32,7 @@ public class SearchService {
         if(token != null){
             SearchHistory searchHistory = new SearchHistory();
             searchHistory.setQuery(key);
-            searchHistory.setUserId(jwtUtils.getUserIdFromJwtToken(token));
+            searchHistory.setUserId(SecurityContextUtils.getUserId());
             searchHistory.setCreatedAt(new Date());
 
             repository.save(searchHistory);
@@ -70,7 +71,7 @@ public class SearchService {
         response.setData(new ArrayList<>());
         response.setCode(HttpServletResponse.SC_OK);
 
-        List<SearchHistory> searchHistories = repository.findByUserId(jwtUtils.getUserIdFromJwtToken(token))
+        List<SearchHistory> searchHistories = repository.findByUserId(SecurityContextUtils.getUserId())
                 .stream().sorted(Comparator.comparingLong(s -> ((SearchHistory) s).getCreatedAt().getTime()).reversed())
                 .toList();
 
@@ -82,9 +83,9 @@ public class SearchService {
 
     @Transactional
     @CacheEvict(cacheNames = "search-history", allEntries = true)
-    public ResDTO<?> deleteSearchHistory(String token, String id){
+    public ResDTO<?> deleteSearchHistory(String id){
         ResDTO<Object>  response = new ResDTO<>();
-        repository.deleteByUserIdAndId(jwtUtils.getUserIdFromJwtToken(token), id);
+        repository.deleteByUserIdAndId(SecurityContextUtils.getUserId(), id);
         response.setMessage("success");
         response.setCode(200);
 
@@ -93,9 +94,9 @@ public class SearchService {
 
     @Transactional
     @CacheEvict(cacheNames = "search-history", allEntries = true)
-    public ResDTO<?> deleteAllSearchHistory(String token){
+    public ResDTO<?> deleteAllSearchHistory(){
         ResDTO<Object>  response = new ResDTO<>();
-        repository.deleteByUserId(jwtUtils.getUserIdFromJwtToken(token));
+        repository.deleteByUserId(SecurityContextUtils.getUserId());
         response.setMessage("success");
         response.setCode(200);
 

@@ -21,6 +21,8 @@ public class UserDetailsResponse {
     private String lastName;
     private String gender;
     private String bio;
+    private String phone;
+    private String fromCity;
     private String profilePicture;
     private String coverPicture;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
