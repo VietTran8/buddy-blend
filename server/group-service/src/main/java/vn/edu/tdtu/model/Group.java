@@ -38,4 +38,6 @@ public class Group {
     @JsonIgnore
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
     private List<Contribution> contributions;
+    @Transient
+    private boolean isPrivate;
 }

@@ -1,9 +1,11 @@
 package vn.edu.tdtu.dto.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import vn.edu.tdtu.enums.EJoinGroupStatus;
 import vn.edu.tdtu.model.Group;
-import vn.edu.tdtu.model.data.User;
 
 import java.util.List;
 

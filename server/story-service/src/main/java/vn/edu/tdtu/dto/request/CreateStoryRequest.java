@@ -1,8 +1,5 @@
 package vn.edu.tdtu.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,8 +8,6 @@ import vn.edu.tdtu.enums.EMediaType;
 import vn.edu.tdtu.enums.EPrivacy;
 import vn.edu.tdtu.enums.EStoryFont;
 import vn.edu.tdtu.enums.EStoryType;
-
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor

@@ -6,7 +6,7 @@ import vn.edu.tdtu.dto.response.StoryResponse;
 import vn.edu.tdtu.model.Story;
 import vn.edu.tdtu.model.Viewer;
 import vn.edu.tdtu.repository.StoryRepository;
-import vn.edu.tdtu.utils.SecurityContextUtils;
+import vn.edu.tdtu.util.SecurityContextUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;

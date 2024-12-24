@@ -9,7 +9,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-import vn.edu.tdtu.dtos.ResDTO;
+import vn.edu.tdtu.dto.ResDTO;
 
 @RestControllerAdvice
 @Slf4j

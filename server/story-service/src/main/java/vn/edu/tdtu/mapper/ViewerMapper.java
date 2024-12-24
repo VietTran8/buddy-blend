@@ -6,10 +6,10 @@ import vn.edu.tdtu.dto.response.ViewerResponse;
 import vn.edu.tdtu.model.Reaction;
 import vn.edu.tdtu.model.Viewer;
 import vn.edu.tdtu.model.data.User;
-import vn.edu.tdtu.service.UserService;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor

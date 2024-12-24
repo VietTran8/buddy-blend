@@ -11,7 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import vn.tdtu.edu.exception.UnauthorizedException;
-import vn.tdtu.edu.utils.JwtUtils;
+import vn.tdtu.edu.util.JwtUtils;
 
 import java.io.IOException;
 import java.util.Collections;

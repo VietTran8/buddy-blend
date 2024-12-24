@@ -14,7 +14,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import vn.edu.tdtu.dto.ResDTO;
-import vn.edu.tdtu.utils.JsonUtil;
+import vn.edu.tdtu.util.JsonUtil;
 
 import java.io.PrintWriter;
 import java.util.List;

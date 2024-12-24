@@ -2,10 +2,10 @@ package vn.edu.tdtu.mapper.response;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.dtos.request.FindByIdsReq;
-import vn.edu.tdtu.dtos.response.UserFavouriteDetailResp;
-import vn.edu.tdtu.models.UserFavourite;
-import vn.edu.tdtu.services.PostService;
+import vn.edu.tdtu.dto.request.FindByIdsReq;
+import vn.edu.tdtu.dto.response.UserFavouriteDetailResp;
+import vn.edu.tdtu.model.UserFavourite;
+import vn.edu.tdtu.service.interfaces.PostService;
 
 @Component
 @RequiredArgsConstructor

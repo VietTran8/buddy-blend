@@ -7,8 +7,8 @@ import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.enums.EGetMemberOption;
 import vn.edu.tdtu.enums.EHandleLeaveType;
-import vn.edu.tdtu.service.GroupMemberService;
-import vn.edu.tdtu.service.GroupService;
+import vn.edu.tdtu.service.interfaces.GroupMemberService;
+import vn.edu.tdtu.service.interfaces.GroupService;
 
 @RestController
 @RequestMapping("/api/v1/groups")

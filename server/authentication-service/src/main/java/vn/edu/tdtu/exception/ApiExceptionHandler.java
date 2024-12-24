@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
-import vn.edu.tdtu.dtos.ResDTO;
+import vn.edu.tdtu.dto.ResDTO;
 
 @ControllerAdvice
 @Slf4j

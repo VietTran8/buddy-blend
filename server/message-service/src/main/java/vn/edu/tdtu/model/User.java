@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import vn.edu.tdtu.enums.EFriendStatus;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,4 +22,5 @@ public class User {
     private String notificationKey;
     private boolean isFriend;
     private int friendsCount;
+    private EFriendStatus friendStatus;
 }

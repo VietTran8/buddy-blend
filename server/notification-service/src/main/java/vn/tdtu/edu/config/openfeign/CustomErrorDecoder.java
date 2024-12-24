@@ -5,7 +5,7 @@ import feign.Response;
 import feign.codec.ErrorDecoder;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import vn.tdtu.edu.dtos.ResDTO;
+import vn.tdtu.edu.dto.ResDTO;
 import vn.tdtu.edu.exception.BadRequestException;
 import vn.tdtu.edu.exception.UnauthorizedException;
 

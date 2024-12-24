@@ -1,0 +1,35 @@
+package vn.tdtu.edu.service.impl;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import vn.tdtu.edu.dto.FindByIdsRequest;
+import vn.tdtu.edu.dto.ResDTO;
+import vn.tdtu.edu.model.data.User;
+import vn.tdtu.edu.repository.httpclient.UserClient;
+import vn.tdtu.edu.service.interfaces.UserService;
+
+import java.util.List;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+    private final UserClient userClient;
+
+    public User findById(String userId) {
+        ResDTO<User> response = userClient.findById(userId);
+
+        log.info(response.toString());
+
+        return response.getData();
+    }
+
+    public List<User> findByIds(List<String> ids){
+        ResDTO<List<User>> response = userClient.findByIds(new FindByIdsRequest(ids));
+
+        log.info(response.toString());
+
+        return response.getData();
+    }
+}

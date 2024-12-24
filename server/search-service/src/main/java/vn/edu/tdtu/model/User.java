@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.edu.tdtu.dtos.MutualFriend;
+import vn.edu.tdtu.dto.MutualFriend;
+import vn.edu.tdtu.enums.EFriendStatus;
 
 import java.io.Serializable;
 import java.util.List;
@@ -25,5 +26,6 @@ public class User implements Serializable {
     private String notificationKey;
     private boolean isFriend;
     private int friendsCount;
+    private EFriendStatus friendStatus;
     private List<MutualFriend> mutualFriends;
 }

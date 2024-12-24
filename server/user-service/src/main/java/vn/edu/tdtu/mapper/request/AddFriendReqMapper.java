@@ -2,11 +2,10 @@ package vn.edu.tdtu.mapper.request;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.dtos.request.FriendReqDTO;
+import vn.edu.tdtu.dto.request.FriendReqDTO;
 import vn.edu.tdtu.enums.EFriendReqStatus;
-import vn.edu.tdtu.models.FriendRequest;
-import vn.edu.tdtu.repositories.UserRepository;
-import vn.edu.tdtu.services.UserService;
+import vn.edu.tdtu.model.FriendRequest;
+import vn.edu.tdtu.repository.UserRepository;
 
 import java.time.LocalDateTime;
 

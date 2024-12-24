@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.tdtu.model.Reaction;
-import vn.edu.tdtu.model.Viewer;
 import vn.edu.tdtu.model.data.User;
 
 import java.time.LocalDateTime;

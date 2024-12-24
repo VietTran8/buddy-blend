@@ -2,10 +2,10 @@ package vn.edu.tdtu.mapper.request;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.dtos.request.SaveUserReqDTO;
+import vn.edu.tdtu.dto.request.SaveUserReqDTO;
 import vn.edu.tdtu.enums.EUserRole;
-import vn.edu.tdtu.models.User;
-import vn.edu.tdtu.utils.StringUtils;
+import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.util.StringUtils;
 
 import java.time.LocalDateTime;
 

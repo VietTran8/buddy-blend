@@ -1,11 +1,11 @@
 package vn.edu.tdtu.mapper;
 
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.dtos.response.ReactResponse;
-import vn.edu.tdtu.models.CommentReactions;
-import vn.edu.tdtu.models.Reactions;
-import vn.edu.tdtu.models.User;
-import vn.edu.tdtu.utils.DateUtils;
+import vn.edu.tdtu.dto.response.ReactResponse;
+import vn.edu.tdtu.model.CommentReactions;
+import vn.edu.tdtu.model.Reactions;
+import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.util.DateUtils;
 
 import java.util.List;
 

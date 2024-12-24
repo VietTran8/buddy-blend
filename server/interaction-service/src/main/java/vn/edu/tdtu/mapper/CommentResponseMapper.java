@@ -2,19 +2,18 @@ package vn.edu.tdtu.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.dtos.response.CommentResponse;
-import vn.edu.tdtu.dtos.response.TopReacts;
+import vn.edu.tdtu.dto.response.CommentResponse;
+import vn.edu.tdtu.dto.response.TopReacts;
 import vn.edu.tdtu.enums.EReactionType;
-import vn.edu.tdtu.models.CommentReactions;
-import vn.edu.tdtu.models.Comments;
-import vn.edu.tdtu.repositories.CommentReactionRepository;
-import vn.edu.tdtu.repositories.CommentsRepository;
-import vn.edu.tdtu.services.UserService;
-import vn.edu.tdtu.utils.DateUtils;
-import vn.edu.tdtu.utils.JwtUtils;
+import vn.edu.tdtu.model.CommentReactions;
+import vn.edu.tdtu.model.Comments;
+import vn.edu.tdtu.repository.CommentReactionRepository;
+import vn.edu.tdtu.repository.CommentsRepository;
+import vn.edu.tdtu.service.interfaces.UserService;
+import vn.edu.tdtu.util.DateUtils;
+import vn.edu.tdtu.util.JwtUtils;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

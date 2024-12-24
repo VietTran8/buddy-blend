@@ -10,10 +10,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import vn.edu.tdtu.dtos.ResDTO;
+import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.exception.UnauthorizedException;
-import vn.edu.tdtu.utils.JsonUtil;
-import vn.edu.tdtu.utils.JwtUtils;
+import vn.edu.tdtu.util.JsonUtil;
+import vn.edu.tdtu.util.JwtUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;

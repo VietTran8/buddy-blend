@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import vn.edu.tdtu.enums.EPrivacy;
 import vn.edu.tdtu.model.Story;
 
 import java.time.LocalDateTime;

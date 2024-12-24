@@ -8,7 +8,7 @@ import vn.edu.tdtu.dto.RoomResponse;
 import vn.edu.tdtu.model.ChatMessage;
 import vn.edu.tdtu.model.Room;
 import vn.edu.tdtu.model.User;
-import vn.edu.tdtu.service.UserService;
+import vn.edu.tdtu.service.interfaces.UserService;
 
 @Component
 @RequiredArgsConstructor

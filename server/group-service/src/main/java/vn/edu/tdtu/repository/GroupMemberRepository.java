@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import vn.edu.tdtu.model.Group;
 import vn.edu.tdtu.model.GroupMember;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

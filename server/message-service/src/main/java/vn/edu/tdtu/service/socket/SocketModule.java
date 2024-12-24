@@ -6,13 +6,12 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
-import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.JoinRoomMessage;
 import vn.edu.tdtu.dto.SendMessage;
 import vn.edu.tdtu.exception.UnauthorizedException;
-import vn.edu.tdtu.utils.JwtUtils;
+import vn.edu.tdtu.util.JwtUtils;
 
 @Component
 @Slf4j

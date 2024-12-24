@@ -1,8 +1,8 @@
 package vn.edu.tdtu.mapper;
 
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.dtos.requests.DoReactRequest;
-import vn.edu.tdtu.models.Reactions;
+import vn.edu.tdtu.dto.requests.DoReactRequest;
+import vn.edu.tdtu.model.Reactions;
 
 import java.time.LocalDateTime;
 

@@ -22,6 +22,7 @@
     <module>api-gateway</module>
     <module>group-service</module>
     <module>story-service</module>
+      <module>moderation-service</module>
   </modules>
 
   <properties>

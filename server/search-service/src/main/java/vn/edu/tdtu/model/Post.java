@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.edu.tdtu.dtos.ShareInfo;
-import vn.edu.tdtu.dtos.TopReacts;
+import vn.edu.tdtu.dto.ShareInfo;
+import vn.edu.tdtu.dto.TopReacts;
 import vn.edu.tdtu.enums.EPostType;
 import vn.edu.tdtu.enums.EPrivacy;
 import vn.edu.tdtu.enums.EReactionType;
@@ -32,11 +32,14 @@ public class Post implements Serializable {
     private EPostType type;
     private User user;
     private int noShared;
-    private int noComments;
+    private long noComments;
     private int noReactions;
     private List<TopReacts> topReacts;
     private EReactionType reacted;
     private ShareInfo shareInfo;
+    private GroupInfo groupInfo;
     private List<User> taggedUsers;
     private boolean isMine;
+    private boolean saved;
+    private boolean illegal;
 }

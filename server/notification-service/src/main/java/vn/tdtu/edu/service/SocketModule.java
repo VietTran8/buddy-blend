@@ -1,19 +1,15 @@
 package vn.tdtu.edu.service;
 
 import com.corundumstudio.socketio.HandshakeData;
-import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import vn.tdtu.edu.dtos.FriendRequestNoti;
-import vn.tdtu.edu.dtos.Message;
-import vn.tdtu.edu.dtos.NewMessageNoti;
+import vn.tdtu.edu.dto.NewMessageNoti;
 import vn.tdtu.edu.exception.UnauthorizedException;
-import vn.tdtu.edu.model.InteractNotification;
-import vn.tdtu.edu.model.User;
-import vn.tdtu.edu.utils.JwtUtils;
+import vn.tdtu.edu.model.CommonNotification;
+import vn.tdtu.edu.util.JwtUtils;
 
 @Service
 @Slf4j
@@ -60,7 +56,7 @@ public class SocketModule {
         };
     }
 
-    public void emitNotification(InteractNotification notification) {
+    public void emitNotification(CommonNotification notification) {
         server.getAllClients().forEach(c -> {
                             if(c.get("userId").equals(notification.getToUserIds().get(0))) {
                                 c.sendEvent("notification", notification);

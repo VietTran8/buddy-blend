@@ -9,14 +9,12 @@ import vn.edu.tdtu.enums.EJoinGroupStatus;
 import vn.edu.tdtu.model.Group;
 import vn.edu.tdtu.model.GroupMember;
 import vn.edu.tdtu.model.data.User;
-import vn.edu.tdtu.repository.http.UserClient;
+import vn.edu.tdtu.repository.httpclient.UserClient;
 import vn.edu.tdtu.utils.SecurityContextUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Component
 @RequiredArgsConstructor

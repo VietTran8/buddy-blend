@@ -1,6 +1,5 @@
 package vn.edu.tdtu.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +8,6 @@ import lombok.NoArgsConstructor;
 import vn.edu.tdtu.model.ChatMessage;
 
 import java.util.Date;
-import java.util.List;
 
 @Data
 @Builder

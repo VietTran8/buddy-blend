@@ -8,12 +8,12 @@ import vn.edu.tdtu.dto.JoinRoomMessage;
 import vn.edu.tdtu.dto.MessageNoti;
 import vn.edu.tdtu.dto.SendMessage;
 import vn.edu.tdtu.mapper.RoomResponseMapper;
-import vn.edu.tdtu.model.Room;
-import vn.edu.tdtu.service.ChatMessageService;
-import vn.edu.tdtu.service.RoomService;
-import vn.edu.tdtu.service.SendKafkaMsgService;
 import vn.edu.tdtu.model.ChatMessage;
-import java.time.LocalDateTime;
+import vn.edu.tdtu.model.Room;
+import vn.edu.tdtu.publisher.KafkaEventPublisher;
+import vn.edu.tdtu.service.interfaces.ChatMessageService;
+import vn.edu.tdtu.service.interfaces.RoomService;
+
 import java.util.*;
 
 @Service
@@ -21,7 +21,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class SocketService {
     private final RoomService roomService;
-    private final SendKafkaMsgService kafkaMsgService;
+    private final KafkaEventPublisher kafkaMsgService;
     private final ChatMessageService chatMessageService;
 
     public void sendSocketMessage(SocketIOClient senderClient, Room room, ChatMessage message){

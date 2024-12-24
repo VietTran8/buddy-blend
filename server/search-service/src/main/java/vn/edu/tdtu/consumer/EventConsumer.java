@@ -6,8 +6,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.message.SyncPostMsg;
 import vn.edu.tdtu.message.SyncUserMsg;
-import vn.edu.tdtu.services.PostService;
-import vn.edu.tdtu.services.UserService;
+import vn.edu.tdtu.service.PostService;
+import vn.edu.tdtu.service.UserService;
 
 @Service
 @RequiredArgsConstructor

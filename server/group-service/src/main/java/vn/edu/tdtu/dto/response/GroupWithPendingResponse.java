@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import vn.edu.tdtu.enums.EGroupPrivacy;
 import vn.edu.tdtu.model.Group;
 
 @AllArgsConstructor
@@ -26,7 +27,8 @@ public class GroupWithPendingResponse extends Group {
                 group.getCreatedAt(),
                 group.getCreatedBy(),
                 group.getGroupMembers(),
-                group.getContributions()
+                group.getContributions(),
+                group.getPrivacy().equals(EGroupPrivacy.PRIVACY_PRIVATE)
         );
         this.isPending = isPending;
         this.memberCount = group.getGroupMembers().stream().filter(member -> !member.isPending()).count();

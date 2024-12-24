@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.CreateStoryRequest;
 import vn.edu.tdtu.dto.request.DoReactRequest;
-import vn.edu.tdtu.service.ReactionService;
-import vn.edu.tdtu.service.StoryService;
+import vn.edu.tdtu.service.interfaces.ReactionService;
+import vn.edu.tdtu.service.interfaces.StoryService;
 
 @RestController
 @RequestMapping("/api/v1/stories")

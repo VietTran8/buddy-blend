@@ -13,8 +13,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import vn.tdtu.edu.dtos.ResDTO;
-import vn.tdtu.edu.utils.JsonUtil;
+import vn.tdtu.edu.dto.ResDTO;
+import vn.tdtu.edu.util.JsonUtil;
 
 import java.io.PrintWriter;
 import java.util.List;

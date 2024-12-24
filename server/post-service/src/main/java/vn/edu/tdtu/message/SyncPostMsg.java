@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.edu.tdtu.enums.ESyncType;
-import vn.edu.tdtu.models.Post;
+import vn.edu.tdtu.model.Post;
 
 @Data
 @AllArgsConstructor
