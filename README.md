@@ -117,8 +117,21 @@ The application ensures providing an online space for users to interact through 
 ### Chatting
 ![chatting](https://raw.githubusercontent.com/VietTran8/resources/refs/heads/master/social_network/chat.png)
 
+### Group list
+![group list](https://raw.githubusercontent.com/VietTran8/resources/refs/heads/master/social_network/group_list.png)
+
 ### Group
 ![group](https://raw.githubusercontent.com/VietTran8/resources/refs/heads/master/social_network/group.png)
 
 ### Friend request
 ![friend request](https://raw.githubusercontent.com/VietTran8/resources/refs/heads/master/social_network/friend_requests.png)
+
+### Favourite
+![favourite](https://raw.githubusercontent.com/VietTran8/resources/refs/heads/master/social_network/favourite.png)
+
+### Saved
+![saved](https://raw.githubusercontent.com/VietTran8/resources/refs/heads/master/social_network/saved.png)
+
+
+And many more pages...
+
