@@ -39,4 +39,12 @@ public class UserServiceImpl implements UserService {
 
         return response.getData();
     }
+
+    @Override
+    public List<String> findUserFriendIdsByUserId(String token, String userId) {
+        ResDTO<List<String>> response = userClient.findUserFriendIdsByUserId(token, userId);
+        log.info("findFriendIds: " + response.toString());
+
+        return response.getData();
+    }
 }

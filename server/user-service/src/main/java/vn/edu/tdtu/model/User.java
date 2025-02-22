@@ -46,12 +46,12 @@ public class User {
     @OneToMany(mappedBy = "toUser")
     @JsonIgnore
     private List<FriendRequest> myRequests;
-    @OneToMany(mappedBy = "bannedByUser", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
+    @OneToMany(mappedBy = "blockedByUser", fetch = FetchType.EAGER, orphanRemoval = true, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
     @JsonIgnore
-    private List<Banning> banningList;
-    @OneToMany(mappedBy = "bannedUser", fetch = FetchType.EAGER)
+    private List<Blocking> blockingList;
+    @OneToMany(mappedBy = "blockedUser", fetch = FetchType.EAGER)
     @JsonIgnore
-    private List<Banning> bannedByUserList;
+    private List<Blocking> bannedByUserList;
     public String getUserFullName(){
         return String.join(" ", this.getFirstName(), this.getMiddleName(), this.getLastName());
     }

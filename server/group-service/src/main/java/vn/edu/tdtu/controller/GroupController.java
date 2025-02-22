@@ -49,6 +49,13 @@ public class GroupController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    @GetMapping("/{groupId}/members/id")
+    public ResponseEntity<?> getAllMemberIdsList(@PathVariable("groupId") String groupId) {
+        ResDTO<?> response = groupService.getGroupMembers(groupId);
+
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
     @GetMapping("/{groupId}/members/new")
     public ResponseEntity<?> getNewMembersList(
             @RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId,

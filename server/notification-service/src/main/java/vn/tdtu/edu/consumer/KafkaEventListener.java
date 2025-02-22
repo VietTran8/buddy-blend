@@ -12,6 +12,7 @@ import vn.tdtu.edu.enums.ENotificationType;
 import vn.tdtu.edu.message.CommonNotificationMessage;
 import vn.tdtu.edu.message.ModerateResultsMessage;
 import vn.tdtu.edu.message.SendOTPMailMessage;
+import vn.tdtu.edu.message.newpost.NewPostMessage;
 import vn.tdtu.edu.model.CommonNotification;
 import vn.tdtu.edu.model.UserInfo;
 import vn.tdtu.edu.model.Violation;
@@ -119,5 +120,10 @@ public class KafkaEventListener {
         mailDetails.setSubject("MÃ OTP");
 
         mailService.sendMail(mailDetails);
+    }
+
+    @KafkaListener(groupId = "NewPostTopicGroup", topics = "${kafka.topic.new-post.name}")
+    public void consumeNewPostTopic(NewPostMessage message) {
+        notificationSender.sendNewPostNotification(message);
     }
 }

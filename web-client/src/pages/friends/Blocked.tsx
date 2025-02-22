@@ -2,20 +2,20 @@ import { FC } from "react";
 import { Avatar, Empty, Modal } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan } from "@fortawesome/free-solid-svg-icons";
-import { useHandleBanUser, useQueryBanningUsers } from "@/hooks";
-import { Banning } from "@/types";
+import { useHandleBlockUser, useQueryBlockingUsers } from "@/hooks";
+import { Blocking } from "@/types";
 import { Info } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface IProps { };
 
 const BlockedPage: FC<IProps> = ({ }) => {
-    const { data: banningUserResponse, isLoading } = useQueryBanningUsers();
+    const { data: blockingUserResponse, isLoading } = useQueryBlockingUsers();
 
-    const banningList: Banning[] = banningUserResponse?.data || [];
+    const blockingList: Blocking[] = blockingUserResponse?.data || [];
 
     const [modal, contextHolder] = Modal.useModal();
-    const { mutate: banUser } = useHandleBanUser();
+    const { mutate: banUser } = useHandleBlockUser();
 
     const handleOnUnBan = (userId: string) => {
         return new Promise((resolve, reject) => {
@@ -55,16 +55,16 @@ const BlockedPage: FC<IProps> = ({ }) => {
                 <h1 className="font-bold lg:text-lg text-base">Danh sách chặn</h1>
                 <p className="md:text-sm text-xs text-gray-500">Danh sách người dùng bị chặn</p>
             </div>
-            {banningList.map((banning, index) => (
-                <div key={banning.id}>
+            {blockingList.map((blocking, index) => (
+                <div key={blocking.id}>
                     <div className="py-3 flex justify-between items-center">
                         <div className="flex gap-x-3 items-center">
-                            <Avatar src={banning.bannedUser.profilePicture || "/images/default-user.png"} alt="user avatar" shape="square" size={50} />
-                            <h1 className="text-base font-semibold">{banning.bannedUser.userFullName}</h1>
+                            <Avatar src={blocking.blockedUser.profilePicture || "/images/default-user.png"} alt="user avatar" shape="square" size={50} />
+                            <h1 className="text-base font-semibold">{blocking.blockedUser.userFullName}</h1>
                         </div>
-                        <p className="text-gray-500 font-medium">{`Chặn lúc ${banning.bannedAt}`}</p>
+                        <p className="text-gray-500 font-medium">{`Chặn lúc ${blocking.blockedAt}`}</p>
                         <div className="flex">
-                            <button onClick={() => confirm(banning.bannedUser.id)} className="btn-danger">
+                            <button onClick={() => confirm(blocking.blockedUser.id)} className="btn-danger">
                                 <span>
                                     <FontAwesomeIcon icon={faBan} className="text-sm" />
                                     <span className="ms-2 text-sm">Bỏ chặn</span>
@@ -72,10 +72,10 @@ const BlockedPage: FC<IProps> = ({ }) => {
                             </button>
                         </div>
                     </div>
-                    {index !== banningList.length - 1 && <hr />}
+                    {index !== blockingList.length - 1 && <hr />}
                 </div>
             ))}
-            {!isLoading && banningList.length === 0 && <Empty description className="my-10">
+            {!isLoading && blockingList.length === 0 && <Empty description className="my-10">
                 <span className="font-semibold text-gray-400">Hiện tại bạn chưa chặn ai cả</span>
             </Empty>}
             {isLoading && <span className="my-10">Loading...</span>}

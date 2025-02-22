@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Post, SearchPeopleItem } from "../../components";
+import { Post, PostSkeleton, SearchPeopleItem, SearchUserItemSkeleton } from "../../components";
 import { useOutletContext } from "react-router-dom";
 import { SearchOutletContextType } from "@/layouts/SearchLayout";
 import { Empty } from "antd";
@@ -30,7 +30,18 @@ const Result: FC<IProps> = ({ }) => {
                     <span className="font-semibold text-gray-400">Không tìm thấy kết quả phù hợp...</span>
                 </Empty>
             </div>}
-            {isLoading && <p className="text-center my-3">Loading...</p>}
+            {isLoading && <>
+                <div className="rounded-md bg-white p-5 mt-2">
+                    {Array(5).fill(null).map((_, index) => (
+                        <SearchUserItemSkeleton key={index} />
+                    ))}
+                </div>
+                <div className="rounded-md bg-white p-5 mt-2 flex flex-col gap-y-2">
+                    {Array(5).fill(null).map((_, index) => (
+                        <PostSkeleton key={index} />
+                    ))}
+                </div>
+            </>}
         </>
     )
 };

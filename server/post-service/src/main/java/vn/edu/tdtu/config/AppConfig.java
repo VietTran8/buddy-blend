@@ -19,6 +19,8 @@ public class AppConfig {
     private String moderationResultNotiTopicName;
     @Value("${kafka.topic.moderate.name}")
     private String moderationTopicName;
+    @Value("${kafka.topic.new-post.name}")
+    private String newPostTopicName;
 
     @Bean
     @LoadBalanced
@@ -48,5 +50,9 @@ public class AppConfig {
     @Bean
     public NewTopic moderationTopic(){
         return new NewTopic(moderationTopicName, 2, (short) 1);
+    }
+    @Bean
+    public NewTopic newPostTopic(){
+        return new NewTopic(newPostTopicName, 2, (short) 1);
     }
 }

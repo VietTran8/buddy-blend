@@ -356,6 +356,23 @@ public class GroupServiceImpl implements GroupService {
         return response;
     }
 
+    @Override
+    public ResDTO<?> getGroupMembers(String groupId) {
+        List<String> memberListUserIds = groupMemberRepository.findAllMembersByGroupId(groupId)
+                .stream().map(gMember -> gMember.getMember().getUserId()).toList();
+        String authUserId = SecurityContextUtils.getUserId();
+
+        if(!memberListUserIds.contains(authUserId))
+            throw new BadRequestException("You are not in this group");
+
+        ResDTO<List<String>> response = new ResDTO<>();
+        response.setCode(HttpServletResponse.SC_OK);
+        response.setData(memberListUserIds);
+        response.setMessage("Member user ids fetched successfully");
+
+        return response;
+    }
+
     public ResDTO<?> getAllFriendGroupMemberUserIds(String accessToken, String groupId) {
         ResDTO<List<String>> response = new ResDTO<>();
 

@@ -59,7 +59,7 @@ public class PostService {
         List<String> matchPostIds = searchHits.getSearchHits()
                 .stream()
                 .map(hit -> hit.getContent().getId())
-                .collect(Collectors.toList());;
+                .collect(Collectors.toList());
 
         return postClient
                 .findAll(token, new FindByIdsReq(matchPostIds))

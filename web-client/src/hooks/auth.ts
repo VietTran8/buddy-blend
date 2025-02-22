@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChangePasswordRequest, CreateChangePasswordRequest, CreateForgotPasswordRequest, PasswordCheckingRequest, SignInRequest, SignUpRequest, ValidateOTPRequest } from "../types/request";
 import { changePassword, createChangePasswordOtp, createForgotPasswordOtp, login, passwordChecking, signUp, validateOtp } from "../services";
 import { BaseResponse, SignInResponse } from "../types";
@@ -53,7 +53,13 @@ export const useLogout = () => {
     const { setUser } = useContext(AuthContext);
     const navigate = useNavigate();
 
+    const queryClient = useQueryClient();
+
     return () => {
+        queryClient.removeQueries({
+            queryKey: ['news-feed']
+        });
+
         removeValue();
         setUser?.(null);
 

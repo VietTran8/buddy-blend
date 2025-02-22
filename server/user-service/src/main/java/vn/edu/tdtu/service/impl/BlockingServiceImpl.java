@@ -4,15 +4,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.ResDTO;
-import vn.edu.tdtu.dto.response.BanningResponse;
+import vn.edu.tdtu.dto.response.BlockingResponse;
 import vn.edu.tdtu.dto.response.IdResponse;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.response.MinimizedUserMapper;
-import vn.edu.tdtu.model.Banning;
+import vn.edu.tdtu.model.Blocking;
 import vn.edu.tdtu.model.User;
-import vn.edu.tdtu.repository.BanningRepository;
+import vn.edu.tdtu.repository.BlockingRepository;
 import vn.edu.tdtu.repository.UserRepository;
-import vn.edu.tdtu.service.interfaces.BanningService;
+import vn.edu.tdtu.service.interfaces.BlockingService;
 import vn.edu.tdtu.util.SecurityContextUtils;
 
 import java.time.LocalDateTime;
@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class BanningServiceImpl implements BanningService {
-    private final BanningRepository banningRepository;
+public class BlockingServiceImpl implements BlockingService {
+    private final BlockingRepository blockingRepository;
     private final UserRepository userRepository;
     private final MinimizedUserMapper minimizedUserMapper;
 
     @Override
-    public ResDTO<?> handleUserBanning(String banUserId) {
+    public ResDTO<?> handleUserBlocking(String banUserId) {
         String authUserId = SecurityContextUtils.getUserId();
 
         Map<String, User> userMap = userRepository.findByIdInAndActive(List.of(banUserId, authUserId), true)
@@ -43,11 +43,11 @@ public class BanningServiceImpl implements BanningService {
         User authUser = userMap.get(authUserId);
         User banUser = userMap.get(banUserId);
 
-        List<Banning> banningList = authUser.getBanningList();
-        List<Banning> opponentBanningList = banUser.getBanningList();
+        List<Blocking> blockingList = authUser.getBlockingList();
+        List<Blocking> opponentBlockingList = banUser.getBlockingList();
 
-        if(opponentBanningList.stream()
-                .anyMatch(banning -> banning.getBannedUser().getId().equals(authUser.getId())))
+        if(opponentBlockingList.stream()
+                .anyMatch(blocking -> blocking.getBlockedUser().getId().equals(authUser.getId())))
             throw new BadRequestException("Người kia đã chặn bạn rồi!");
 
         ResDTO<IdResponse> response = new ResDTO<>();
@@ -55,25 +55,25 @@ public class BanningServiceImpl implements BanningService {
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(new IdResponse(banUser.getId()));
 
-        banningList.stream()
+        blockingList.stream()
                 .filter(
-                        banning -> banning.getBannedUser().getId().equals(banUser.getId())
+                        blocking -> blocking.getBlockedUser().getId().equals(banUser.getId())
                 ).findFirst()
                 .ifPresentOrElse(
-                        banning -> {
-                            banningList.remove(banning);
+                        blocking -> {
+                            blockingList.remove(blocking);
 
                             userRepository.save(authUser);
 
                             response.setMessage("Đã hủy chặn người dùng thành công!");
                         },  () -> {
-                            Banning newBanning = new Banning();
+                            Blocking newBlocking = new Blocking();
 
-                            newBanning.setBannedAt(LocalDateTime.now());
-                            newBanning.setBannedUser(banUser);
-                            newBanning.setBannedByUser(authUser);
+                            newBlocking.setBlockedAt(LocalDateTime.now());
+                            newBlocking.setBlockedUser(banUser);
+                            newBlocking.setBlockedByUser(authUser);
 
-                            banningList.add(newBanning);
+                            blockingList.add(newBlocking);
 
                             userRepository.save(authUser);
 
@@ -85,26 +85,26 @@ public class BanningServiceImpl implements BanningService {
     }
 
     @Override
-    public ResDTO<?> getBannedUserList() {
+    public ResDTO<?> getBlockedUserList() {
         String authUserId = SecurityContextUtils.getUserId();
 
         User authUser = userRepository.findByIdAndActive(authUserId,  true)
                 .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng!"));
 
-        List<BanningResponse> responseData = authUser.getBanningList()
+        List<BlockingResponse> responseData = authUser.getBlockingList()
                 .stream()
-                .map(banning -> {
-                    BanningResponse banningResponse = new BanningResponse();
+                .map(blocking -> {
+                    BlockingResponse blockingResponse = new BlockingResponse();
 
-                    banningResponse.setId(banning.getId());
-                    banningResponse.setBannedAt(banning.getBannedAt());
-                    banningResponse.setBannedUser(minimizedUserMapper.mapToDTO(banning.getBannedUser()));
+                    blockingResponse.setId(blocking.getId());
+                    blockingResponse.setBlockedAt(blocking.getBlockedAt());
+                    blockingResponse.setBlockedUser(minimizedUserMapper.mapToDTO(blocking.getBlockedUser()));
 
-                    return banningResponse;
+                    return blockingResponse;
                 })
                 .toList();
 
-        ResDTO<List<BanningResponse>> response = new ResDTO<>();
+        ResDTO<List<BlockingResponse>> response = new ResDTO<>();
 
         response.setData(responseData);
         response.setCode(HttpServletResponse.SC_OK);

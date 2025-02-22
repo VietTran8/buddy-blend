@@ -1,10 +1,10 @@
 import { FC, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { connectNotificationSocket, disconnectNotificationSocket, notificationSocket } from "../../config";
-import { useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import { Avatar, notification } from "antd";
 import { MessageNotification, NotificationSocketMessage } from "../../types/notification";
-import { ENotificationType } from "../../types";
+import { BaseResponse, ENotificationType, PaginationResponse, Post } from "../../types";
 import { getNotificationIconSrc } from "../../utils";
 
 interface IProps { };
@@ -94,12 +94,38 @@ const NotificationProvider: FC<IProps> = ({ }) => {
             openChatNotification(value);
         });
 
+        notificationSocket.on("new_post", (newPost: Post) => {
+            queryClient.setQueryData(["news-feed"], (oldData: InfiniteData<BaseResponse<PaginationResponse<Post>>>) => {
+                if(!oldData) return oldData;
+
+                const newPages = [...oldData.pages];
+
+                const lastPage = newPages[newPages.length - 1];
+
+                const updatedLastPage: BaseResponse<PaginationResponse<Post>> = {
+                    ...lastPage,
+                    data: {
+                        ...lastPage.data,
+                        data: [...lastPage.data.data, newPost]
+                    }
+                };
+
+                newPages[newPages.length - 1] = updatedLastPage;
+
+                return {
+                    ...oldData,
+                    pages: newPages
+                }
+            });
+        })
+
         return () => {
             notificationSocket.off("connect");
             notificationSocket.off("disconnect");
             notificationSocket.off("connect_error");
             notificationSocket.off("notification");
             notificationSocket.off("new_message");
+            notificationSocket.off("new_post");
         }
     }, []);
 

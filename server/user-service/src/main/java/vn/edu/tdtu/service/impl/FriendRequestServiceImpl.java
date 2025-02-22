@@ -134,7 +134,24 @@ public class FriendRequestServiceImpl implements FriendRequestService {
             return response;
         }
 
-        return JwtUtils.generateInvalidTokenResp();
+        throw new UnauthorizedException("You are not authenticated");
+    }
+
+    @Override
+    public ResDTO<?> getFriendIds(String userId) {
+        ResDTO<List<String>> response = new ResDTO<>();
+
+        List<User> minimizedUsers = getListFriends(userId);
+
+        if(userId != null){
+            response.setMessage("friends list fetched successfully");
+            response.setCode(HttpServletResponse.SC_OK);
+            response.setData(minimizedUsers.stream().map(User::getId).toList());
+
+            return response;
+        }
+
+        throw new BadRequestException("User id can not be null");
     }
 
     public List<FriendRequest> getListFriendRequest(String userId){

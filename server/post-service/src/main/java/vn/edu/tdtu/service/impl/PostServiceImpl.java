@@ -19,6 +19,7 @@ import vn.edu.tdtu.mapper.request.PostPostRequestMapper;
 import vn.edu.tdtu.mapper.request.UpdatePostRequestMapper;
 import vn.edu.tdtu.mapper.response.PostResponseMapper;
 import vn.edu.tdtu.message.ModerateMessage;
+import vn.edu.tdtu.message.NewPostMessage;
 import vn.edu.tdtu.model.Media;
 import vn.edu.tdtu.model.Post;
 import vn.edu.tdtu.model.PostTag;
@@ -51,7 +52,6 @@ public class PostServiceImpl implements PostService {
     private final CustomPostRepository customPostRepository;
     private final UserService userService;
     private final GroupService groupService;
-    private final BannedWordRepository bannedWordRepository;
     private final MediaRepository mediaRepository;
     private final KafkaEventPublisher kafkaEventPublisher;
 
@@ -348,6 +348,8 @@ public class PostServiceImpl implements PostService {
         kafkaEventPublisher.pubModerateMessage(message);
         kafkaEventPublisher.pubSyncPostMessage(post, ESyncType.TYPE_CREATE);
 
+        handleSendNewPostNotification(token, postResponse);
+
         return response;
     }
 
@@ -503,6 +505,25 @@ public class PostServiceImpl implements PostService {
         notification.setCreateAt(new Date());
 
         return notification;
+    }
+
+    private void handleSendNewPostNotification(String tokenHeader, PostResponse postResponse){
+        NewPostMessage newPostMessage = new NewPostMessage();
+        newPostMessage.setPost(postResponse);
+
+        if((EPostType.NORMAL.equals(postResponse.getType()) || EPostType.SHARE.equals(postResponse.getType())) &&
+                !EPrivacy.PRIVATE.equals(postResponse.getPrivacy())
+        ) {
+            List<String> postedUserFriendIds = userService.findUserFriendIdsByUserId(tokenHeader, postResponse.getUser().getId());
+            newPostMessage.setBroadcastIds(postedUserFriendIds);
+
+            kafkaEventPublisher.pubNewPostMessage(newPostMessage);
+        } else if(EPostType.GROUP.equals(postResponse.getType())) {
+            List<String> groupUserIds = groupService.getMemberIdList(tokenHeader, postResponse.getGroupInfo().getId());
+            newPostMessage.setBroadcastIds(groupUserIds);
+
+            kafkaEventPublisher.pubNewPostMessage(newPostMessage);
+        }
     }
 
     private ResDTO<PaginationResponse<PostResponse>> findPostsByUserId(String token, String userId, int page, int size) {

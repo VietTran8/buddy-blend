@@ -12,7 +12,7 @@ import CommentCreator from "./CommentCreator";
 import ShareModalContent from "./modals/ShareModalContent";
 import ReactionsModalContent from "./modals/ReactionsModalContent";
 import { EPostType, EReactionType, Post as PostData } from "../../types";
-import { countCharacters, getPrivacyDesc, getReactionDesc, getReactionIcon, getReactionTextColor, getTimeDiff, randomUUID, renderTaggingTitle } from "../../utils";
+import { countCharacters, getPrivacyDesc, getReactionDesc, getReactionIcon, getReactionTextColor, getTimeDiff, randomUUID, removeExtraSpaces, renderTaggingTitle } from "../../utils";
 import { useReaction } from "../../hooks";
 import { AuthContext } from "../../context";
 import { cn } from "@/lib/utils";
@@ -152,11 +152,11 @@ const Post: FC<IProps> = ({
                 </div>}
                 {post && (post.background && [...post?.medias].length === 0) ?
                     <div className={cn(STORY_BACKGROUND[post.background], "w-full min-h-[300px] p-5 mb-3 mt-2 flex items-center justify-center md:font-bold font-semibold text-gray-50")}>
-                        <p className={cn(countCharacters(post.content) > 100 ? "md:text-lg text-md" : "md:text-2xl text-lg", "text-center")}>{post.content}</p>
+                        <p className={cn(countCharacters(post.content) > 100 ? "md:text-lg text-md" : "md:text-2xl text-lg", "text-center whitespace-pre-line")}>{post.content}</p>
                     </div> :
                     post?.content &&
                     <p
-                        className={`px-4 ${post?.medias.length === 0 ? 'pb-5 pt-2' : 'pb-1 pt-2'} text-base text-justify`}>
+                        className={`px-4 ${post?.medias.length === 0 ? 'pb-5 pt-2' : 'pb-1 pt-2'} text-base text-justify whitespace-pre-line`}>
                         {post?.content}
                     </p>
                 }
@@ -212,7 +212,7 @@ const Post: FC<IProps> = ({
                 open={openCommentModal}
                 onCancel={() => setOpenCommentModal(false)}
                 width={850}
-                footer={<CommentCreator onCommented={handleOnNewComment} post={post!} placeholder={`Bình luận dưới tên ${user?.userFullName}...`} />}
+                footer={<CommentCreator onCommented={handleOnNewComment} post={post!} placeholder={`Bình luận dưới tên ${removeExtraSpaces(user?.userFullName)}...`} />}
             >
                 <PostCommentModalContent onNewComment={handleOnNewComment} post={post!} />
             </Modal>

@@ -39,8 +39,8 @@ export type MutualFriend = {
     profileImage: string
 }
 
-export type Banning = {
+export type Blocking = {
     id: string;
-    bannedAt: string;
-    bannedUser: User;
+    blockedAt: string;
+    blockedUser: User;
 }

@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.response.InteractNotification;
+import vn.edu.tdtu.dto.response.PostResponse;
 import vn.edu.tdtu.enums.ESyncType;
 import vn.edu.tdtu.message.ModerateMessage;
 import vn.edu.tdtu.message.ModerationNotificationMsg;
+import vn.edu.tdtu.message.NewPostMessage;
 import vn.edu.tdtu.message.SyncPostMsg;
 import vn.edu.tdtu.model.Post;
 
@@ -23,6 +25,8 @@ public class KafkaEventPublisher {
     private String moderateNotificationTopicName;
     @Value("${kafka.topic.moderate.name}")
     private String moderateTopicName;
+    @Value("${kafka.topic.new-post.name}")
+    private String newPostTopicName;
 
     public void pubSharePostMessage(InteractNotification notification){
         kafkaTemplate.send(interactTopicName, notification);
@@ -38,5 +42,9 @@ public class KafkaEventPublisher {
 
     public void pubModerateMessage(ModerateMessage msg){
         kafkaTemplate.send(moderateTopicName, msg);
+    }
+
+    public void pubNewPostMessage(NewPostMessage msg){
+        kafkaTemplate.send(newPostTopicName, msg);
     }
 }

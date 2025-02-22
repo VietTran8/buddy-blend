@@ -3,16 +3,10 @@ package vn.edu.tdtu.mapper.response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.response.MinimizedUserResponse;
-import vn.edu.tdtu.dto.response.MutualFriend;
-import vn.edu.tdtu.enums.EFriendReqStatus;
-import vn.edu.tdtu.enums.EFriendStatus;
-import vn.edu.tdtu.model.FriendRequest;
 import vn.edu.tdtu.model.User;
-import vn.edu.tdtu.repository.FriendRequestRepository;
 import vn.edu.tdtu.repository.UserRepository;
 import vn.edu.tdtu.util.SecurityContextUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -39,12 +33,12 @@ public class MinimizedUserMapper {
                 && f.getId().equals(user.getId())));
         minimizedUser.setFirstThreeFriends(userFriends.stream().limit(3).map(friend -> friend.getProfilePicture() != null ? friend.getProfilePicture() : "").toList());
         minimizedUser.setHiddenBanned(
-                authUser != null && (authUser.getBanningList()
+                authUser != null && (authUser.getBlockingList()
                         .stream()
-                        .anyMatch(banning -> banning.getBannedUser().getId().equals(user.getId())) ||
-                        user.getBanningList()
+                        .anyMatch(banning -> banning.getBlockedUser().getId().equals(user.getId())) ||
+                        user.getBlockingList()
                                 .stream()
-                                .anyMatch(banning -> banning.getBannedUser().getId().equals(authUser.getId())))
+                                .anyMatch(banning -> banning.getBlockedUser().getId().equals(authUser.getId())))
         );
         minimizedUser.setMutualFriends(baseUserMapper.getMutualFriends(myFriends, userFriends));
         minimizedUser.setFriendsCount(userFriends.size());

@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class BanningResponse {
+public class BlockingResponse {
     private String id;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
-    private LocalDateTime bannedAt;
-    private MinimizedUserResponse bannedUser;
+    private LocalDateTime blockedAt;
+    private MinimizedUserResponse blockedUser;
 }

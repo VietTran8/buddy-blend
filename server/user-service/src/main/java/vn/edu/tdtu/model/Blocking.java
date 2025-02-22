@@ -11,15 +11,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Banning {
+public class Blocking {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    private LocalDateTime bannedAt;
+    private LocalDateTime blockedAt;
     @ManyToOne
-    @JoinColumn(name = "bannedById")
-    private User bannedByUser;
+    @JoinColumn(name = "blockedById")
+    private User blockedByUser;
     @ManyToOne
-    @JoinColumn(name = "bannedId")
-    private User bannedUser;
+    @JoinColumn(name = "blockedId")
+    private User blockedUser;
 }

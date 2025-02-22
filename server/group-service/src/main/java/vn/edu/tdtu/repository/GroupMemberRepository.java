@@ -54,6 +54,12 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, String
             "m.group.id = :groupId " +
             "AND m.group.isDeleted = false " +
             "AND m.isPending = false " +
+            "ORDER BY m.joinedAt DESC")
+    List<GroupMember> findAllMembersByGroupId(@Param("groupId") String groupId);
+    @Query("SELECT m FROM GroupMember m WHERE " +
+            "m.group.id = :groupId " +
+            "AND m.group.isDeleted = false " +
+            "AND m.isPending = false " +
             "AND m.member.userId IN :friendIds " +
             "ORDER BY m.joinedAt DESC")
     Page<GroupMember> findFriendMembersByGroupId(@Param("groupId") String groupId, @Param("friendIds") List<String> friendIds, Pageable pageable);

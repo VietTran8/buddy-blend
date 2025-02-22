@@ -2,8 +2,8 @@ package vn.edu.tdtu.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import vn.edu.tdtu.model.Banning;
+import vn.edu.tdtu.model.Blocking;
 
 @Repository
-public interface BanningRepository extends JpaRepository<Banning, String> {
+public interface BlockingRepository extends JpaRepository<Blocking, String> {
 }

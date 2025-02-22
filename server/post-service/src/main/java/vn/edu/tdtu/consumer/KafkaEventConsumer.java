@@ -30,12 +30,6 @@ public class KafkaEventConsumer {
             Optional<Post> optionalPost = postRepository.findById(message.getRefId());
 
             optionalPost.ifPresent((post) -> {
-//                if(post.getImageUrls() != null) {
-//                    post.getImageUrls().forEach(image -> fileService.delete(image, EFileType.TYPE_IMG));
-//                }
-//
-//                postRepository.delete(post);
-
                 post.setDetached(true);
 
                 List<Media> postMedias = mediaRepository.findAllById(post.getMediaIds());

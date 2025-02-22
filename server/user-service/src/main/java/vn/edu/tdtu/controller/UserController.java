@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
-import vn.edu.tdtu.service.interfaces.BanningService;
+import vn.edu.tdtu.service.interfaces.BlockingService;
 import vn.edu.tdtu.service.interfaces.FriendRequestService;
 import vn.edu.tdtu.service.interfaces.UserFavouriteService;
 import vn.edu.tdtu.service.interfaces.UserService;
@@ -18,7 +18,7 @@ import vn.edu.tdtu.service.interfaces.UserService;
 @Slf4j
 public class UserController {
     private final UserService userService;
-    private final BanningService banningService;
+    private final BlockingService blockingService;
     private final FriendRequestService friendRequestService;
     private final UserFavouriteService userFavouriteService;
 
@@ -150,6 +150,12 @@ public class UserController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    @GetMapping("/friends/id")
+    public ResponseEntity<?> getFriendIds(@RequestParam(name = "id", required = true) String userId){
+        ResDTO<?> response = friendRequestService.getFriendIds(userId);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
     @GetMapping("/friends/suggestions")
     public ResponseEntity<?> getFriendSuggestions(){
         ResDTO<?> response = friendRequestService.getFriendSuggestions();
@@ -195,15 +201,15 @@ public class UserController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    @PostMapping("/ban/{banUserId}")
-    public ResponseEntity<?> handleBanUser(@PathVariable("banUserId") String banUserId){
-        ResDTO<?> response = banningService.handleUserBanning(banUserId);
+    @PostMapping("/block/{blockUserId}")
+    public ResponseEntity<?> handleBlockUser(@PathVariable("blockUserId") String banUserId){
+        ResDTO<?> response = blockingService.handleUserBlocking(banUserId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    @GetMapping("/ban")
-    public ResponseEntity<?> getBaningUsers(){
-        ResDTO<?> response = banningService.getBannedUserList();
+    @GetMapping("/block")
+    public ResponseEntity<?> getBlockedUsers(){
+        ResDTO<?> response = blockingService.getBlockedUserList();
         return ResponseEntity.status(response.getCode()).body(response);
     }
 }

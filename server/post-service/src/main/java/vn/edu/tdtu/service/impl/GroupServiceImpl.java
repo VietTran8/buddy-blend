@@ -38,4 +38,12 @@ public class GroupServiceImpl implements GroupService {
 
         return allowResponse.getData();
     }
+
+    @Override
+    public List<String> getMemberIdList(String accessToken, String groupId) {
+        ResDTO<List<String>> response = groupClient.getMemberIdList(accessToken, groupId);
+        log.info("memberIdList: " + response.toString());
+
+        return response.getData();
+    }
 }

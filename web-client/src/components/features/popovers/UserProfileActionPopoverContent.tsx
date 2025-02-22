@@ -1,4 +1,4 @@
-import { useHandleBanUser } from "@/hooks";
+import { useHandleBlockUser } from "@/hooks";
 import { faBan } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Modal } from "antd";
@@ -12,11 +12,11 @@ interface IProps {
 
 const UserProfileActionPopoverContent: FC<IProps> = ({ userId }) => {
     const [modal, contextHolder] = Modal.useModal();
-    const { mutate: banUser } = useHandleBanUser();
+    const { mutate: blockUser } = useHandleBlockUser();
 
-    const handleOnBan = () => {
+    const handleOnBlock = () => {
         return new Promise((resolve, reject) => {
-            banUser(userId, {
+            blockUser(userId, {
                 onSuccess: (data) => {
                     toast.success("Chặn người dùng thành công!");
 
@@ -42,7 +42,7 @@ const UserProfileActionPopoverContent: FC<IProps> = ({ userId }) => {
             cancelText: 'Hủy',
             centered: true,
             destroyOnClose: true,
-            onOk: handleOnBan
+            onOk: handleOnBlock
         });
     };
 

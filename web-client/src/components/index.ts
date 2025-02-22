@@ -77,3 +77,4 @@ export { default as StoryWrapper } from './providers/StoryWrapper';
 export { default as PostSkeleton } from './skeletons/PostSkeleton';
 export { default as GroupLayoutSkeleton } from './skeletons/GroupLayoutSkeleton';
 export { default as ProfileLayoutSkeleton } from './skeletons/ProfileLayoutSkeleton';
+export { default as SearchUserItemSkeleton } from './skeletons/SearchUserItemSkeleton';

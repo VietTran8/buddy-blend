@@ -5,12 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.response.MutualFriend;
 import vn.edu.tdtu.dto.response.UserDetailsResponse;
-import vn.edu.tdtu.enums.EFriendReqStatus;
-import vn.edu.tdtu.enums.EFriendStatus;
 import vn.edu.tdtu.exception.BadRequestException;
-import vn.edu.tdtu.model.FriendRequest;
 import vn.edu.tdtu.model.User;
-import vn.edu.tdtu.repository.FriendRequestRepository;
 import vn.edu.tdtu.repository.UserRepository;
 import vn.edu.tdtu.util.SecurityContextUtils;
 
@@ -74,8 +70,8 @@ public class UserDetailsMapper {
 
     private boolean isBanned(User authUser, User otherUser) {
         return !authUser.getId().equals(otherUser.getId()) &&
-                (authUser.getBanningList().stream().anyMatch(b -> b.getBannedUser().getId().equals(otherUser.getId())) ||
-                        otherUser.getBanningList().stream().anyMatch(b -> b.getBannedUser().getId().equals(authUser.getId())));
+                (authUser.getBlockingList().stream().anyMatch(b -> b.getBlockedUser().getId().equals(otherUser.getId())) ||
+                        otherUser.getBlockingList().stream().anyMatch(b -> b.getBlockedUser().getId().equals(authUser.getId())));
     }
 
     private List<MutualFriend> getAllFriends(List<User> friends) {

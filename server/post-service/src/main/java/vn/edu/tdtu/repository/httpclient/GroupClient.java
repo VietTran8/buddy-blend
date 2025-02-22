@@ -21,4 +21,7 @@ public interface GroupClient {
 
     @GetMapping("/{groupId}/allow-fetch-post")
     public ResDTO<Boolean> allowFetchPost(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
+
+    @GetMapping("/{groupId}/members/id")
+    public ResDTO<List<String>> getMemberIdList(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
 }

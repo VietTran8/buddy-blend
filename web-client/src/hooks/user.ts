@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query"
-import { banUser, getBanningUsers, getUserById, getUserProfile, getUserProfileById, updateUserInfo, renameUser, updateUserPic } from "../services"
+import { blockUser, getBlockingUsers, getUserById, getUserProfile, getUserProfileById, updateUserInfo, renameUser, updateUserPic } from "../services"
 import { BaseResponse, UpdateUserInfoRequest, RenameUserRequest, User } from "../types";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
@@ -96,11 +96,11 @@ export const useUpdateUserCoverPic = () => {
     });
 }
 
-export const useHandleBanUser = () => {
+export const useHandleBlockUser = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (userId: string) => banUser(userId),
+        mutationFn: (userId: string) => blockUser(userId),
         onMutate: (userId) => ({ userId }),
         onSuccess: (_, __, { userId }) => {
             queryClient.invalidateQueries({
@@ -108,7 +108,7 @@ export const useHandleBanUser = () => {
             });
 
             queryClient.invalidateQueries({
-                queryKey: ["banning-users"]
+                queryKey: ["blocking-users"]
             });
         },
         onError: (data: AxiosError) => {
@@ -117,10 +117,10 @@ export const useHandleBanUser = () => {
     });
 }
 
-export const useQueryBanningUsers = () => {
+export const useQueryBlockingUsers = () => {
     return useQuery({
-        queryKey: ["banning-users"],
-        queryFn: () => getBanningUsers()
+        queryKey: ["blocking-users"],
+        queryFn: () => getBlockingUsers()
     });
 }
 

@@ -17,6 +17,7 @@ import vn.tdtu.edu.dto.fcm.NotificationContent;
 import vn.tdtu.edu.dto.fcm.NotificationMessage;
 import vn.tdtu.edu.dto.fcm.NotificationRequestBody;
 import vn.tdtu.edu.message.CommonNotificationMessage;
+import vn.tdtu.edu.message.newpost.NewPostMessage;
 import vn.tdtu.edu.model.CommonNotification;
 import vn.tdtu.edu.model.UserInfo;
 import vn.tdtu.edu.model.data.User;
@@ -198,6 +199,10 @@ public class NotificationSender {
             log.error("Error sending notification", e);
             return false;
         }
+    }
+
+    public void sendNewPostNotification(NewPostMessage message) {
+        socketModule.emitNewPostNotification(message);
     }
 
     private String getUserFullName(User foundUser){

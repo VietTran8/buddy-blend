@@ -1,5 +1,5 @@
 import { http } from "../config";
-import { Banning, BaseResponse, IdResponse, UpdateUserInfoRequest, RenameUserRequest, User, UserDetails } from "../types";
+import { Blocking, BaseResponse, IdResponse, UpdateUserInfoRequest, RenameUserRequest, User, UserDetails } from "../types";
 
 export const getUserById = async (id: string): Promise<BaseResponse<User>> => {
     const response: BaseResponse<User> = await http.get(`/users/${id}`);
@@ -38,14 +38,14 @@ export const updateUserPic = async (file: File, type: "profile" | "cover"): Prom
     return response;
 }
 
-export const banUser = async (userId: string): Promise<BaseResponse<IdResponse>> => {
-    const response: BaseResponse<IdResponse> = await http.post(`/users/ban/${userId}`);
+export const blockUser = async (userId: string): Promise<BaseResponse<IdResponse>> => {
+    const response: BaseResponse<IdResponse> = await http.post(`/users/block/${userId}`);
 
     return response;
 }
 
-export const getBanningUsers = async (): Promise<BaseResponse<Banning[]>> => {
-    const response: BaseResponse<Banning[]> = await http.get(`/users/ban`);
+export const getBlockingUsers = async (): Promise<BaseResponse<Blocking[]>> => {
+    const response: BaseResponse<Blocking[]> = await http.get(`/users/block`);
 
     return response;
 }

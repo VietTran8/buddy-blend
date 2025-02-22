@@ -20,7 +20,7 @@ const PostCommentModalContent: FC<IProps> = ({ post, isModal = true, onNewCommen
             {!isModal && <>
                 <CommentCreator onCommented={onNewComment} placeholder={`Bình luận về bài viết của ${removeExtraSpaces(post.user.userFullName)}...`} post={post} />
                 <hr className="my-3"/>
-                <h2 className="font-medium text-base text-gray-400">{`Bình luận về bài viết của ${post.user.userFullName} (${data ? data.data.length : 0}):`}</h2>
+                <h2 className="font-medium text-base text-gray-400">{`Bình luận về bài viết của ${removeExtraSpaces(post.user.userFullName)} (${data ? data.data.length : 0}):`}</h2>
             </>}
             {!data || data.data.length == 0 && <Empty className="my-auto" description={
                 <Typography.Text className="text-gray-400">Chưa có bình luận nào...</Typography.Text>

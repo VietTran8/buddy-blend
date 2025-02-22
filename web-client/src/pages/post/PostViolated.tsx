@@ -25,13 +25,13 @@ const PostViolated: FC<IProps> = ({ }) => {
                     <Avatar src={user?.profilePicture || `/images/default-user.png`} size={100} />
                     <img src="/icons/alert.png" className="w-8 h-8 absolute -bottom-1 right-1"/>
                 </div>
-                <p className="mt-5 text-base font-semibold text-gray-400 text-center">Nội dung bạn vừa tải lên vô tình vi phạm tiêu chuẩn cộng động của chúng tôi, có thể do nguyên nhân:</p>
+                <p className="mt-5 text-base text-gray-400 text-center">Nội dung bạn vừa tải lên vô tình vi phạm tiêu chuẩn cộng động của chúng tôi, có thể do nguyên nhân:</p>
                 <List
                     size="large"
-                    className="mt-5"
+                    className="mt-3"
                     bordered
                     dataSource={content.filter(item => item != "\n")}
-                    renderItem={(item) => <List.Item>{item}</List.Item>}
+                    renderItem={(item) => <List.Item className="font-semibold">{item}</List.Item>}
                 />
             </div>
             <h1 className="lg:text-lg text-base font-bold mt-3">Chi tiết nội dung</h1>

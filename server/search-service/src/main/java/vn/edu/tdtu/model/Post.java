@@ -22,8 +22,6 @@ import java.util.List;
 public class Post implements Serializable {
     private String id;
     private String content;
-//    private List<String> imageUrls;
-//    private List<String> videoUrls;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private Date createdAt;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")

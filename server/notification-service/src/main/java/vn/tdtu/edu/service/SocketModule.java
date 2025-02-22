@@ -10,7 +10,7 @@ import vn.tdtu.edu.dto.NewMessageNoti;
 import vn.tdtu.edu.exception.UnauthorizedException;
 import vn.tdtu.edu.message.CommonNotificationMessage;
 import vn.tdtu.edu.message.UserConnectMessage;
-import vn.tdtu.edu.model.CommonNotification;
+import vn.tdtu.edu.message.newpost.NewPostMessage;
 import vn.tdtu.edu.publisher.KafkaEventPublisher;
 import vn.tdtu.edu.util.JwtUtils;
 import vn.tdtu.edu.util.SessionIdUtil;
@@ -93,6 +93,15 @@ public class SocketModule {
             if(newMessageNoti.getToUserId().equals(c.get("userId"))) {
                 log.info("chat notification sent!");
                 c.sendEvent("new_message", newMessageNoti);
+            }
+        });
+    }
+
+    public void emitNewPostNotification(NewPostMessage message) {
+
+        server.getAllClients().forEach((client) -> {
+            if(message.getBroadcastIds().contains((String) client.get("userId"))) {
+                client.sendEvent("new_post", message.getPost());
             }
         });
     }

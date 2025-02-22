@@ -19,6 +19,7 @@ public interface GroupService {
     public void inviteUsers(String accessToken, InviteUsersRequest payload);
     public ResDTO<?> getPendingMembersList(String accessToken, String groupId);
     public ResDTO<?> getGroupMembers(String accessToken, String groupId, int page, int size, EGetMemberOption option);
+    public ResDTO<?> getGroupMembers(String groupId);
     public ResDTO<?> getAllFriendGroupMemberUserIds(String accessToken, String groupId);
     public ResDTO<?> isPrivateGroupOrUserJoined(String groupId);
 }
