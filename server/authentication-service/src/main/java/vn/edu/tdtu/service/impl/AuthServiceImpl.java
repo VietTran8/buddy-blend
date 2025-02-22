@@ -13,13 +13,14 @@ import vn.edu.tdtu.constant.RedisKey;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.LoginResponse;
+import vn.edu.tdtu.dto.response.PasswordCheckingResponse;
 import vn.edu.tdtu.dto.response.SignUpResponse;
 import vn.edu.tdtu.enums.EUserRole;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.message.SendOTPMailMessage;
 import vn.edu.tdtu.model.AuthInfo;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.repository.AuthInfoRepository;
 import vn.edu.tdtu.service.interfaces.AuthService;
@@ -185,6 +186,48 @@ public class AuthServiceImpl implements AuthService {
         return new ResDTO<>(
                 HttpServletResponse.SC_OK,
                 "Otp is correct",
+                null
+        );
+    }
+
+    @Override
+    public ResDTO<?> passwordChecking(PasswordCheckingRequest request) {
+        AuthInfo foundUser = authInfoRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("User not found with email: " + request.getEmail()));
+
+        boolean result = passwordEncoder.matches(request.getPassword(), foundUser.getHashedPassword());
+
+        String token = null;
+
+        if(result) {
+            token = OTPUtils.generateOTP(20);
+
+            redisService.set(
+                RedisKey.combineKey(RedisKey.PASSWORD_CHECKING_TOKEN_KEY, request.getEmail()),
+                token,
+                600
+            );
+        }
+
+        return new ResDTO<>(
+                result ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST,
+                result ? "Matched" : "Not matched",
+                result ? new PasswordCheckingResponse(token) : null
+        );
+    }
+
+    @Override
+    public ResDTO<?> confirmTokenChecking(ConfirmTokenCheckingRequest request) {
+        String storedToken = redisService.get(RedisKey.combineKey(
+                RedisKey.PASSWORD_CHECKING_TOKEN_KEY,
+                request.getEmail()
+        ));
+
+        boolean result = request.getToken() != null && request.getToken().equals(storedToken);
+
+        return new ResDTO<>(
+                result ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST,
+                result ? "Matched" : "Not matched",
                 null
         );
     }

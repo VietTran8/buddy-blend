@@ -9,7 +9,6 @@ import vn.tdtu.edu.model.CommonNotification;
 
 @Repository
 public interface NotificationRepository extends MongoRepository<CommonNotification, String> {
-    @Query(value = "{ 'toUserIds': ?0 }", sort = "{ 'createAt': -1 }")
+    @Query(value = "{ 'toUsers.userId': ?0 }", sort = "{ 'createAt': -1 }")
     Page<CommonNotification> findByToUserId(String toUserId, Pageable pageable);
-    void deleteByIdAndToUserIdsContaining(String id, String toUserId);
 }

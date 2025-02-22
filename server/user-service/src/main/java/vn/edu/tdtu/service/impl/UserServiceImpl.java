@@ -41,6 +41,7 @@ public class UserServiceImpl implements UserService {
     private final UserDetailsMapper userDetailsMapper;
     private final KafkaEventPublisher kafkaMsgService;
     private final GroupService groupService;
+    private final AuthService authService;
 
     public ResDTO<?> findAll(){
         ResDTO<List<User>> response = new ResDTO<>();
@@ -225,9 +226,21 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException(String.format("Không tìm thấy người dùng với id: %s", userId));
         }
 
-        user.setFirstName(request.getFirstName());
-        user.setMiddleName(request.getMiddleName());
-        user.setLastName(request.getLastName());
+        ConfirmTokenCheckingRequest checkingRequest = new ConfirmTokenCheckingRequest();
+        checkingRequest.setEmail(user.getEmail());
+        checkingRequest.setToken(request.getToken());
+
+        if(!authService.confirmationTokenChecking(checkingRequest))
+            throw new BadRequestException("Invalid token!");
+
+        if(request.getFirstName() != null)
+            user.setFirstName(request.getFirstName());
+
+        if (request.getMiddleName() != null)
+            user.setMiddleName(request.getMiddleName());
+
+        if(request.getLastName() != null)
+            user.setLastName(request.getLastName());
 
         response.setMessage("Cập nhật thành công!");
         response.setCode(HttpServletResponse.SC_OK);

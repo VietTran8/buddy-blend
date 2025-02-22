@@ -17,6 +17,7 @@ public class User {
     private String lastName;
     private String profilePicture;
     private String createdAt;
+    private boolean online;
     private String userFullName;
     private String notificationKey;
 }

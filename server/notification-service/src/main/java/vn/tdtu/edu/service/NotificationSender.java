@@ -13,7 +13,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import vn.tdtu.edu.dto.*;
+import vn.tdtu.edu.dto.fcm.NotificationContent;
+import vn.tdtu.edu.dto.fcm.NotificationMessage;
+import vn.tdtu.edu.dto.fcm.NotificationRequestBody;
+import vn.tdtu.edu.message.CommonNotificationMessage;
 import vn.tdtu.edu.model.CommonNotification;
+import vn.tdtu.edu.model.UserInfo;
 import vn.tdtu.edu.model.data.User;
 import vn.tdtu.edu.service.interfaces.UserService;
 
@@ -46,7 +51,27 @@ public class NotificationSender {
         }
     }
 
-    public boolean sendCommonNotification(CommonNotification commonNotification){
+    public boolean sendCommonNotification(CommonNotification commonNotification) {
+        User foundUser = userService.findById(commonNotification.getFromUserId());
+
+        CommonNotificationMessage commonNotificationMessage = new CommonNotificationMessage();
+        commonNotificationMessage.setToUserIds(commonNotification
+                .getToUsers()
+                .stream().map(UserInfo::getUserId)
+                .toList());
+        commonNotificationMessage.setType(commonNotification.getType());
+        commonNotificationMessage.setContent(commonNotification.getContent());
+        commonNotificationMessage.setTitle(commonNotification.getTitle());
+        commonNotificationMessage.setAvatarUrl(foundUser != null ? foundUser.getProfilePicture() : null);
+        commonNotificationMessage.setUserFullName(foundUser != null ? foundUser.getUserFullName() : null);
+        commonNotificationMessage.setRefId(commonNotification.getRefId());
+        commonNotificationMessage.setCreateAt(commonNotification.getCreateAt());
+        commonNotificationMessage.setFromUserId(commonNotification.getFromUserId());
+
+        return sendCommonNotification(commonNotificationMessage);
+    }
+
+    public boolean sendCommonNotification(CommonNotificationMessage commonNotification){
         socketModule.emitNotification(commonNotification);
 
         String SEND_NOTI_URL = "https://fcm.googleapis.com/v1/projects/"+ projectId +"/messages:send";
@@ -66,8 +91,8 @@ public class NotificationSender {
                 httpPost.setHeader("Content-Type", "application/json");
 
                 ObjectMapper objectMapper = new ObjectMapper();
-                NotificationRequestBody<CommonNotification> requestBody = new NotificationRequestBody<>();
-                NotificationMessage<CommonNotification> message = new NotificationMessage<>();
+                NotificationRequestBody<CommonNotificationMessage> requestBody = new NotificationRequestBody<>();
+                NotificationMessage<CommonNotificationMessage> message = new NotificationMessage<>();
                 requestBody.setMessage(message);
 
                 NotificationContent notificationContent = new NotificationContent();

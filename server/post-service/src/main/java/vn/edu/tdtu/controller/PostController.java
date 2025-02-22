@@ -11,6 +11,7 @@ import vn.edu.tdtu.dto.request.CreatePostRequest;
 import vn.edu.tdtu.dto.request.FindByIdsReq;
 import vn.edu.tdtu.dto.request.SharePostRequest;
 import vn.edu.tdtu.dto.request.UpdatePostContentRequest;
+import vn.edu.tdtu.dto.response.PostResponse;
 import vn.edu.tdtu.service.intefaces.PostService;
 import vn.edu.tdtu.service.intefaces.SavePostService;
 
@@ -123,6 +124,13 @@ public class PostController {
             @RequestParam(name = "size", required = false, defaultValue = "10") int limit
     ){
         ResDTO<?> response = postService.getGroupPosts(token, groupId, page, limit);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @GetMapping("/detached/{postId}")
+    public ResponseEntity<?> getDetachedPost(@RequestHeader("Authorization") String tokenHeader, @PathVariable("postId") String postId) {
+        ResDTO<PostResponse> response = postService.findDetachedPost(tokenHeader, postId);
+
         return ResponseEntity.status(response.getCode()).body(response);
     }
 

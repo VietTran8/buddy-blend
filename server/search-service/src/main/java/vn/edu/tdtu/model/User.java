@@ -24,6 +24,7 @@ public class User implements Serializable {
     private String createdAt;
     private String userFullName;
     private String notificationKey;
+    private boolean online;
     private boolean isFriend;
     private int friendsCount;
     private EFriendStatus friendStatus;

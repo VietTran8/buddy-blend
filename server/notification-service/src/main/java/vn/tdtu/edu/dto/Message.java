@@ -15,7 +15,7 @@ public class Message {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date createdAt;
     private String content;
-    private String imageUrls;
+    private String medias;
     private String fromUserId;
     private String toUserId;
 }

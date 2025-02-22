@@ -3,6 +3,7 @@ package vn.edu.tdtu.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import vn.edu.tdtu.model.Media;
 
 import java.util.List;
 
@@ -11,6 +12,6 @@ import java.util.List;
 @Data
 public class SendMessage {
     private String content;
-    private List<String> imageUrls;
+    private List<Media> medias;
     private String toUserId;
 }

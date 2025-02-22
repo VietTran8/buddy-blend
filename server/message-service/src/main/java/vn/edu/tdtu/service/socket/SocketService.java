@@ -58,7 +58,7 @@ public class SocketService {
                     .fromUserId(senderClient.get("userId"))
                     .toUserId(messageDto.getToUserId())
                     .roomId(foundRoom.getId())
-                    .imageUrls(messageDto.getImageUrls())
+                    .medias(messageDto.getMedias())
                     .build();
 
             ChatMessage savedMessage = chatMessageService.saveMessage(newMessage);

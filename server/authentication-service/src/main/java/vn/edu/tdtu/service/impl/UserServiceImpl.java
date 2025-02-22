@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.SignUpRequest;
 import vn.edu.tdtu.dto.response.SignUpResponse;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.repository.UserClient;
 import vn.edu.tdtu.service.interfaces.UserService;
 

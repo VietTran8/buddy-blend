@@ -7,15 +7,18 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 import vn.edu.tdtu.model.Post;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PostRepository extends MongoRepository<Post, String> {
-    @Query("{ 'normalizedContent' : { $regex: ?0, $options: 'i' } }")
+    @Query("{ 'normalizedContent' : { $regex: ?0, $options: 'i' }, 'detached': { $ne: true } }")
     List<Post> findByContent(String key);
     @Query("""
       {
            '$and': [
+             { 'detached': { $ne: true } },
              {  'type': { '$ne': 'GROUP' } },
              {
                '$or': [
@@ -39,13 +42,14 @@ public interface PostRepository extends MongoRepository<Post, String> {
            ]
      }
     """)
-    List<Post> findByUserIdOrPostTagsTaggedUserIdWithPrivacy(
+    Page<Post> findByUserIdOrPostTagsTaggedUserIdWithPrivacy(
             String userId,
             String taggedUserId,
             List<String> myFriendIds,
-            String authUserId
+            String authUserId,
+            Pageable pageable
     );
-    Page<Post> findByGroupIdOrderByCreatedAtDesc(String groupId, Pageable pageable);
-    List<Post> findByIdIn(List<String> id);
-
+    Page<Post> findByGroupIdAndDetachedNotOrderByCreatedAtDesc(String groupId, boolean detached, Pageable pageable);
+    List<Post> findByIdInAndDetachedNot(Collection<String> id, boolean detached);
+    Optional<Post> findByIdAndDetachedAndUserId(String id, boolean detached, String userId);
 }

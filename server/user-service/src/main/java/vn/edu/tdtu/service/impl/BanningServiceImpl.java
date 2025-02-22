@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.response.BanningResponse;
 import vn.edu.tdtu.dto.response.IdResponse;
-import vn.edu.tdtu.dto.response.MinimizedUserResponse;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.response.MinimizedUserMapper;
 import vn.edu.tdtu.model.Banning;

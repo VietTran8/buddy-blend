@@ -19,7 +19,7 @@ public class NewMessageNoti extends Message{
         this.setAvatar(avatar);
         this.setContent(message.getContent());
         this.setCreatedAt(message.getCreatedAt());
-        this.setImageUrls(message.getImageUrls());
+        this.setMedias(message.getMedias());
         this.setFromUserId(message.getFromUserId());
         this.setToUserId(message.getToUserId());
     }

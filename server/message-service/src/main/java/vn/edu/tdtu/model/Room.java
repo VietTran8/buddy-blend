@@ -27,4 +27,5 @@ public class Room {
     private Date createdAt;
     @DBRef
     private ChatMessage latestMessage;
+    private boolean archived;
 }

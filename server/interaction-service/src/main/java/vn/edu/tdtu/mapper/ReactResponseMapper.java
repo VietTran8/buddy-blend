@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.response.ReactResponse;
 import vn.edu.tdtu.model.CommentReactions;
 import vn.edu.tdtu.model.Reactions;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.util.DateUtils;
 
 import java.util.List;

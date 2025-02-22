@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.ModerateResponseDto;
-import vn.edu.tdtu.message.ModerateImagesMessage;
-import vn.edu.tdtu.message.ModerateImagesResultsMessage;
+import vn.edu.tdtu.message.ModerateMessage;
+import vn.edu.tdtu.message.ModerateResultsMessage;
 import vn.edu.tdtu.producer.KafkaEventPublisher;
 import vn.edu.tdtu.service.interfaces.ModerationService;
 
@@ -16,9 +16,10 @@ public class KafkaEventConsumer {
     private final KafkaEventPublisher publisher;
 
     @KafkaListener(groupId = "ModerateGroup", topics = "${kafka.topic.moderate.name}")
-    public void consumeModerateTopic(ModerateImagesMessage message){
-        ModerateResponseDto result = moderationService.bulkModerateImages(message.getImageUrls());
+    public void consumeModerateTopic(ModerateMessage message){
+        ModerateResponseDto result = moderationService.moderate(message);
 
-        publisher.publishModerationResult(new ModerateImagesResultsMessage(result, message.getPostId()));
+        if(!result.isAccept())
+            publisher.publishModerationResult(new ModerateResultsMessage(result, message));
     }
 }

@@ -18,5 +18,6 @@ public class User {
     private String profilePicture;
     private String userFullName;
     private boolean isFriend;
+    private boolean online;
 }
 

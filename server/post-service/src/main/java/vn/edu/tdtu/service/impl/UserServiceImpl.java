@@ -6,7 +6,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.user.FindByIdsRequest;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.repository.httpclient.UserClient;
 import vn.edu.tdtu.service.intefaces.UserService;
 

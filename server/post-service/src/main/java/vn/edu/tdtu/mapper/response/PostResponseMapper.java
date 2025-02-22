@@ -6,12 +6,14 @@ import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.response.GroupInfo;
 import vn.edu.tdtu.dto.response.PostResponse;
 import vn.edu.tdtu.dto.response.TopReacts;
+import vn.edu.tdtu.enums.EPostType;
 import vn.edu.tdtu.enums.EReactionType;
 import vn.edu.tdtu.model.Post;
 import vn.edu.tdtu.model.PostTag;
-import vn.edu.tdtu.model.Reacts;
-import vn.edu.tdtu.model.User;
-import vn.edu.tdtu.repository.PostShareRepository;
+import vn.edu.tdtu.model.data.Reacts;
+import vn.edu.tdtu.model.data.User;
+import vn.edu.tdtu.repository.MediaRepository;
+import vn.edu.tdtu.repository.PostRepository;
 import vn.edu.tdtu.repository.SavePostRepository;
 import vn.edu.tdtu.service.impl.UserServiceImpl;
 import vn.edu.tdtu.service.intefaces.GroupService;
@@ -31,37 +33,30 @@ public class PostResponseMapper {
     private final UserServiceImpl userService;
     private final GroupService groupService;
     private final InteractionService interactionService;
-    private final PostShareRepository postShareRepository;
     private final SavePostRepository savePostRepository;
+    private final PostRepository postRepository;
+    private final MediaRepository mediaRepository;
     private final JwtUtils jwtUtils;
 
+    public PostResponse mapToDto(String token, String postId, Post post, Map<String, Post> sharedPostsMap, boolean bulkFetch){
+        PostResponse postResponse = mapToDto(token, postId, post, bulkFetch);
+
+        if(post.getType().equals(EPostType.SHARE)) {
+            Post foundSharedPost = !bulkFetch ?
+                    postRepository.findById(post.getSharedPostId()).orElse(null) :
+                    sharedPostsMap.get(post.getSharedPostId());
+
+            postResponse.setSharedPost(mapToBasePostDto(token, foundSharedPost, bulkFetch));
+        }
+
+        return postResponse;
+    }
+
     public PostResponse mapToDto(String token, String postId, Post post, boolean bulkFetch){
-        User postedUser = new User();
-        if(!bulkFetch)
-            postedUser =  userService.findById(token, post.getUserId());
 
-        List<User> taggedUsers = post.getPostTags().stream().map(PostTag::getTaggedUser).toList();
+        PostResponse postResponse = mapToBasePostDto(token, post, bulkFetch);
 
-        GroupInfo foundGroup = null;
-
-        if(post.getGroupId() != null && !post.getGroupId().isEmpty())
-            foundGroup = groupService.getGroupById(token, post.getGroupId());
-
-        PostResponse postResponse = new PostResponse();
-
-        postResponse.setId(post.getId());
-        postResponse.setPrivacy(post.getPrivacy());
-        postResponse.setContent(post.getContent());
-        postResponse.setType(post.getType());
-        postResponse.setImageUrls(post.getImageUrls());
-        postResponse.setVideoUrls(post.getVideoUrls());
-        postResponse.setCreatedAt(DateUtils.localDateTimeToDate(post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now()));
-        postResponse.setUpdatedAt(DateUtils.localDateTimeToDate(post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now()));
-        postResponse.setNoShared(postShareRepository.findBySharedPostId(post.getId()).size());
-        postResponse.setGroupInfo(foundGroup);
-        postResponse.setTaggedUsers(taggedUsers);
-        postResponse.setHiddenCreatedAt(DateUtils.localDateTimeToDate((post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now())));
-        postResponse.setUser(postedUser);
+        postResponse.setNoShared(0);
         postResponse.setSaved(savePostRepository.existsByUserIdAndPostIdsContains(SecurityContextUtils.getUserId(), postId));
 
         Map<EReactionType, List<Reacts>> reactionsMap = interactionService.findReactionsByPostId(token, postId);
@@ -89,6 +84,48 @@ public class PostResponseMapper {
             Reacts react = findUserReaction(reactionsMap, userId);
             postResponse.setReacted(react != null ? react.getType() : null);
         }
+
+        if(!bulkFetch && post.getType().equals(EPostType.SHARE)) {
+            Post foundSharedPost = postRepository.findById(post.getSharedPostId()).orElse(null);
+
+            postResponse.setSharedPost(mapToBasePostDto(token, foundSharedPost, bulkFetch));
+        }
+
+        return postResponse;
+    }
+
+    private PostResponse mapToBasePostDto(String token, Post post, boolean bulkFetch) {
+        User postedUser = new User();
+
+        if(!bulkFetch)
+            postedUser =  userService.findById(token, post.getUserId());
+
+        List<User> taggedUsers = new ArrayList<>();
+
+        if(post.getPostTags() != null)
+            taggedUsers = post.getPostTags().stream().map(PostTag::getTaggedUser).toList();
+
+        GroupInfo foundGroup = null;
+
+        if(post.getGroupId() != null && !post.getGroupId().isEmpty())
+            foundGroup = groupService.getGroupById(token, post.getGroupId());
+
+        PostResponse postResponse = new PostResponse();
+
+        postResponse.setId(post.getId());
+        postResponse.setPrivacy(post.getPrivacy());
+        postResponse.setContent(post.getContent());
+        postResponse.setType(post.getType());
+//        postResponse.setImageUrls(post.getImageUrls() != null ? post.getImageUrls() : new ArrayList<>());
+//        postResponse.setVideoUrls(post.getVideoUrls() != null ? post.getVideoUrls() : new ArrayList<>());
+        postResponse.setMedias(mediaRepository.findAllById(post.getMediaIds() != null ? post.getMediaIds() : List.of()));
+        postResponse.setCreatedAt(DateUtils.localDateTimeToDate(post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now()));
+        postResponse.setUpdatedAt(DateUtils.localDateTimeToDate(post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now()));
+        postResponse.setGroupInfo(foundGroup);
+        postResponse.setTaggedUsers(taggedUsers);
+        postResponse.setBackground(post.getBackground());
+        postResponse.setHiddenCreatedAt(DateUtils.localDateTimeToDate((post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now())));
+        postResponse.setUser(postedUser);
 
         return postResponse;
     }

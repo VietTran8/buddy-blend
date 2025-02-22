@@ -11,6 +11,7 @@ import vn.edu.tdtu.dto.request.ReportRequest;
 import vn.edu.tdtu.dto.response.GetAllReportResponse;
 import vn.edu.tdtu.dto.response.ReportResponse;
 import vn.edu.tdtu.mapper.response.ReportResponseMapper;
+import vn.edu.tdtu.model.Post;
 import vn.edu.tdtu.model.Report;
 import vn.edu.tdtu.repository.PostRepository;
 import vn.edu.tdtu.repository.ReportRepository;
@@ -25,7 +26,6 @@ import java.util.*;
 public class ReportServiceImpl implements ReportService {
     private final ReportRepository reportRepository;
     private final PostRepository postRepository;
-    private final PostShareServiceImpl postShareService;
     private final JwtUtils jwtUtils;
     private final ReportResponseMapper reportResponseMapper;
 
@@ -42,29 +42,15 @@ public class ReportServiceImpl implements ReportService {
         report.setUserId(userId);
         report.setCreateAt(new Date());
 
-        postRepository.findById(request.getPostId())
-                .ifPresentOrElse(
-                        p -> {
-                            report.setPostId(p.getId());
+        Post post = postRepository.findById(request.getPostId())
+                        .orElseThrow(() -> new RuntimeException("post not found with id: " + request.getPostId()));
 
-                            response.setMessage("submitted");
-                            response.setData(data);
-                            response.setCode(200);
-                        }, () -> {
-                            postShareService.findById(request.getPostId())
-                                    .ifPresentOrElse(
-                                            postShare -> {
-                                                report.setPostId(postShare.getSharedPostId());
+        report.setPostId(post.getId());
 
-                                                response.setMessage("submitted");
-                                                response.setData(data);
-                                                response.setCode(200);
-                                            },
-                                            () -> {
-                                                throw new RuntimeException("post not found with id: " + request.getPostId());
-                                            });
-                        }
-                );
+        response.setMessage("submitted");
+        response.setData(data);
+        response.setCode(200);
+
         reportRepository.save(report);
         data.put("savedReport", report.getId());
 

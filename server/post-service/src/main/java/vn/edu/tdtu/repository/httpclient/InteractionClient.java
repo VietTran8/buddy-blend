@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.tdtu.config.openfeign.FeignConfig;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.enums.EReactionType;
-import vn.edu.tdtu.model.Comment;
-import vn.edu.tdtu.model.Reacts;
+import vn.edu.tdtu.model.data.Comment;
+import vn.edu.tdtu.model.data.Reacts;
 
 import java.util.List;
 import java.util.Map;

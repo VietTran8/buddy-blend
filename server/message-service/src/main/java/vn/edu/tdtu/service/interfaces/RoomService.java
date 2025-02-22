@@ -8,4 +8,6 @@ public interface RoomService {
     public Room findById(String id);
     public Room findExistingRoom(String fromUserId, String toUserId);
     public ResDTO<?> findRoomsByUser();
+    public ResDTO<?> archiveRoom(String opponentId, boolean archive);
+    public ResDTO<?> deleteRoom(String opponentId);
 }

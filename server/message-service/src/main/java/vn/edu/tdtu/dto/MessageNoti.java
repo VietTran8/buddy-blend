@@ -18,7 +18,7 @@ public class MessageNoti {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private Date createdAt;
     private String content;
-    private String imageUrls;
+    private String medias;
     private String fromUserId;
     private String toUserId;
 
@@ -26,7 +26,7 @@ public class MessageNoti {
         this.id = message.getId();
         this.createdAt = message.getCreatedAt();
         this.content = message.getContent();
-        this.imageUrls = message.getImageUrls().size() + "";
+        this.medias = message.getMedias().size() + "";
         this.fromUserId = message.getFromUserId();
         this.toUserId = message.getToUserId();
     }

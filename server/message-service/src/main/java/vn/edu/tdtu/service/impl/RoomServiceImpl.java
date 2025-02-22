@@ -1,9 +1,11 @@
 package vn.edu.tdtu.service.impl;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.RoomResponse;
+import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.RoomResponseMapper;
 import vn.edu.tdtu.model.Room;
 import vn.edu.tdtu.repository.RoomRepository;
@@ -50,5 +52,29 @@ public class RoomServiceImpl implements RoomService {
                 .toList());
 
         return response;
+    }
+
+    @Override
+    public ResDTO<?> archiveRoom(String opponentId, boolean archived) {
+        String authUserId = SecurityContextUtils.getUserId();
+        Room foundRoom = findExistingRoom(authUserId, opponentId);
+
+        if(foundRoom == null)
+            throw new BadRequestException("Room not found!");
+
+        foundRoom.setArchived(archived);
+
+        roomRepository.save(foundRoom);
+
+        return new ResDTO<>(
+                String.format("Room %s successfully", archived ? "archived" : "unarchived"),
+                null,
+                HttpServletResponse.SC_OK
+        );
+    }
+
+    @Override
+    public ResDTO<?> deleteRoom(String opponentId) {
+        return null;
     }
 }

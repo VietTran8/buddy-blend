@@ -6,7 +6,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.response.InteractNotification;
 import vn.edu.tdtu.enums.ESyncType;
-import vn.edu.tdtu.message.ModerateImagesMessage;
+import vn.edu.tdtu.message.ModerateMessage;
 import vn.edu.tdtu.message.ModerationNotificationMsg;
 import vn.edu.tdtu.message.SyncPostMsg;
 import vn.edu.tdtu.model.Post;
@@ -36,7 +36,7 @@ public class KafkaEventPublisher {
         kafkaTemplate.send(moderateNotificationTopicName, msg);
     }
 
-    public void pubModerateImagesMessage(ModerateImagesMessage msg){
+    public void pubModerateMessage(ModerateMessage msg){
         kafkaTemplate.send(moderateTopicName, msg);
     }
 }

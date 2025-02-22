@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.edu.tdtu.enums.EPostType;
 import vn.edu.tdtu.enums.EPrivacy;
+import vn.edu.tdtu.model.Media;
 
 import java.util.List;
 
@@ -13,11 +14,11 @@ import java.util.List;
 @Data
 public class CreatePostRequest {
     private String content;
-    private List<String> imageUrls;
-    private List<String> videoUrls;
+    private List<Media> medias;
     private EPrivacy privacy;
     private Boolean active;
     private EPostType type;
     private String groupId;
+    private String background;
     private List<PostTagReqDTO> postTags;
 }

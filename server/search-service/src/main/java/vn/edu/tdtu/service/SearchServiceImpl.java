@@ -38,7 +38,7 @@ public class SearchServiceImpl implements SearchService {
         }
 
         SearchResponse data = new SearchResponse();
-        data.setUsers(userService.findByNameContaining(token, key));
+        data.setUsers(userService.searchUserFullName(token, key));
         data.setPosts(postService.findByContentContaining(token, key));
 
         ResDTO<SearchResponse> response = new ResDTO<>();
@@ -52,7 +52,7 @@ public class SearchServiceImpl implements SearchService {
     @Cacheable(key = "T(java.util.Objects).hash(#p1)", value = "fetch-result", unless = "#result.data.users.isEmpty() and #result.data.posts.isEmpty()")
     public ResDTO<?> fetchResult(String token, String key){
         SearchResponse data = new SearchResponse();
-        data.setUsers(userService.findByNameContaining(token, key));
+        data.setUsers(userService.searchUserFullName(token, key));
         data.setPosts(postService.findByContentContaining(token, key));
 
         ResDTO<SearchResponse> response = new ResDTO<>();

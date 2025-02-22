@@ -21,8 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class UserDetailsMapper {
-    private final FriendRequestRepository friendRequestRepository;
     private final UserRepository userRepository;
+    private final BaseUserMapper baseUserMapper;
 
     public UserDetailsResponse mapToDTO(User user){
         if(user == null) {
@@ -38,44 +38,22 @@ public class UserDetailsMapper {
             return null;
         }
 
-        List<User> myFriends = getListFriends(authUser);
-        List<User> userFriends = getListFriends(user);
-        List<FriendRequest> authUserFriendRequests = getUserFriendRequest(authUser, user);
+        List<User> myFriends = baseUserMapper.getListFriends(authUser);
+        List<User> userFriends = baseUserMapper.getListFriends(user);
 
-        UserDetailsResponse userDetails = new UserDetailsResponse();
+        UserDetailsResponse userDetails = new UserDetailsResponse(baseUserMapper.baseMapToDto(user));
 
         userDetails.setFriend(myFriends.stream().anyMatch(f -> !authUserId.equals(user.getId())
                 && f.getId().equals(user.getId())));
-
-        userDetails.setFriendStatus(EFriendStatus.NOT_YET);
-
-        authUserFriendRequests.stream().findFirst()
-                .ifPresent(request -> {
-                    switch (request.getStatus()) {
-                        case PENDING -> {
-                            if(request.getToUser().getId().equals(user.getId())){
-                                userDetails.setFriendStatus(EFriendStatus.SENT_BY_YOU);
-                            }else {
-                                userDetails.setFriendStatus(EFriendStatus.SENT_TO_YOU);
-                            }
-                        }
-                        case ACCEPTED -> {
-                            userDetails.setFriendStatus(EFriendStatus.IS_FRIEND);
-                        }
-                        case CANCELLED -> {
-                            userDetails.setFriendStatus(EFriendStatus.NOT_YET);
-                        }
-                    }
-                });
-
         userDetails.setMyAccount(authUserId.equals(user.getId()));
         userDetails.setBio(user.getBio());
+        userDetails.setFriendsCount(userFriends.size());
         userDetails.setCoverPicture(user.getCover());
         userDetails.setGender(user.getGender());
         userDetails.setPhone(user.getPhone() != null ? user.getPhone() : "Chưa cập nhật...");
         userDetails.setFromCity(user.getFromCity() != null ? user.getFromCity() : "Chưa cập nhật...");
 
-        List<MutualFriend> mutualFriends = getMutualFriends(myFriends, userFriends);
+        List<MutualFriend> mutualFriends = baseUserMapper.getMutualFriends(myFriends, userFriends);
 
         userDetails.setMutualFriends(
                 userDetails.isMyAccount() ?
@@ -84,23 +62,12 @@ public class UserDetailsMapper {
 
         userDetails.setOtherFriends(
                 userDetails.isMyAccount() ?
-                        getAllFriends(authUser) :
-                        getAllFriends(user)
+                        getAllFriends(myFriends) :
+                        getAllFriends(userFriends)
                                 .stream()
                                 .filter(friend -> !mutualFriends.contains(friend))
                                 .toList()
         );
-
-        userDetails.setFriendsCount(userFriends.size());
-        userDetails.setId(user.getId());
-        userDetails.setUserFullName(user.getUserFullName());
-        userDetails.setEmail(user.getEmail());
-        userDetails.setCreatedAt(user.getCreatedAt());
-        userDetails.setFirstName(user.getFirstName());
-        userDetails.setMiddleName(user.getMiddleName());
-        userDetails.setLastName(user.getLastName());
-        userDetails.setProfilePicture(user.getProfilePicture() != null ? user.getProfilePicture() : "");
-        userDetails.setNotificationKey(user.getNotificationKey());
 
         return userDetails;
     }
@@ -111,13 +78,8 @@ public class UserDetailsMapper {
                         otherUser.getBanningList().stream().anyMatch(b -> b.getBannedUser().getId().equals(authUser.getId())));
     }
 
-    private List<FriendRequest> getUserFriendRequest(User fromUser, User toUser) {
-        return friendRequestRepository.findByToUserAndFromUserOrFromUserAndToUser(toUser, fromUser, toUser, fromUser);
-    }
-
-    private static List<MutualFriend> getMutualFriends(List<User> myFriends, List<User> userFriends) {
-        return myFriends.stream()
-                .filter(userFriends::contains)
+    private List<MutualFriend> getAllFriends(List<User> friends) {
+        return friends.stream()
                 .map(friend -> {
                     MutualFriend mutualFriend = new MutualFriend();
 
@@ -128,36 +90,5 @@ public class UserDetailsMapper {
                     return mutualFriend;
                 })
                 .toList();
-    }
-
-    private List<MutualFriend> getAllFriends(User user) {
-
-        return getListFriends(user).stream()
-                .map(friend -> {
-                    MutualFriend mutualFriend = new MutualFriend();
-
-                    mutualFriend.setFullName(friend.getUserFullName());
-                    mutualFriend.setId(friend.getId());
-                    mutualFriend.setProfileImage(friend.getProfilePicture());
-
-                    return mutualFriend;
-                })
-                .toList();
-    }
-
-    private List<User> getListFriends(User user) {
-        List<User> friends = new ArrayList<>();
-
-        if(user != null){
-            List<FriendRequest> friendRequests = friendRequestRepository.findByFromUserAndStatusOrToUserAndStatus(user, EFriendReqStatus.ACCEPTED, user, EFriendReqStatus.ACCEPTED);
-            friends = friendRequests.stream().map(request -> {
-                if (request.getFromUser().getId().equals(user.getId())) {
-                    return request.getToUser();
-                }
-                return request.getFromUser();
-            }).filter(User::isActive).toList();
-        }
-
-        return friends;
     }
 }

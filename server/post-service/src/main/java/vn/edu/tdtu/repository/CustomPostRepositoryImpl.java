@@ -1,6 +1,10 @@
 package vn.edu.tdtu.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -16,13 +20,30 @@ import java.util.List;
 public class CustomPostRepositoryImpl implements CustomPostRepository{
     private final MongoTemplate mongoTemplate;
     @Override
-    public List<Post> findNewsFeed(String userId, List<String> friendIds, List<String> groupIds, LocalDateTime startTime) {
-        Criteria criteria = new Criteria().orOperator(
-                Criteria.where("userId").in(friendIds).and("privacy").in(EPrivacy.PUBLIC, EPrivacy.ONLY_FRIENDS).and("createdAt").lte(startTime),
-                Criteria.where("userId").is(userId).and("createdAt").lte(startTime),
-                Criteria.where("groupId").in(groupIds).and("createdAt").lte(startTime)
+    public Page<Post> findNewsFeed(String userId, List<String> friendIds, List<String> groupIds, LocalDateTime startTime, int page, int size) {
+        Criteria detachCriteria = new Criteria().orOperator(
+                Criteria.where("detached").is(false),
+                Criteria.where("detached").is(null)
         );
-        Query query = Query.query(criteria);
-        return mongoTemplate.find(query, Post.class);
+
+        Criteria criteria = new Criteria().orOperator(
+                Criteria.where("userId").in(friendIds).and("privacy").in(EPrivacy.PUBLIC, EPrivacy.ONLY_FRIENDS),
+                Criteria.where("userId").is(userId),
+                Criteria.where("groupId").in(groupIds)
+        ).andOperator(detachCriteria);
+
+        //.and("createdAt").lte(startTime)
+
+        Query countQuery = Query.query(criteria);
+        long totalElements = mongoTemplate.count(countQuery, Post.class);
+
+        Query query = Query.query(criteria)
+                .with(Sort.by(Sort.Direction.DESC, "createdAt"))
+                .skip((long) (page - 1) * size)
+                .limit(size);
+
+        List<Post> posts = mongoTemplate.find(query, Post.class);
+
+        return new PageImpl<>(posts, PageRequest.of(page - 1, size), totalElements);
     }
 }

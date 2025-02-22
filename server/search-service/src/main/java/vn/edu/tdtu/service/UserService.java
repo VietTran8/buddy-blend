@@ -2,6 +2,10 @@ package vn.edu.tdtu.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.common.unit.Fuzziness;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.request.FindByUserIdsReq;
 import vn.edu.tdtu.exception.BadRequestException;
@@ -18,6 +22,7 @@ import java.util.List;
 public class UserService {
     private final EsUserRepository userRepository;
     private final UserClient userClient;
+    private final ElasticsearchOperations elasticsearchOperations;
 
     public void saveUser(SyncUser user) {
         userRepository.save(user);
@@ -40,13 +45,25 @@ public class UserService {
         userRepository.deleteById(user.getId());
     }
     
-    public List<User> findByNameContaining(String accessToken, String name) {
-        List<String> matchUserIds = userRepository.findByFullName(name).stream().map(SyncUser::getId).toList();
+    public List<User> searchUserFullName(String accessToken, String name) {
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(q -> q
+                        .match(mq -> mq
+                                .field("fullName")
+                                .query(name)
+                                .fuzziness(Fuzziness.ONE.asString())
+                        )
+                )
+                .build();
 
-        log.info(matchUserIds.toString());
+        SearchHits<SyncUser> searchHits = elasticsearchOperations.search(query, SyncUser.class);
+
+        List<String> matchedUserIds = searchHits.getSearchHits().stream()
+                .map(hit -> hit.getContent().getId())
+                .toList();
 
         return userClient
-                .findByIds(accessToken, new FindByUserIdsReq(matchUserIds))
+                .findByIds(accessToken, new FindByUserIdsReq(matchedUserIds))
                 .getData();
     }
 }

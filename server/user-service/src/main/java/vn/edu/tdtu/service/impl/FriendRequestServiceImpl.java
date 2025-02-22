@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.FQAcceptationDTO;
 import vn.edu.tdtu.dto.request.FriendReqDTO;
-import vn.edu.tdtu.dto.response.FriendRequestMessage;
+import vn.edu.tdtu.message.FriendRequestMessage;
 import vn.edu.tdtu.dto.response.FriendRequestResponse;
 import vn.edu.tdtu.dto.response.HandleFriendRequestResponse;
 import vn.edu.tdtu.dto.response.MinimizedUserResponse;
@@ -287,8 +287,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     private static FriendRequestMessage getFriendRequestMessage(FriendRequest newRequest) {
         FriendRequestMessage notification = new FriendRequestMessage();
-        notification.setAvatarUrl(newRequest.getFromUser().getProfilePicture());
-        notification.setUserFullName(newRequest.getFromUser().getUserFullName());
+        notification.setFromUserId(newRequest.getFromUser().getId());
         notification.setNotificationKey(newRequest.getToUser().getNotificationKey());
         notification.setContent(newRequest.getFromUser().getUserFullName() + " đã gửi cho bạn lời mời kết bạn");
         notification.setTitle("Yêu cầu kết bạn");

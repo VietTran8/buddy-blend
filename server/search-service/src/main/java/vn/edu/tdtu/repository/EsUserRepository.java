@@ -8,5 +8,4 @@ import java.util.List;
 
 @Repository
 public interface EsUserRepository extends ElasticsearchRepository<SyncUser, String> {
-    List<SyncUser> findByFullName(String fullName);
 }

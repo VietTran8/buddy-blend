@@ -7,7 +7,7 @@ import vn.edu.tdtu.dto.MessageResponse;
 import vn.edu.tdtu.dto.RoomResponse;
 import vn.edu.tdtu.model.ChatMessage;
 import vn.edu.tdtu.model.Room;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.service.interfaces.UserService;
 
 @Component
@@ -16,7 +16,6 @@ import vn.edu.tdtu.service.interfaces.UserService;
 public class RoomResponseMapper {
     private final UserService userService;
     public RoomResponse mapToDTO(String currentUserId, Room object){
-
         RoomResponse response = new RoomResponse();
         response.setId(object.getId());
         response.setCreatedAt(object.getCreatedAt());
@@ -40,6 +39,7 @@ public class RoomResponseMapper {
             response.setRoomImage(opponentUser.getProfilePicture());
             response.setRoomName(opponentUser.getUserFullName());
             response.setOpponentUserId(opponentUserId);
+            response.setOnline(opponentUser.isOnline());
         }
 
         return response;
@@ -52,7 +52,7 @@ public class RoomResponseMapper {
             msgResponse.setId(msg.getId());
             msgResponse.setContent(msg.getContent());
             msgResponse.setCreatedAt(msg.getCreatedAt());
-            msgResponse.setImageUrls(msg.getImageUrls());
+            msgResponse.setMedias(msg.getMedias());
             msgResponse.setFromUserId(msg.getFromUserId());
             msgResponse.setToUserId(msg.getToUserId());
 

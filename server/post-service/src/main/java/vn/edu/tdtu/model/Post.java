@@ -25,15 +25,21 @@ public class Post {
     private String content;
     private List<String> imageUrls;
     private List<String> videoUrls;
+    private List<String> mediaIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private EPrivacy privacy;
     private Boolean active;
+    @Indexed
     private String groupId;
+    private String background;
+    private String sharedPostId;
     @Indexed
     private EPostType type;
     @Indexed
     private String userId;
+    @Indexed
+    private boolean detached;
     private List<PostTag> postTags;
     private String normalizedContent;
 }

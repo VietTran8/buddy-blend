@@ -1,6 +1,6 @@
 package vn.edu.tdtu.service.intefaces;
 
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.User;
 
 import java.util.List;
 

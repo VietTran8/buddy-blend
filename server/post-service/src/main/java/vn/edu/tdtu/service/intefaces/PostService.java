@@ -24,5 +24,6 @@ public interface PostService {
     public ResDTO<?> updatePostContent(String token, UpdatePostContentRequest request);
     public ResDTO<?> deletePost(String postId);
     public ResDTO<?> sharePost(String token, SharePostRequest request);
+    public ResDTO<PostResponse> findDetachedPost(String token, String postId);
     public ResDTO<PaginationResponse<PostResponse>> findUserPosts(String token, String uId, int page, int size);
 }

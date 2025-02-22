@@ -66,7 +66,7 @@ public class ReactionServiceImpl implements ReactionService {
 
             notification.setUserFullName(foundUser.getUserFullName());
             notification.setAvatarUrl(foundUser.getProfilePicture());
-            notification.setContent(notification.getUserFullName() + " đã bày tỏ cảm xúc về tin của bạn.");
+            notification.setContent("đã bày tỏ cảm xúc về tin của bạn.");
             notification.setRefId(foundStory.getId());
             notification.setTitle("Có người tương tác nè!");
             notification.setFromUserId(userId);

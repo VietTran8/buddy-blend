@@ -20,13 +20,11 @@ public class CommonNotification {
     @Id
     @Indexed
     private String id;
-    private String userFullName;
-    private String avatarUrl;
     private String content;
     private String title;
     private String refId;
     private String fromUserId;
-    private List<String> toUserIds;
+    private List<UserInfo> toUsers;
     private ENotificationType type;
     private String createAt;
 }

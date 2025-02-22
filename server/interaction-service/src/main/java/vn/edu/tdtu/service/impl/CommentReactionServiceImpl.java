@@ -9,7 +9,7 @@ import vn.edu.tdtu.enums.EReactionType;
 import vn.edu.tdtu.mapper.CommentReactionMapper;
 import vn.edu.tdtu.mapper.ReactResponseMapper;
 import vn.edu.tdtu.model.CommentReactions;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.repository.CommentReactionRepository;
 import vn.edu.tdtu.service.interfaces.CommentReactionService;
 import vn.edu.tdtu.service.interfaces.UserService;

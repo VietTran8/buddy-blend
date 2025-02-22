@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.ResDTO;
-import vn.edu.tdtu.model.Post;
+import vn.edu.tdtu.model.data.Post;
 import vn.edu.tdtu.repository.httpclient.PostClient;
 import vn.edu.tdtu.service.interfaces.PostService;
 

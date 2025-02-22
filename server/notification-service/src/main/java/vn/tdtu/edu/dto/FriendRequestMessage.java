@@ -10,8 +10,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class FriendRequestMessage {
-    private String userFullName;
-    private String avatarUrl;
+    private String fromUserId;
     private String content;
     private String notificationKey;
     private String toUserId;

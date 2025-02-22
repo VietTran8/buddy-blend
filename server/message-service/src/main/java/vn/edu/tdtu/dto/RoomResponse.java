@@ -20,6 +20,7 @@ public class RoomResponse {
     private String roomImage;
     private boolean lastSentByYou;
     private String opponentUserId;
+    private boolean online;
     @JsonIgnore()
     private Date createdAt;
 }

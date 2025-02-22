@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.edu.tdtu.enums.EReactionType;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.User;
 
 import java.util.Date;
 

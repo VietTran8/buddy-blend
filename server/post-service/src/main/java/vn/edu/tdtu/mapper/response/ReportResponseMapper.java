@@ -7,7 +7,7 @@ import vn.edu.tdtu.dto.response.ReportResponse;
 import vn.edu.tdtu.dto.response.ReportUserResponse;
 import vn.edu.tdtu.model.Post;
 import vn.edu.tdtu.model.Report;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.service.impl.UserServiceImpl;
 import vn.edu.tdtu.service.intefaces.PostService;
 

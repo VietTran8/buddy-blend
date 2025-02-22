@@ -8,13 +8,12 @@ import vn.edu.tdtu.dto.response.InteractNotification;
 import vn.edu.tdtu.dto.response.ReactResponse;
 import vn.edu.tdtu.dto.response.TopReacts;
 import vn.edu.tdtu.enums.ENotificationType;
-import vn.edu.tdtu.enums.EPostType;
 import vn.edu.tdtu.enums.EReactionType;
 import vn.edu.tdtu.mapper.DoReactMapper;
 import vn.edu.tdtu.mapper.ReactResponseMapper;
-import vn.edu.tdtu.model.Post;
+import vn.edu.tdtu.model.data.Post;
 import vn.edu.tdtu.model.Reactions;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.repository.ReactionRepository;
 import vn.edu.tdtu.service.interfaces.PostService;
@@ -45,9 +44,6 @@ public class ReactionServiceImpl implements ReactionService {
         Post foundPost = postService.findById(token, request.getPostId());
 
         if(foundPost != null){
-            if(foundPost.getType().equals(EPostType.SHARE))
-                postId = foundPost.getShareInfo().getId();
-
             AtomicReference<Boolean> isCreateNew = new AtomicReference<>();
             isCreateNew.set(false);
 
@@ -81,7 +77,7 @@ public class ReactionServiceImpl implements ReactionService {
                     InteractNotification notification = new InteractNotification();
                     notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
                     notification.setAvatarUrl(foundUser.getProfilePicture());
-                    notification.setContent(notification.getUserFullName() + " đã bày tỏ cảm xúc về bài viết của bạn.");
+                    notification.setContent("đã bày tỏ cảm xúc về bài viết của bạn.");
                     notification.setRefId(reaction.getPostId());
                     notification.setTitle("Có người tương tác nè!");
                     notification.setFromUserId(userId);

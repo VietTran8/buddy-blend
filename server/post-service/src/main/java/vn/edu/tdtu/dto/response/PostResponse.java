@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 import vn.edu.tdtu.enums.EPostType;
 import vn.edu.tdtu.enums.EPrivacy;
 import vn.edu.tdtu.enums.EReactionType;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.Media;
+import vn.edu.tdtu.model.data.User;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -20,8 +21,8 @@ import java.util.List;
 public class PostResponse implements Serializable {
     private String id;
     private String content;
-    private List<String> imageUrls;
-    private List<String> videoUrls;
+//    private List<String> imageUrls;
+//    private List<String> videoUrls;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private Date createdAt;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
@@ -29,12 +30,14 @@ public class PostResponse implements Serializable {
     private EPrivacy privacy;
     private EPostType type;
     private User user;
+    private List<Media> medias;
     private int noShared;
     private long noComments;
     private int noReactions;
     private List<TopReacts> topReacts;
     private EReactionType reacted;
-    private ShareInfo shareInfo;
+    private PostResponse sharedPost;
+    private String background;
     private GroupInfo groupInfo;
     private List<User> taggedUsers;
     private boolean isMine;

@@ -8,5 +8,4 @@ import java.util.List;
 
 @Repository
 public interface EsPostRepository extends ElasticsearchRepository<SyncPost, String> {
-    List<SyncPost> findByContent(String content);
 }

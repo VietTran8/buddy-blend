@@ -5,6 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.support.converter.JsonMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -36,4 +39,18 @@ public class ApplicationConfig {
     public NewTopic syncUser(){
         return new NewTopic(synUserTopicName, 2, (short) 1);
     }
+
+    @Bean
+    public RedisTemplate<String, ?> redisTemplate(RedisConnectionFactory connectionFactory){
+        RedisTemplate<String, ?> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(connectionFactory);
+
+        return redisTemplate;
+    }
+
+    @Bean
+    public JsonMessageConverter jsonMessageConverter(){
+        return new JsonMessageConverter();
+    }
+
 }

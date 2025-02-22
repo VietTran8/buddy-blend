@@ -51,4 +51,16 @@ public class AuthController {
         ResDTO<?> response = authService.validateOTP(validateOTPRequest);
         return ResponseEntity.status(response.getCode()).body(response);
     }
+
+    @PostMapping("/password-checking")
+    public ResponseEntity<?> passwordChecking(@RequestBody PasswordCheckingRequest request) {
+        ResDTO<?> response = authService.passwordChecking(request);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @PostMapping("/confirm-token-checking")
+    public ResponseEntity<?> confirmTokenChecking(@RequestBody ConfirmTokenCheckingRequest request){
+        ResDTO<?> response = authService.confirmTokenChecking(request);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
 }

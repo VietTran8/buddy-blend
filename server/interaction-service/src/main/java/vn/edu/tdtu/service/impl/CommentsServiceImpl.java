@@ -10,11 +10,10 @@ import vn.edu.tdtu.dto.requests.UpdateCommentRequest;
 import vn.edu.tdtu.dto.response.CommentResponse;
 import vn.edu.tdtu.dto.response.InteractNotification;
 import vn.edu.tdtu.enums.ENotificationType;
-import vn.edu.tdtu.enums.EPostType;
 import vn.edu.tdtu.mapper.CommentResponseMapper;
 import vn.edu.tdtu.model.Comments;
-import vn.edu.tdtu.model.Post;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.Post;
+import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.repository.CommentsRepository;
 import vn.edu.tdtu.service.interfaces.CommentService;
@@ -46,8 +45,6 @@ public class CommentsServiceImpl implements CommentService {
         if(foundUser != null){
             Post foundPost = postService.findById(token, request.getPostId());
             if(foundPost != null){
-                if(foundPost.getType().equals(EPostType.SHARE))
-                    postId = foundPost.getShareInfo().getId();
 
                 Comments comment = new Comments();
                 comment.setCreatedAt(LocalDateTime.now());
@@ -78,7 +75,7 @@ public class CommentsServiceImpl implements CommentService {
                     InteractNotification interactNotification = new InteractNotification();
                     interactNotification.setAvatarUrl(foundUser.getProfilePicture());
                     interactNotification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
-                    interactNotification.setContent(interactNotification.getUserFullName() + " đã bình luận về bài viết của bạn");
+                    interactNotification.setContent("đã bình luận về bài viết của bạn");
                     interactNotification.setRefId(postId);
                     interactNotification.setTitle("Có người tương tác nè!");
                     interactNotification.setFromUserId(userIdFromJwtToken);

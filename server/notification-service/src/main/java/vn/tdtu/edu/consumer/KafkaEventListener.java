@@ -7,15 +7,21 @@ import org.springframework.stereotype.Service;
 import vn.tdtu.edu.dto.FriendRequestMessage;
 import vn.tdtu.edu.dto.MailDetails;
 import vn.tdtu.edu.dto.Message;
+import vn.tdtu.edu.enums.EModerateType;
 import vn.tdtu.edu.enums.ENotificationType;
-import vn.tdtu.edu.message.ModerateImagesResultsMessage;
+import vn.tdtu.edu.message.CommonNotificationMessage;
+import vn.tdtu.edu.message.ModerateResultsMessage;
 import vn.tdtu.edu.message.SendOTPMailMessage;
 import vn.tdtu.edu.model.CommonNotification;
+import vn.tdtu.edu.model.UserInfo;
+import vn.tdtu.edu.model.Violation;
 import vn.tdtu.edu.service.NotificationSender;
 import vn.tdtu.edu.service.interfaces.MailService;
 import vn.tdtu.edu.service.interfaces.NotificationService;
+import vn.tdtu.edu.service.interfaces.ViolationService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -24,13 +30,25 @@ public class KafkaEventListener {
     private final NotificationSender notificationSender;
     private final NotificationService notiService;
     private final MailService mailService;
+    private final ViolationService violationService;
 
     @KafkaListener(groupId = "InteractNotification", topics = {"${kafka.topic.interact-noti.name}", "${kafka.topic.invite-users-noti.name}"})
-    public void consumeInteractTopic(CommonNotification notification){
+    public void consumeInteractTopic(CommonNotificationMessage notification){
         log.info("Interaction message: " + notification.toString());
         boolean sendResult = notificationSender.sendCommonNotification(notification);
 
-        notiService.save(notification);
+        CommonNotification commonNotification = new CommonNotification();
+        commonNotification.setTitle(notification.getTitle());
+        commonNotification.setContent(notification.getContent());
+        commonNotification.setType(notification.getType());
+        commonNotification.setCreateAt(notification.getCreateAt());
+        commonNotification.setFromUserId(notification.getFromUserId());
+        commonNotification.setToUsers(notification.getToUserIds().stream().map(
+                id -> new UserInfo(id, false)
+        ).collect(Collectors.toList()));
+        commonNotification.setRefId(notification.getRefId());
+
+        notiService.save(commonNotification);
 
         if (sendResult)
             log.info("Notification sent to target user");
@@ -57,8 +75,8 @@ public class KafkaEventListener {
         commonNotification.setContent(message.getContent());
         commonNotification.setType(ENotificationType.FRIEND_REQUEST);
         commonNotification.setCreateAt(String.valueOf(System.currentTimeMillis()));
-        commonNotification.setToUserIds(List.of(message.getToUserId()));
-        commonNotification.setUserFullName(message.getUserFullName());
+        commonNotification.setFromUserId(message.getFromUserId());
+        commonNotification.setToUsers(List.of(new UserInfo(message.getToUserId(), false)));
 
         notiService.save(commonNotification);
 
@@ -66,15 +84,27 @@ public class KafkaEventListener {
     }
 
     @KafkaListener(groupId = "ModerateNotiGroup", topics = "${kafka.topic.moderation-result-noti.name}")
-    public void consumeModerationResult(ModerateImagesResultsMessage message){
+    public void consumeModerationResult(ModerateResultsMessage message){
         log.info("Moderate result message: " + message.toString());
+
+        Violation violation = new Violation();
+        violation.setContent(message.getRejectReason());
+        violation.setRefId(message.getRefId());
+
+        violationService.save(violation);
 
         CommonNotification commonNotification = new CommonNotification();
         commonNotification.setTitle("Có vấn đề ở bài viết bạn đã đăng");
-        commonNotification.setContent("Chúng tôi phát hiện có một vài hình ảnh không phù hợp trong bài viết của bạn. Vì vậy, bài viết của bạn đã bị xóa khỏi cộng đồng!");
+        commonNotification.setContent(
+                String.format(
+                        "Chúng tôi phát hiện có một vài hình ảnh hoặc nội dung không phù hợp trong %s của bạn. Vì vậy, bài viết của bạn đã bị xóa khỏi cộng đồng!",
+                        EModerateType.TYPE_POST.equals(message.getType()) ? "bài viết" : "bình luận"
+                )
+        );
         commonNotification.setType(ENotificationType.MODERATION);
         commonNotification.setCreateAt(message.getTimestamp());
-        commonNotification.setToUserIds(List.of(message.getToUserId()));
+        commonNotification.setToUsers(List.of(new UserInfo(message.getToUserId(), false)));
+        commonNotification.setRefId(violation.getId());
 
         notiService.save(commonNotification);
 

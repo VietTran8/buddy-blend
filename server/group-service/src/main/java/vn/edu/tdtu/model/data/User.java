@@ -21,6 +21,7 @@ public class User {
     private String profilePicture;
     private String createdAt;
     private String userFullName;
+    private boolean online;
     private boolean isFriend;
     private EFriendStatus friendStatus;
     private int friendsCount;

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class RenameReqDTO {
-//    private String userId;
+    private String token;
     private String firstName;
     private String middleName;
     private String lastName;

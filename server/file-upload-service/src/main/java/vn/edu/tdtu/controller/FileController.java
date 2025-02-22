@@ -85,7 +85,7 @@ public class FileController {
                 String publicId = fileService.parsePublicId(name, folder);
 
                 uploadFileResponse.setUrl(name);
-                uploadFileResponse.setThumbnailUrl(folder.equals(EUploadFolder.FOLDER_VIDEO) ? "https://res.cloudinary.com/dt8itomae/video/upload/so_1/v1730141061/"+ publicId +".jpg" : "");
+                uploadFileResponse.setThumbnailUrl(folder.equals(EUploadFolder.FOLDER_VIDEO) ? "https://res.cloudinary.com/dt8itomae/video/upload/so_1/v1730141061/"+ publicId +".jpg" : name);
 
                 return uploadFileResponse;
             }).collect(Collectors.toList());

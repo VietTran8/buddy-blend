@@ -9,14 +9,15 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ModerationNotificationMsg extends ModerateImagesResultsMessage{
+public class ModerationNotificationMsg extends ModerateResultsMessage {
     private String toUserId;
 
-    public ModerationNotificationMsg(ModerateImagesResultsMessage message, String toUserId) {
+    public ModerationNotificationMsg(ModerateResultsMessage message, String toUserId) {
         this.toUserId = toUserId;
         this.setAccept(message.isAccept());
         this.setRejectReason(message.getRejectReason());
         this.setTimestamp(message.getTimestamp());
-        this.setPostId(message.getPostId());
+        this.setRefId(message.getRefId());
+        this.setType(message.getType());
     }
 }

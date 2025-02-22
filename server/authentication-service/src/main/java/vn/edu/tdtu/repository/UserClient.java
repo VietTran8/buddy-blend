@@ -9,7 +9,7 @@ import vn.edu.tdtu.config.FeignConfig;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.SignUpRequest;
 import vn.edu.tdtu.dto.response.SignUpResponse;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.User;
 
 @FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class, path = "/api/v1/users")
 public interface UserClient {

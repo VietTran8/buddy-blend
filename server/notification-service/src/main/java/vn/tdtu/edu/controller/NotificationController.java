@@ -31,4 +31,11 @@ public class NotificationController {
         ResDTO<?> response = notificationService.detachNotification(id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
+
+
+    @PostMapping("/read/{id}")
+    public ResponseEntity<?> readNotification(@PathVariable("id") String id) {
+        ResDTO<?> response = notificationService.readNotification(id);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
 }

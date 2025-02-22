@@ -3,6 +3,7 @@ package vn.edu.tdtu.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import vn.edu.tdtu.model.data.User;
 
 import java.time.LocalDateTime;
 

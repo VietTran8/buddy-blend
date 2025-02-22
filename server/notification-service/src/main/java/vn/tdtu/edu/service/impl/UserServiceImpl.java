@@ -10,6 +10,7 @@ import vn.tdtu.edu.repository.httpclient.UserClient;
 import vn.tdtu.edu.service.interfaces.UserService;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -18,6 +19,9 @@ public class UserServiceImpl implements UserService {
     private final UserClient userClient;
 
     public User findById(String userId) {
+        if(userId == null)
+            return null;
+
         ResDTO<User> response = userClient.findById(userId);
 
         log.info(response.toString());
@@ -26,7 +30,11 @@ public class UserServiceImpl implements UserService {
     }
 
     public List<User> findByIds(List<String> ids){
-        ResDTO<List<User>> response = userClient.findByIds(new FindByIdsRequest(ids));
+        ResDTO<List<User>> response = userClient.findByIds(new FindByIdsRequest(ids
+                .stream()
+                .filter(Objects::nonNull)
+                .toList()
+        ));
 
         log.info(response.toString());
 

@@ -72,11 +72,37 @@ services:
     depends_on:
       - elasticsearch
 
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_USER=access_user
+      - MYSQL_PASSWORD=access_password
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    depends_on:
+      - mysql
+    ports:
+      - "80:80"
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=root_password
+
 volumes:
   data: {}
   redis_data: {}
   esdata:
     driver: local
+  mysqldata: {}
 
 networks:
   default:

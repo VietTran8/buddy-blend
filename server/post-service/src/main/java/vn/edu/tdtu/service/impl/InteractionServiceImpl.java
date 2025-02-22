@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.enums.EReactionType;
-import vn.edu.tdtu.model.Comment;
-import vn.edu.tdtu.model.Reacts;
+import vn.edu.tdtu.model.data.Comment;
+import vn.edu.tdtu.model.data.Reacts;
 import vn.edu.tdtu.repository.httpclient.InteractionClient;
 import vn.edu.tdtu.service.intefaces.InteractionService;
 
