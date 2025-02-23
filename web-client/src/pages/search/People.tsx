@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { SearchPeopleItem } from "../../components";
+import { SearchPeopleItem, SearchUserItemSkeleton } from "../../components";
 import { useOutletContext } from "react-router-dom";
 import { SearchOutletContextType } from "@/layouts/SearchLayout";
 import { Empty } from "antd";
@@ -20,7 +20,9 @@ const People: FC<IProps> = ({ }) => {
                 {!isLoading && searchResults.users.length === 0 && <Empty description>
                     <span className="font-semibold text-gray-400">Không tìm thấy người dùng nào phù hợp...</span>
                 </Empty>}
-                {isLoading && <p className="text-center my-3">Loading...</p>}
+                {isLoading && Array(5).fill(null).map((_, index) => (
+                    <SearchUserItemSkeleton key={index} />
+                ))}
             </div>
         </div>
     );

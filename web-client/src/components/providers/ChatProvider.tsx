@@ -179,7 +179,7 @@ const ChatProvider: FC<IProps> = ({ }) => {
             open={open}
         >
             <div className="grid grid-cols-12 h-full gap-x-2 relative">
-                <div className="col-span-4 bg-white p-2">
+                <div className="col-span-4 bg-white p-2 max-h-screen custom-scroll-no-hover overflow-auto">
                     <Input className="mb-4" placeholder="Tìm kiếm trong tin nhắn" endDrawable={<FontAwesomeIcon icon={faSearch} className="text-[--primary-color]" />} />
                     <h1 className="font-semibold lg:text-lg text-base my-2 text-gray-600">{`Danh sách tin nhắn (${chatRooms?.length})`}</h1>
                     {chatRooms?.map((room) => (<div onClick={() => handleOnRoomClick(room)} key={randomUUID()} className={`rounded-md hover:bg-gray-100 ${room.id === selectedRoom?.id && 'bg-gray-100'} cursor-pointer transition-all p-3 flex items-center gap-x-2`}>

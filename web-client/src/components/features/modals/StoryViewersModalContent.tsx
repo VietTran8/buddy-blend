@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { BackgroundKey, STORY_BACKGROUND, STORY_FONTS } from "../../../constants";
 import { Link } from "react-router-dom";
+import BasicUserItemSkeleton from "@/components/skeletons/BasicUserItemSkeleton";
 
 interface IProps {
     story: Story;
@@ -62,7 +63,7 @@ const StoryViewersModalContent: FC<IProps> = ({ story, className }) => {
                         </div>
                     </Link>
                 ))}
-                {isLoading && <span className="font-semibold text-center py-10">Loading...</span>}
+                {isLoading && Array(10).fill(null).map((_, index) => <BasicUserItemSkeleton key={index}/>)}
             </div>
         </div>
     );

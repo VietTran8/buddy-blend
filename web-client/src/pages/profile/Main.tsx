@@ -33,24 +33,24 @@ const Main: FC<IProps> = ({ }) => {
                             <span className="text-sm font-semibold">Chỉnh sửa</span>
                         </Button>}
                     </div>
-                    {isFetching ? <p>Loading...</p> : <div className="rounded-md bg-white p-5 mt-3 flex flex-col gap-y-3">
+                    {<div className="rounded-md bg-white p-5 mt-3 flex flex-col gap-y-3">
                         <h1 className="font-semibold text-base md:text-large">Thông tin</h1>
                         <div className="text-gray-500 text-justify">
                             <div className="flex items-center gap-x-3">
                                 <FontAwesomeIcon icon={faMarsAndVenus} />
-                                <p>Giới tính: <span className="font-semibold">{user?.gender}</span></p>
+                                <p>Giới tính: <span className="font-semibold">{isFetching ? 'Đang tải...' : user?.gender}</span></p>
                             </div>
                             <div className="flex flex-nowrap items-center gap-x-3 mt-1 line-clamp-1">
                                 <FontAwesomeIcon icon={faEnvelope} />
-                                <p>Email: <span className="font-semibold">{user?.email}</span></p>
+                                <p>Email: <span className="font-semibold">{isFetching ? 'Đang tải...' : user?.email}</span></p>
                             </div>
                             <div className="flex items-center gap-x-3 mt-1">
                                 <FontAwesomeIcon icon={faPhone} />
-                                <p>Điện thoại: <span className="font-semibold">{user?.phone}</span></p>
+                                <p>Điện thoại: <span className="font-semibold">{isFetching ? 'Đang tải...' : user?.phone}</span></p>
                             </div>
                             <div className="flex items-center gap-x-3 mt-1">
                                 <FontAwesomeIcon icon={faLocationDot} />
-                                <p>Đến từ: <span className="font-semibold">{user?.fromCity}</span></p>
+                                <p>Đến từ: <span className="font-semibold">{isFetching ? 'Đang tải...' : user?.fromCity}</span></p>
                             </div>
                         </div>
                     </div>}

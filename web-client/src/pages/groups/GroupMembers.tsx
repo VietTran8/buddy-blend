@@ -1,6 +1,6 @@
 import { Dot } from "lucide-react";
 import { FC } from "react";
-import { GroupAdminItem, GroupMemberItem } from "../../components";
+import { BasicUserItemSkeleton, GroupAdminItem, GroupMemberItem } from "../../components";
 import { Link, useOutletContext } from "react-router-dom";
 import { GroupPrivacy, OutletGroupContextType } from "../../types";
 import { useQueryAdminMembers, useQueryAllMembers, useQueryFriendMembers, useQueryNewMembers } from "../../hooks";
@@ -65,9 +65,9 @@ const GroupMembers: FC<IProps> = ({ }) => {
                 <span className="text-gray-400">Người mới tham gia nhóm này sẽ hiển thị tại đây</span>
                 {newMembersPages?.map((page, index) => <div key={index} className="flex flex-col gap-y-3">
                     {page.data.data.map((member, index) => <GroupMemberItem groupId={group?.id} key={index} member={member} className="mt-3" />)}
+                    {isNewMembersLoading && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
+                    {isFetchingNextNewMembersPage && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
                 </div>)}
-                {isNewMembersLoading && <p className="text-center">Loading...</p>}
-                {isFetchingNextNewMembersPage && <p className="text-center">Loading more...</p>}
                 {hasNewMembersPage && <button onClick={() => fetchNextNewMembersPage()} className="w-full mt-3 btn-secondary">Xem thêm</button>}
                 <hr className="my-5" />
                 <h1 className="flex items-center">
@@ -78,9 +78,9 @@ const GroupMembers: FC<IProps> = ({ }) => {
                 <div className="mt-2">
                     {adminMembersPages?.map((page, index) => <div key={index} className="flex flex-col gap-y-1">
                         {page.data.data.map((member, index) => <GroupAdminItem groupId={group?.id} key={index} member={member} />)}
+                        {isAdminMembersLoading && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
+                        {isFetchingNextAdminMembersPage && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
                     </div>)}
-                    {isAdminMembersLoading && <p className="text-center">Loading...</p>}
-                    {isFetchingNextAdminMembersPage && <p className="text-center">Loading more...</p>}
                     {hasAdminMembersPage && <button onClick={() => fetchNextAdminMembersPage()} className="w-full mt-3 btn-secondary">Xem thêm</button>}
                 </div>
                 <hr className="my-5" />
@@ -93,9 +93,9 @@ const GroupMembers: FC<IProps> = ({ }) => {
                     <div className="mt-2">
                         {friendMembersPages?.map((page, index) => <div key={index} className="flex flex-col gap-y-1">
                             {page.data.data.map((member, index) => <GroupMemberItem groupId={group?.id} key={index} member={member} />)}
+                            {isFriendMembersLoading && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
+                            {isFetchingNextFriendMembersPage && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
                         </div>)}
-                        {isFriendMembersLoading && <p className="text-center">Loading...</p>}
-                        {isFetchingNextFriendMembersPage && <p className="text-center">Loading more...</p>}
                         {hasFriendMembersPage && <button onClick={() => fetchNextFriendMembersPage()} className="w-full mt-3 btn-secondary">Xem thêm</button>}
                     </div>
                     <hr className="my-5" />
@@ -108,10 +108,10 @@ const GroupMembers: FC<IProps> = ({ }) => {
                     </h1>
                     <div className="mt-2">
                         {allMembersPages?.map((page, index) => <div key={index} className="flex flex-col gap-y-1">
-                            {page.data.data.map((member, index) => <GroupMemberItem groupId={group?.id} key={index} member={member}  />)}
+                            {page.data.data.map((member, index) => <GroupMemberItem groupId={group?.id} key={index} member={member} />)}
+                            {isAllMembersLoading && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
+                            {isFetchingNextAllMembersPage && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
                         </div>)}
-                        {isAllMembersLoading && <p className="text-center">Loading...</p>}
-                        {isFetchingNextAllMembersPage && <p className="text-center">Loading more...</p>}
                         {hasAllMembersPage && <button onClick={() => fetchNextAllMembersPage()} className="w-full mt-3 btn-secondary">Xem thêm</button>}
                     </div>
                 </>}

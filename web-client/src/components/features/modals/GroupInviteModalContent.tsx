@@ -4,6 +4,7 @@ import { Plus, Search, X } from "lucide-react";
 import { Avatar, Empty } from "antd";
 import { User } from "../../../types";
 import { useInvitesUsers, useQueryGroupFriendSuggesstions } from "../../../hooks";
+import BasicUserItemSkeleton from "@/components/skeletons/BasicUserItemSkeleton";
 
 interface IProps {
     groupId?: string
@@ -65,7 +66,7 @@ const GroupInviteModalContent: FC<IProps> = ({ groupId }) => {
                         {users && users.length === 0 && <Empty description={false}>
                             <p className="text-gray-400 font-semibold">Không có bạn bè nào phù hợp</p>
                         </Empty>}
-                        {isLoading && <p className="text-center">Loading...</p>}
+                        {isLoading && Array(10).fill(null).map((_, index) => <BasicUserItemSkeleton rightButton key={index}/>)}
                     </div>
                 </section>
                 <section className="md:col-span-5 col-span-full bg-gray-50 md:h-full h-[300px] custom-scroll-no-hover overflow-y-auto md:m-0 m-1 rounded-md p-3">

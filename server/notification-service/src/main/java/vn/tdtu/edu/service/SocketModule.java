@@ -82,7 +82,7 @@ public class SocketModule {
 
     public void emitNotification(CommonNotificationMessage notification) {
         server.getAllClients().forEach(c -> {
-                            if(c.get("userId").equals(notification.getToUserIds().get(0))) {
+                            if(notification.getToUserIds().get(0).equals(c.get("userId"))) {
                                 c.sendEvent("notification", notification);
                             }
                         });

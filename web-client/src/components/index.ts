@@ -78,3 +78,8 @@ export { default as PostSkeleton } from './skeletons/PostSkeleton';
 export { default as GroupLayoutSkeleton } from './skeletons/GroupLayoutSkeleton';
 export { default as ProfileLayoutSkeleton } from './skeletons/ProfileLayoutSkeleton';
 export { default as SearchUserItemSkeleton } from './skeletons/SearchUserItemSkeleton';
+export { default as BasicUserItemSkeleton } from './skeletons/BasicUserItemSkeleton';
+export { default as NotificationSkeleton } from './skeletons/NotificationSkeleton';
+export { default as FriendPageItemSkeleton } from './skeletons/FriendPageItemSkeleton';
+export { default as MemberAboutSkeleton } from './skeletons/MemberAboutSkeleton';
+export { default as GroupItemSkeleton } from './skeletons/GroupItemSkeleton';

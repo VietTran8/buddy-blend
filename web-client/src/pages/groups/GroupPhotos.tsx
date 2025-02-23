@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Empty, Image } from "antd";
+import { Empty, Image, Skeleton } from "antd";
 import { VideoPlayer } from "../../components";
 import { useOutletContext } from "react-router-dom";
 import { EFileType, GroupPrivacy, OutletGroupContextType } from "../../types";
@@ -20,7 +20,6 @@ const GroupPhotos: FC<IProps> = ({ }) => {
         <>
             {(group?.privacy === GroupPrivacy.PRIVACY_PUBLIC || group?.joined) ? <div className="bg-white rounded-md mt-3 p-5 h-fit">
                 <h1 className="font-semibold text-base md:text-large">Hình ảnh</h1>
-                {isLoading && <p className="font-semibold">Loading...</p>}
                 <div className="grid md:grid-cols-3 grid-cols-2 gap-3 mt-5">
                     {mediaPages?.map(page => page.data.map(media => media.type === EFileType.TYPE_IMG ?
                         <div className="rounded-md overflow-hidden h-[190px]">
@@ -32,13 +31,13 @@ const GroupPhotos: FC<IProps> = ({ }) => {
                             <Image height={190} preview={{
                                 destroyOnClose: true,
                                 mask: <FontAwesomeIcon icon={faPlay} className="text-[30px]" />,
-                                imageRender: () => (<VideoPlayer  className="w-auto h-[90dvh]" src={media.url} />)
+                                imageRender: () => (<VideoPlayer className="w-auto h-[90dvh]" src={media.url} />)
                             }} width={"100%"} src={media.thumbnail} className="object-cover" />
-
                         </div>
                     ))}
+                    {isLoading && Array(10).fill(null).map((_, index) => <Skeleton.Node key={index} className="!h-[190px] !w-full" active children />)}
+                    {isFetchingNextPage && Array(10).fill(null).map((_, index) => <Skeleton.Node key={index} className="!h-[190px] !w-full" active children />)}
                 </div>
-                {isFetchingNextPage && <p className="font-semibold">Loading next page...</p>}
                 {!isLoading && mediaPages?.length === 1 && mediaPages[0].data.length === 0 && <Empty description>
                     <p className="font-semibold text-gray-300">{`Nhóm này chưa tải lên ảnh nào...`}</p>
                 </Empty>}

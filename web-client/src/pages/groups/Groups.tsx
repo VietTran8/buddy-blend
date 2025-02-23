@@ -1,13 +1,13 @@
 import { Plus } from "lucide-react";
 import { FC } from "react";
-import { GroupItem } from "../../components";
+import { GroupItem, GroupItemSkeleton } from "../../components";
 import { Link } from "react-router-dom";
 import { useQueryMyGroup } from "../../hooks";
 
 interface IProps { };
 
 const GroupPage: FC<IProps> = ({ }) => {
-    const { data: groupResponse } = useQueryMyGroup();
+    const { data: groupResponse, isLoading } = useQueryMyGroup();
 
     const groups = groupResponse?.data;
 
@@ -25,6 +25,7 @@ const GroupPage: FC<IProps> = ({ }) => {
                 </div>
                 <div className="grid grid-cols-3 gap-3 mt-3">
                     {groups?.map((group, index) => (<GroupItem group={group} key={index} />))}
+                    {isLoading && Array(10).fill(null).map((_, index) => <GroupItemSkeleton key={index}/>)}
                 </div>
             </div>
         </>

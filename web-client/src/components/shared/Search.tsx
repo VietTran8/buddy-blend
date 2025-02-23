@@ -1,5 +1,5 @@
 import { FC, useState, useRef, useEffect } from "react";
-import { HtmlText, Input } from "..";
+import { BasicUserItemSkeleton, HtmlText, Input } from "..";
 import { Book, Clock, Search as SearchIcon, X } from "lucide-react";
 import { Avatar, Empty } from "antd";
 import { useClearHistory, useDebounce, useDeleteHistory, useFetchSearchResult, useQuerySearchHistory } from "@/hooks";
@@ -140,7 +140,8 @@ const Search: FC<IProps> = () => {
                         </div>
                     ))}
                 </>}
-                {isHistoryResponseLoading && <p className="text-center">Loading...</p>}
+                {isHistoryResponseLoading && Array(10).fill(null).map((_, index) => <BasicUserItemSkeleton key={index}/>)}
+                {isFetchingSearchResult && Array(10).fill(null).map((_, index) => <BasicUserItemSkeleton key={index}/>)}
                 {!isHistoryResponseLoading && histories && histories.length === 0 && <Empty
                     className="p-10"
                     description

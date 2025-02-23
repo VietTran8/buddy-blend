@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Post as ResultPost } from "../../components";
+import { PostSkeleton, Post as ResultPost } from "../../components";
 import { useOutletContext } from "react-router-dom";
 import { SearchOutletContextType } from "@/layouts/SearchLayout";
 import { Empty } from "antd";
@@ -20,7 +20,9 @@ const Post: FC<IProps> = ({ }) => {
                     <span className="font-semibold text-gray-400">Không tìm thấy bài viết nào phù hợp...</span>
                 </Empty>
             </div>}
-            {isLoading && <p className="text-center my-3">Loading...</p>}
+            {isLoading && Array(5).fill(null).map((_, index) => (
+                <PostSkeleton key={index} />
+            ))}
         </div>
     );
 };

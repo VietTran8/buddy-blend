@@ -6,6 +6,7 @@ import { useHandleBlockUser, useQueryBlockingUsers } from "@/hooks";
 import { Blocking } from "@/types";
 import { Info } from "lucide-react";
 import toast from "react-hot-toast";
+import { BasicUserItemSkeleton } from "@/components";
 
 interface IProps { };
 
@@ -78,7 +79,8 @@ const BlockedPage: FC<IProps> = ({ }) => {
             {!isLoading && blockingList.length === 0 && <Empty description className="my-10">
                 <span className="font-semibold text-gray-400">Hiện tại bạn chưa chặn ai cả</span>
             </Empty>}
-            {isLoading && <span className="my-10">Loading...</span>}
+            {isLoading && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarShape="square" rightButton key={index}/>)}
+            
             {contextHolder}
         </section>
     );

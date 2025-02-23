@@ -9,9 +9,9 @@ const SearchUserItemSkeleton: FC<IProps> = ({ }) => {
         <div className="flex-1">
             <Skeleton.Node active style={{ width: "250px", height: "18px" }} children/>
             <div className="flex items-center gap-x-1 mt-2">
-                <Avatar.Group size={"small"}>
+                <Avatar.Group>
                     {Array(5).fill(null).map((_, index) => (
-                        <Skeleton.Avatar key={index} />
+                        <Skeleton.Avatar size={"small"} key={index} />
                     ))}
                 </Avatar.Group>
                 <Skeleton.Node active style={{ width: "100px", height: "13px" }} children />

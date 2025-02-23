@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { FriendPageItem } from "../../components";
+import { FriendPageItem, FriendPageItemSkeleton } from "../../components";
 import { useQueryFriendRequests } from "../../hooks";
 import { Empty } from "antd";
 
@@ -20,7 +20,11 @@ const RequestPage: FC<IProps> = ({ }) => {
             {friendRequests?.length === 0 && <Empty className="col-span-full mt-20" description={false}>
                 <p className="text-base font-semibold text-gray-400">Bạn chưa có lời mời kết bạn nào</p>
             </Empty>}
-            {isLoading && <p className="text-center my-10">Loading...</p>}
+            {isLoading && Array(10).fill(null).map((_, index) => (
+                <div key={index} className="md:col-span-4 col-span-6">
+                    <FriendPageItemSkeleton />
+                </div>))
+            }
         </div>
     )
 };

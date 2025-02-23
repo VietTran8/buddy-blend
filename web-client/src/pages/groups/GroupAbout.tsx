@@ -4,6 +4,7 @@ import { Avatar } from "antd";
 import { Link, useOutletContext, useParams } from "react-router-dom";
 import { GroupPrivacy, OutletGroupContextType } from "../../types";
 import { useQueryAdminMembers } from "../../hooks";
+import { MemberAboutSkeleton } from "@/components";
 
 interface IProps { };
 
@@ -60,9 +61,9 @@ const GroupAbout: FC<IProps> = ({ }) => {
                     </div>
                     <span className="font-medium">{
                         firstAdminMembers && firstAdminMembers?.length > 2 ? `${firstAdminMembers[0].user.lastName}, ${firstAdminMembers[1].user.lastName} và ${firstAdminMembers.length - 2} người khác là quản trị viên` :
-                        `${firstAdminMembers?.map(member => member.user.lastName).join(', ')} là quản trị viên`
+                            `${firstAdminMembers?.map(member => member.user.lastName).join(', ')} là quản trị viên`
                     }</span>
-                    {isAdminMembersLoading && <p className="text-center">Loading...</p>}
+                    {isAdminMembersLoading && <MemberAboutSkeleton />}
                 </div>
                 <Link to={`/group/${id}/members`}>
                     <button className="md:btn-secondary-lg btn-secondary w-full">Xem tất cả</button>

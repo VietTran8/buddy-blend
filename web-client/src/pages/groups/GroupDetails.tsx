@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Post, PostCreator } from "../../components";
+import { Post, PostCreator, PostSkeleton } from "../../components";
 import { GroupPrivacy, OutletGroupContextType } from "../../types";
 import { useOutletContext } from "react-router-dom";
 import { useQueryGroupPosts } from "../../hooks";
@@ -28,8 +28,8 @@ const GroupDetails: FC<IProps> = ({ }) => {
                 {groupPages?.length === 1 && groupPages[0].data.data.length === 0 && <Empty description={false}>
                     <p className="font-semibold text-center text-gray-400">Chưa có bài viết nào trong nhóm.</p>
                 </Empty>}
-                {isLoading && <p className="text-center my-10">Loading...</p>}
-                {isFetchingNextPage && <p className="text-center my-10">Loading more...</p>}
+                {isLoading && Array(5).fill(null).map((_, index) => <PostSkeleton key={index}/>)}
+                {isFetchingNextPage &&  Array(3).fill(null).map((_, index) => <PostSkeleton key={index}/>)}
             </> : <Empty description={false}>
                 <p className="font-semibold text-center text-gray-400">Tham gia nhóm để xem các bài viết.</p>
             </Empty>}

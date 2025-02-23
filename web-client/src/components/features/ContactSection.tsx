@@ -5,6 +5,7 @@ import { FC, useContext } from "react";
 import { useQueryFriendList } from "../../hooks";
 import { ChatContext } from "@/context";
 import { useQueryClient } from "@tanstack/react-query";
+import BasicUserItemSkeleton from "../skeletons/BasicUserItemSkeleton";
 
 interface IProps {
     className?: string;
@@ -43,7 +44,8 @@ const ContactSection: FC<IProps> = ({ className }) => {
                     </div>
                 </div>
             ))}
-            {isLoading && <p className="text-center my-10">Loading...</p>}
+            
+            {isLoading && Array(10).fill(null).map((_, index) => <BasicUserItemSkeleton key={index} />)}
         </div>
     )
 };

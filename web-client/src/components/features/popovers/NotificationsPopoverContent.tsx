@@ -5,6 +5,7 @@ import { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from 
 import { BaseResponse, PaginationResponse } from "../../../types";
 import { InteractNotification } from "../../../types/notification";
 import NotificationItem from "../NotificationItem";
+import NotificationSkeleton from "@/components/skeletons/NotificationSkeleton";
 
 
 interface IProps {
@@ -39,8 +40,8 @@ const NotificationsPopoverContent: FC<IProps> = ({
             {data?.pages.length === 1 && data.pages[0].data.data.length == 0 && <Empty className="my-10" description={false}>
                 <p className="font-semibold text-gray-400">Hiện tại chưa có thông báo nào...</p>
             </Empty>}
-            {isLoading && <p className="text-center">Loading...</p>}
-            {isFetchingNextPage && <p className="text-center">Loading more...</p>}
+            {isLoading && Array(5).fill(null).map((_, index) => <NotificationSkeleton key={index}/>)}
+            {isFetchingNextPage && Array(5).fill(null).map((_, index) => <NotificationSkeleton key={index}/>)}
             {hasNextPage && <p onClick={() => fetchNextPage()} className="text-center my-2 text-[--primary-color] cursor-pointer">Xem thêm</p>}
         </div>
     )

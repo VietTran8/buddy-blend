@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import { Avatar } from "antd";
 import { Link } from "react-router-dom";
 import { useQueryFriendList } from "../../../hooks";
+import BasicUserItemSkeleton from "@/components/skeletons/BasicUserItemSkeleton";
 
 interface IProps {
     prevUsers?: User[];
@@ -81,7 +82,7 @@ const TagUserModalContent: FC<IProps> = ({ prevUsers, onComplete }) => {
                         </div>
                     })
                 }
-                {isLoading && <p className="text-center my-10">Loading...</p>}
+                {isLoading && Array(10).fill(null).map((_, index) => <BasicUserItemSkeleton key={index} rightButton />)}
             </div>
         </div>
     );

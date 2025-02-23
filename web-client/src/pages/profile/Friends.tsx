@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { ContactSection, Input } from "../../components";
+import { BasicUserItemSkeleton, ContactSection, Input } from "../../components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Avatar } from "antd";
@@ -44,7 +44,7 @@ const Friends: FC<IProps> = ({ }) => {
                     <Input onChange={(e) => setSearchTerm(e.target.value)} startDrawable={<FontAwesomeIcon icon={faSearch} />} placeholder="Tìm kiếm" className="!w-[280px] text-gray-400" />
                 </div>
                 <div className="mt-3 grid md:grid-cols-2 grid-cols-1 gap-3">
-                    {isLoading && <p className="text-center mt-10">Loading...</p>}
+                    {isLoading && Array(10).fill(null).map((_, index) => <BasicUserItemSkeleton avatarShape="square" avatarSize={80} key={index}/>)}
                     {friendList?.map((user, index) => (
                         <div key={index} className="flex p-2 items-center rounded-md bg-white gap-x-3">
                             <Avatar shape="square" size={80} src={user.profilePicture || "/images/default-user.png"} />
