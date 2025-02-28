@@ -1,8 +1,9 @@
-import { faEllipsis } from "@fortawesome/free-solid-svg-icons";
+import { faEllipsis, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Avatar } from "antd";
+import { Avatar, Empty } from "antd";
 import { FC, useContext } from "react";
 import { ChatContext, ChatContextType } from "../../../context";
+import Input from "@/components/shared/Input";
 
 interface IMessagesPopoverContentProps {
     className?: string,
@@ -13,7 +14,8 @@ const MessagesPopoverContent: FC<IMessagesPopoverContentProps> = ({ className, o
     const { openChatDrawer, rooms } = useContext<ChatContextType>(ChatContext);
 
     return (
-        <div className={`${className} w-[320px] max-h-[70vh] overflow-y-auto no-scrollbar`}>
+        <div className={`${className} w-[360px] max-h-[70vh] overflow-y-auto no-scrollbar p-1`}>
+            <Input placeholder="Tìm kiếm người dùng..." endDrawable={<FontAwesomeIcon className="text-gray-400" icon={faSearch} />} className="mb-2"/>
             {rooms.map((room, index) => (
                 <div onClick={() => {
                     openChatDrawer(room.opponentUserId);
@@ -26,15 +28,18 @@ const MessagesPopoverContent: FC<IMessagesPopoverContentProps> = ({ className, o
                     <div className="flex-1 min-w-0">
                         <h1 className="font-semibold text-base line-clamp-1">{room.roomName}</h1>
                         <span className="block text-sm truncate text-gray-400">{room.latestMessage ? (room.lastSentByYou ? `Bạn: ${room.latestMessage.content}` : room.latestMessage.content) :
-                                    `Các bạn vừa được kết nối...`}</span>
+                            `Các bạn vừa được kết nối...`}</span>
                     </div>
                     <span>
                         <FontAwesomeIcon icon={faEllipsis} className="text-lg text-gray-400" />
                     </span>
                 </div>
             ))}
+            {rooms.length === 0 && <Empty description className="py-20">
+                <p className="font-semibold text-gray-300">Chọn một bạn bè để nhắn tin nhé!</p>
+            </Empty>}
         </div>
-    );    
+    );
 };
 
 export default MessagesPopoverContent;

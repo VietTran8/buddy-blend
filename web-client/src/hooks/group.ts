@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { CreateGroupRequest, HandleLeaveOrPendingRequest, InviteUsersRequest, ModerateMemberRequest, UpdateGroupRequest } from "../types"
-import { cancelOrLeaveGroup, createGroup, deleteGroup, deleteMember, getAdminMembers, getAllMembers, getFriendMembers, getGroupById, getMinGroupById, getMyGroups, getNewMembers, getPendingMembers, inviteUsers, joinGroup, moderateMember, updateGroup } from "../services"
+import { BaseResponse, CreateGroupRequest, HandleLeaveOrPendingRequest, InviteUsersRequest, ModerateMemberRequest, PromoteToAdminRequest, PromoteToAdminResponse, UpdateGroupRequest } from "../types"
+import { cancelOrLeaveGroup, createGroup, deleteGroup, deleteMember, getAdminMembers, getAllMembers, getFriendMembers, getGroupById, getMinGroupById, getMyGroups, getNewMembers, getPendingMembers, handlePromoteAdmin, inviteUsers, joinGroup, moderateMember, updateGroup } from "../services"
 import toast from "react-hot-toast"
 import { AxiosError } from "axios"
 import { getErrorRespMsg } from "../utils"
@@ -25,7 +25,8 @@ export const useQueryGroupById = (id?: string) => {
     return useQuery({
         queryKey: ["group", id],
         queryFn: () => getGroupById(id!),
-        enabled: !!id
+        enabled: !!id,
+        retry: false
     });
 }
 
@@ -223,4 +224,21 @@ export const useInvitesUsers = () => {
             toast.error("Lỗi xảy ra!");
         }
     });
+}
+
+export const useHandlePromoteAdmin = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (payload: PromoteToAdminRequest) => handlePromoteAdmin(payload),
+        onSuccess: (data: BaseResponse<PromoteToAdminResponse>) => {
+            toast.success(data.message);
+
+            queryClient.invalidateQueries({ queryKey: ["members", data.data.groupId] });
+            queryClient.invalidateQueries({ queryKey: ["group", data.data.groupId] });
+        },
+        onError: (error: AxiosError) => {
+            toast.error(getErrorRespMsg(error));
+        }
+    })
 }

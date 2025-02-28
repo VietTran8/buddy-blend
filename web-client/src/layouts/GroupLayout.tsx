@@ -5,7 +5,7 @@ import { Dot, Ellipsis, Link2, LogOut, Plus, History, Users, Earth, Lock, X } fr
 import { FC, useState } from "react";
 import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import { groupNavItems } from "../constants";
-import { EditGroupInfoModalContent, GroupInviteModalContent, GroupLayoutSkeleton } from "../components";
+import { EditGroupInfoModalContent, GroupInviteModalContent, GroupLayoutSkeleton, NotFound } from "../components";
 import { useCancelOrLeaveGroup, useJoinGroup, useQueryGroupById, useUpdateGroup, useUploadFile } from "../hooks";
 import { EditGroupInfoType, EJoinGroupStatus, Group, GroupPrivacy } from "../types";
 import toast from "react-hot-toast";
@@ -92,7 +92,7 @@ const GroupLayout: FC<IProps> = ({ }) => {
                     }, {
                         onSuccess: () => {
                             toast.success("Đã tải ảnh lên", { id: toastId })
-                        }, 
+                        },
                         onError: (error: any) => {
                             toast.error(getErrorRespMsg(error), { id: toastId });
                         }
@@ -106,7 +106,8 @@ const GroupLayout: FC<IProps> = ({ }) => {
 
     return (
         <>
-            {isLoading ? <GroupLayoutSkeleton /> : <>
+            {isLoading ? <GroupLayoutSkeleton /> : 
+                group ? <>
                 <div className="rounded-md w-full bg-white p-5">
                     <div className="w-full h-[260px] rounded-lg overflow-hidden mb-4 relative">
                         <Image preview={{
@@ -152,8 +153,8 @@ const GroupLayout: FC<IProps> = ({ }) => {
                                     <ul>
                                         {
                                             group?.joinStatus === EJoinGroupStatus.SUCCESS ?
-                                                <li onClick={() => handleMemberGroup("leave")} className="px-3 py-2 font-medium text-gray-600 rounded hover:bg-gray-100 flex cursor-pointer transition-all gap-x-2"><LogOut className="text-gray-500 text-sm" /> Rời khỏi nhóm</li> :
-                                                <li onClick={() => handleMemberGroup("cancel-pending")} className="px-3 py-2 font-medium text-gray-600 rounded hover:bg-gray-100 flex cursor-pointer transition-all gap-x-2"><X className="text-gray-500 text-sm" /> Hủy yêu cầu đang chờ</li>
+                                                <li onClick={() => handleMemberGroup("leave")} className="px-3 py-2 text-sm items-center font-medium text-gray-600 rounded hover:bg-gray-100 flex cursor-pointer transition-all gap-x-2"><LogOut className="text-gray-500 text-sm" /> Rời khỏi nhóm</li> :
+                                                <li onClick={() => handleMemberGroup("cancel-pending")} className="px-3 py-2 text-sm items-center font-medium text-gray-600 rounded hover:bg-gray-100 flex cursor-pointer transition-all gap-x-2"><X className="text-gray-500 text-sm" /> Hủy yêu cầu đang chờ</li>
                                         }
                                     </ul>
                                 }
@@ -172,7 +173,7 @@ const GroupLayout: FC<IProps> = ({ }) => {
                                 trigger="click"
                                 content={
                                     <ul>
-                                        <li className="px-3 py-2 font-medium text-gray-600 rounded hover:bg-gray-100 flex cursor-pointer transition-all gap-x-2"><Link2 className="text-gray-500 text-sm" /> Sao chép địa chỉ liên kết</li>
+                                        <li className="px-3 py-2 font-medium text-gray-600 rounded hover:bg-gray-100 flex cursor-pointer transition-all gap-x-2 text-sm items-center"><Link2 className="text-gray-500 text-sm" /> Sao chép địa chỉ liên kết</li>
                                     </ul>
                                 }
                                 open={openGroupAction}
@@ -260,7 +261,7 @@ const GroupLayout: FC<IProps> = ({ }) => {
                 >
                     <EditGroupInfoModalContent onUpdated={handleOnUpdated} type={editType} group={group} />
                 </Modal>
-            </>}
+            </> : <NotFound />}
         </>
     );
 };

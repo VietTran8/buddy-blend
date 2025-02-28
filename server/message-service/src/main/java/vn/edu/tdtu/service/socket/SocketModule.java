@@ -8,10 +8,14 @@ import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.dto.JoinRoomMessage;
-import vn.edu.tdtu.dto.SendMessage;
+import vn.edu.tdtu.message.ExitAllRoomMessage;
+import vn.edu.tdtu.message.JoinRoomMessage;
+import vn.edu.tdtu.message.SeenMessage;
+import vn.edu.tdtu.message.SendMessage;
 import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.util.JwtUtils;
+
+import java.util.Objects;
 
 @Component
 @Slf4j
@@ -26,6 +30,8 @@ public class SocketModule {
         server.addConnectListener(onConnected());
         server.addEventListener("send_message", SendMessage.class, onMessageReceived());
         server.addEventListener("join_room", JoinRoomMessage.class, onJoinRoom());
+        server.addEventListener("exit_rooms", ExitAllRoomMessage.class, onExitAllRoom());
+        server.addEventListener("seen", SeenMessage.class, onSeen());
     }
 
     public ConnectListener onConnected(){
@@ -71,6 +77,32 @@ public class SocketModule {
             @Override
             public void onData(SocketIOClient client, JoinRoomMessage joinRoomMessage, AckRequest ackRequest) throws Exception {
                 socketService.joinRoom(client, joinRoomMessage);
+            }
+        };
+    }
+
+    public DataListener<SeenMessage> onSeen() {
+        return new DataListener<SeenMessage>() {
+            @Override
+            public void onData(SocketIOClient socketIOClient, SeenMessage seenMessage, AckRequest ackRequest) throws Exception {
+                String clientUserId = socketIOClient.get("userId");
+
+                log.info("User [{}] seen message from room [{}]", clientUserId, seenMessage.getFromUserId());
+
+                socketService.updateSeenTime(
+                        socketIOClient,
+                        Objects.isNull(clientUserId) ? "" : clientUserId,
+                        seenMessage
+                );
+            }
+        };
+    }
+
+    public DataListener<ExitAllRoomMessage> onExitAllRoom() {
+        return new DataListener<ExitAllRoomMessage>() {
+            @Override
+            public void onData(SocketIOClient socketIOClient, ExitAllRoomMessage exitAllRoomMessage, AckRequest ackRequest) throws Exception {
+                socketService.exitAllRoom(socketIOClient);
             }
         };
     }

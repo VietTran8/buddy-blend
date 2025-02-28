@@ -63,6 +63,11 @@ export type JoinGroupResponse = {
     status: EJoinGroupStatus
 }
 
+export type PromoteToAdminResponse = {
+    groupId: string;
+    admin: boolean;
+}
+
 //Story
 export type StoryIdResponse = {
     id: string;

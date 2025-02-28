@@ -7,6 +7,7 @@ import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.enums.EGetMemberOption;
 import vn.edu.tdtu.enums.EHandleLeaveType;
+import vn.edu.tdtu.service.interfaces.GroupAdminService;
 import vn.edu.tdtu.service.interfaces.GroupMemberService;
 import vn.edu.tdtu.service.interfaces.GroupService;
 
@@ -16,6 +17,7 @@ import vn.edu.tdtu.service.interfaces.GroupService;
 public class GroupController {
     private final GroupService groupService;
     private final GroupMemberService groupMemberService;
+    private final GroupAdminService groupAdminService;
 
     @GetMapping("/{groupId}")
     public ResponseEntity<?> getGroupById(@RequestHeader("Authorization") String tokenHeader, @PathVariable("groupId") String groupId){
@@ -144,6 +146,13 @@ public class GroupController {
     @PostMapping("/member/leave")
     public ResponseEntity<?> leaveGroup(@RequestBody LeaveGroupRequest payload){
         ResDTO<?> response = groupService.handleCancelPendingAndLeaveGroup(payload, EHandleLeaveType.LEAVE);
+
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @PostMapping("/member/promoteToAdmin")
+    public ResponseEntity<?> promoteToAdmin(@RequestBody PromoteToAdminRequest payload){
+        ResDTO<?> response = groupAdminService.promoteToAdmin(payload);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }

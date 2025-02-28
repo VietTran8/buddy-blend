@@ -40,7 +40,7 @@ const ModerateMemberPage: FC<IProps> = ({ }) => {
         </h1>
         {pendingMembers && pendingMembers.length > 0 ? <div className="mt-5">
             {pendingMembers.map((member, index) => (
-                <GroupMemberItem key={index} member={member} isModerate onModerate={handleOnModerate}/>
+                <GroupMemberItem admin={false} key={index} member={member} isModerate onModerate={handleOnModerate}/>
             ))}
         </div> : <Empty className="my-10" description={false}>
                 <p className="font-semibold text-gray-400">Không có thành viên nào.</p>

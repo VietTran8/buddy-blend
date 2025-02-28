@@ -64,7 +64,7 @@ const GroupMembers: FC<IProps> = ({ }) => {
                 </h1>
                 <span className="text-gray-400">Người mới tham gia nhóm này sẽ hiển thị tại đây</span>
                 {newMembersPages?.map((page, index) => <div key={index} className="flex flex-col gap-y-3">
-                    {page.data.data.map((member, index) => <GroupMemberItem groupId={group?.id} key={index} member={member} className="mt-3" />)}
+                    {page.data.data.map((member, index) => <GroupMemberItem admin={!!group?.admin} groupId={group?.id} key={index} member={member} className="mt-3" />)}
                     {isNewMembersLoading && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
                     {isFetchingNextNewMembersPage && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
                 </div>)}
@@ -77,7 +77,7 @@ const GroupMembers: FC<IProps> = ({ }) => {
                 </h1>
                 <div className="mt-2">
                     {adminMembersPages?.map((page, index) => <div key={index} className="flex flex-col gap-y-1">
-                        {page.data.data.map((member, index) => <GroupAdminItem groupId={group?.id} key={index} member={member} />)}
+                        {page.data.data.map((member, index) => <GroupAdminItem admin={!!group?.admin} groupId={group?.id} key={index} member={member} />)}
                         {isAdminMembersLoading && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
                         {isFetchingNextAdminMembersPage && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
                     </div>)}
@@ -92,7 +92,7 @@ const GroupMembers: FC<IProps> = ({ }) => {
                     </h1>
                     <div className="mt-2">
                         {friendMembersPages?.map((page, index) => <div key={index} className="flex flex-col gap-y-1">
-                            {page.data.data.map((member, index) => <GroupMemberItem groupId={group?.id} key={index} member={member} />)}
+                            {page.data.data.map((member, index) => <GroupMemberItem admin={!!group?.admin} groupId={group?.id} key={index} member={member} />)}
                             {isFriendMembersLoading && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
                             {isFetchingNextFriendMembersPage && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
                         </div>)}
@@ -108,7 +108,7 @@ const GroupMembers: FC<IProps> = ({ }) => {
                     </h1>
                     <div className="mt-2">
                         {allMembersPages?.map((page, index) => <div key={index} className="flex flex-col gap-y-1">
-                            {page.data.data.map((member, index) => <GroupMemberItem groupId={group?.id} key={index} member={member} />)}
+                            {page.data.data.map((member, index) => <GroupMemberItem admin={!!group.admin} groupId={group?.id} key={index} member={member} />)}
                             {isAllMembersLoading && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
                             {isFetchingNextAllMembersPage && Array(5).fill(null).map((_, index) => <BasicUserItemSkeleton avatarSize={60} key={index} />)}
                         </div>)}

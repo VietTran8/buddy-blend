@@ -70,4 +70,11 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, String
             "AND m.member.userId IN :friendIds " +
             "ORDER BY m.joinedAt DESC")
     List<GroupMember> findFriendMembersByGroupId(@Param("groupId") String groupId, @Param("friendIds") List<String> friendIds);
+    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END " +
+            "FROM GroupMember m " +
+            "WHERE m.group.id = :groupId " +
+            "AND m.group.isDeleted = false " +
+            "AND m.member.userId = :userId " +
+            "AND m.isAdmin = true")
+    boolean existsAdminMemberByUserIdAndGroupId(@Param("userId") String userId, @Param("groupId") String groupId);
 }

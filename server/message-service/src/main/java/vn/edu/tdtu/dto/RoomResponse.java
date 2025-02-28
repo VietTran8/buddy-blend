@@ -1,5 +1,6 @@
 package vn.edu.tdtu.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,8 @@ public class RoomResponse {
     private String roomImage;
     private boolean lastSentByYou;
     private String opponentUserId;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    private Date opponentLastSeenTime;
     private boolean online;
     @JsonIgnore()
     private Date createdAt;

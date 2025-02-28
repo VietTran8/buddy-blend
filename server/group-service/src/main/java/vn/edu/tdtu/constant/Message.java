@@ -20,7 +20,7 @@ public class Message {
     public final static String GROUP_LEAVED_MSG = "Group leaved successfully";
     public final static String GROUP_PENDING_CANCELLED_MSG = "Group leaved successfully";
     public final static String GROUP_MEMBER_JOINED_MSG = "Group member joined";
+    public final static String GROUP_MEMBER_PROMOTED_MSG = "Promoted member to admin successfully";
+    public final static String GROUP_MEMBER_REVOKED_MSG = "Revoked member from admin successfully";
     public final static String USER_NOT_FOUND_MSG = "User not found";
-
-
 }

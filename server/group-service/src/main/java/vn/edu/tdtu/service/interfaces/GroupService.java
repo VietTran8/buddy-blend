@@ -5,6 +5,7 @@ import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.GroupIdResponse;
 import vn.edu.tdtu.enums.EGetMemberOption;
 import vn.edu.tdtu.enums.EHandleLeaveType;
+import vn.edu.tdtu.model.Group;
 
 public interface GroupService {
     public ResDTO<GroupIdResponse> createGroup(CreateGroupRequest payload);

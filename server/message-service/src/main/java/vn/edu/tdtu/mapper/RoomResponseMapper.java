@@ -29,8 +29,10 @@ public class RoomResponseMapper {
 
         if(object.getUserId1().equals(currentUserId)){
            opponentUserId = object.getUserId2();
+           response.setOpponentLastSeenTime(object.getUser2LastSeenTime());
         }else {
             opponentUserId = object.getUserId1();
+            response.setOpponentLastSeenTime(object.getUser1LastSeenTime());
         }
 
         opponentUser = userService.findById(opponentUserId);

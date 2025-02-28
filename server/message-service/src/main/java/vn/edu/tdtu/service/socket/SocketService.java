@@ -4,9 +4,11 @@ import com.corundumstudio.socketio.SocketIOClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.dto.JoinRoomMessage;
+import vn.edu.tdtu.message.ExitAllRoomMessage;
+import vn.edu.tdtu.message.JoinRoomMessage;
 import vn.edu.tdtu.dto.MessageNoti;
-import vn.edu.tdtu.dto.SendMessage;
+import vn.edu.tdtu.message.SeenMessage;
+import vn.edu.tdtu.message.SendMessage;
 import vn.edu.tdtu.mapper.RoomResponseMapper;
 import vn.edu.tdtu.model.ChatMessage;
 import vn.edu.tdtu.model.Room;
@@ -38,7 +40,7 @@ public class SocketService {
                 .getRoomOperations(room.getId())
                 .getClients()
                 .forEach(client -> {
-                    if(client.getSessionId().equals(senderClient.getSessionId())){
+                    if(client.getSessionId().equals(senderClient.getSessionId())) {
                         Map<String, Object> data = new HashMap<>();
                         data.put("roomId", room.getId());
 
@@ -87,11 +89,9 @@ public class SocketService {
                     .build();
         }
 
-        if(senderClient.get("userId").equals(room.getUserId1())) {
+        if(room.getUserId1().equals(senderClient.get("userId"))) {
             room.setUser1LastSeenTime(new Date());
-        }
-
-        if(senderClient.get("userId").equals(room.getUserId2())) {
+        } else if(room.getUserId2().equals(senderClient.get("userId"))) {
             room.setUser2LastSeenTime(new Date());
         }
 
@@ -101,5 +101,41 @@ public class SocketService {
 
         senderClient.joinRoom(room.getId());
         sendRoomJoinedMessage(senderClient, senderClient.get("userId"), room);
+
+        senderClient.getNamespace()
+                .getRoomOperations(room.getId())
+                .getClients()
+                .forEach(client -> {
+                    if(message.getToUserId().equals(client.get("userId"))) {
+                        client.sendEvent("recipient_seen", true);
+                    }
+                });
+    }
+
+    public void updateSeenTime(SocketIOClient senderClient, String userId, SeenMessage message) {
+        Room room = roomService.findExistingRoom(userId, message.getFromUserId());
+
+        if(room != null) {
+            if(room.getUserId1().equals(userId)) {
+                room.setUser1LastSeenTime(new Date());
+            }else if(room.getUserId2().equals(userId)) {
+                room.setUser2LastSeenTime(new Date());
+            }
+
+            roomService.saveRoom(room);
+
+            senderClient.getNamespace()
+                    .getRoomOperations(room.getId())
+                    .getClients()
+                    .forEach(client -> {
+                        if(!userId.equals(client.get("userId"))) {
+                            client.sendEvent("recipient_seen", true);
+                        }
+                    });
+        }
+    }
+
+    public void exitAllRoom(SocketIOClient senderClient) {
+        senderClient.getAllRooms().forEach(senderClient::leaveRoom);
     }
 }

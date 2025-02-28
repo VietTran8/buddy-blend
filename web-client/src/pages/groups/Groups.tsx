@@ -3,6 +3,7 @@ import { FC } from "react";
 import { GroupItem, GroupItemSkeleton } from "../../components";
 import { Link } from "react-router-dom";
 import { useQueryMyGroup } from "../../hooks";
+import { Empty } from "antd";
 
 interface IProps { };
 
@@ -25,8 +26,11 @@ const GroupPage: FC<IProps> = ({ }) => {
                 </div>
                 <div className="grid grid-cols-3 gap-3 mt-3">
                     {groups?.map((group, index) => (<GroupItem group={group} key={index} />))}
-                    {isLoading && Array(10).fill(null).map((_, index) => <GroupItemSkeleton key={index}/>)}
+                    {isLoading && Array(10).fill(null).map((_, index) => <GroupItemSkeleton key={index} />)}
                 </div>
+                {groups?.length === 0 && <Empty description className="py-24">
+                    <p className="font-semibold text-gray-300">Bạn chưa tham gia nhóm nào, hãy tạo nhóm nhé!</p>
+                </Empty>}
             </div>
         </>
     );

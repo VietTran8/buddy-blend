@@ -61,7 +61,7 @@ const CreateImageStoryForm: FC<IProps> = ({ className, editedFile }) => {
                     <Link className="w-full" to="/">
                         <button disabled={isCreating} type="button" className="btn-secondary-lg w-full">Hủy</button>
                     </Link>
-                    <button disabled={!!!editedFile || isCreating} type="submit" className="btn-primary-lg w-full">{isCreating ? 'Đang tạo tin' :'Tạo tin mới'}</button>
+                    <button disabled={!!!editedFile || isCreating} type="submit" className="btn-primary-lg w-full">{isCreating ? 'Đang tạo tin...' :'Tạo tin mới'}</button>
                 </div>
             </Form>
         )}

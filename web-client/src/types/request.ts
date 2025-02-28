@@ -83,6 +83,11 @@ export type InviteUsersRequest = {
     userIds: string[];
 }
 
+export type PromoteToAdminRequest = {
+    groupId: string;
+    memberId: string;
+}
+
 // Post
 type CreatePostTag = {
     taggedUserId: string;

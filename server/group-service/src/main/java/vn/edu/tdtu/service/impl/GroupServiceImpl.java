@@ -25,6 +25,7 @@ import vn.edu.tdtu.repository.GroupMemberRepository;
 import vn.edu.tdtu.repository.GroupRepository;
 import vn.edu.tdtu.repository.MemberRepository;
 import vn.edu.tdtu.repository.httpclient.UserClient;
+import vn.edu.tdtu.service.interfaces.GroupAdminService;
 import vn.edu.tdtu.service.interfaces.GroupMemberService;
 import vn.edu.tdtu.service.interfaces.GroupService;
 import vn.edu.tdtu.utils.SecurityContextUtils;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GroupServiceImpl implements GroupService {
     private final GroupRepository groupRepository;
+    private final GroupAdminService groupAdminService;
     private final MemberRepository memberRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final GroupMemberService groupMemberService;
@@ -94,7 +96,7 @@ public class GroupServiceImpl implements GroupService {
         Group group = groupRepository.findByIdAndIsDeleted(id, false)
                 .orElseThrow(() -> new BadRequestException(Message.GROUP_NOT_FOUND_MSG));
 
-        adminCheck(group);
+        groupAdminService.adminCheck(group.getId());
 
         if(payload.getName() != null)
             group.setName(payload.getName());
@@ -123,7 +125,7 @@ public class GroupServiceImpl implements GroupService {
         Group group = groupRepository.findByIdAndIsDeleted(id, false)
                         .orElseThrow(() -> new BadRequestException(Message.GROUP_NOT_FOUND_MSG));
 
-        adminCheck(group);
+        groupAdminService.adminCheck(group.getId());
 
         group.setDeleted(true);
         groupRepository.save(group);
@@ -239,7 +241,7 @@ public class GroupServiceImpl implements GroupService {
         Group foundGroup = groupRepository.findByIdAndIsDeleted(payload.getGroupId(), false)
                 .orElseThrow(() -> new BadRequestException(Message.GROUP_NOT_FOUND_MSG));
 
-        adminCheck(foundGroup);
+        groupAdminService.adminCheck(foundGroup.getId());
 
         GroupMember foundMember = groupMemberRepository.findPendingMemberInGroup(payload.getGroupId(), payload.getMemberId())
                 .orElseThrow(() -> new BadRequestException(Message.GROUP_MEMBER_NOT_FOUND_MSG));
@@ -419,24 +421,8 @@ public class GroupServiceImpl implements GroupService {
         Group group = groupRepository.findByIdAndIsDeleted(groupId, false)
                 .orElseThrow(() -> new BadRequestException(Message.GROUP_NOT_FOUND_MSG));
 
-        adminCheck(group);
+        groupAdminService.adminCheck(group.getId());
 
         return groupMemberRepository.findByGroupAndIsPending(group, true);
-    }
-
-    private static boolean currentUserIsNotGroupAdmin(Group group) {
-        String userId = SecurityContextUtils.getUserId();
-
-        return group.getGroupMembers()
-                .stream()
-                .noneMatch(member -> member.isAdmin() && member
-                        .getMember()
-                        .getUserId()
-                        .equals(userId));
-    }
-
-    public static void adminCheck(Group group) {
-        if(currentUserIsNotGroupAdmin(group))
-            throw new UnauthorizedException(Message.GROUP_NOT_PERMITTED_MSG);
     }
 }

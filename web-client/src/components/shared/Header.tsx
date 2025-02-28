@@ -69,7 +69,7 @@ const Header: FC<IHeaderProps> = ({ className }) => {
                     <div className="flex items-center justify-end gap-x-5 me-3 lg:me-0">
                         <Popover
                             content={<MessagesPopoverContent onChatUserClick={handleChatUserClick} />}
-                            title="Tin nhắn"
+                            title={<h1 className="font-semibold text-lg">Tin nhắn</h1>}
                             trigger="click"
                             open={openMessages}
                             onOpenChange={handleOpenMsgChange}

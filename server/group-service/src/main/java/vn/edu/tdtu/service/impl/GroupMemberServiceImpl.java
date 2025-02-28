@@ -10,13 +10,16 @@ import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.model.Group;
 import vn.edu.tdtu.repository.GroupMemberRepository;
 import vn.edu.tdtu.repository.GroupRepository;
+import vn.edu.tdtu.service.interfaces.GroupAdminService;
 import vn.edu.tdtu.service.interfaces.GroupMemberService;
+import vn.edu.tdtu.service.interfaces.GroupService;
 
 @Service
 @RequiredArgsConstructor
 public class GroupMemberServiceImpl implements GroupMemberService {
     private final GroupMemberRepository groupMemberRepository;
     private final GroupRepository groupRepository;
+    private final GroupAdminService groupAdminService;
 
     @Transactional
     public void removeGroupMemberById(String id) {
@@ -25,10 +28,7 @@ public class GroupMemberServiceImpl implements GroupMemberService {
 
     @Transactional
     public ResDTO<?> removeMember(String groupId, String memberId) {
-        Group foundGroup = groupRepository.findByIdAndIsDeleted(groupId, false)
-                .orElseThrow(() -> new BadRequestException(Message.GROUP_NOT_FOUND_MSG));
-
-        GroupServiceImpl.adminCheck(foundGroup);
+        groupAdminService.adminCheck(groupId);
 
         removeGroupMemberById(memberId);
 

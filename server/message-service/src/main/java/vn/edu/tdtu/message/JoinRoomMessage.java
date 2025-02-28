@@ -1,4 +1,4 @@
-package vn.edu.tdtu.dto;
+package vn.edu.tdtu.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

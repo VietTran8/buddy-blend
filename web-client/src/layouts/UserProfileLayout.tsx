@@ -1,6 +1,6 @@
 import { FC, useContext } from "react";
 import { Header, ProfileLayoutSkeleton, UserProfileActionPopoverContent } from "../components";
-import { Avatar, Button, Divider, Popconfirm, Popover } from "antd";
+import { Avatar, Button, Divider, Image, Popconfirm, Popover } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComment, faList, faUserEdit } from "@fortawesome/free-solid-svg-icons";
 import { Link, Outlet, useLocation, useParams } from "react-router-dom";
@@ -66,9 +66,13 @@ const UserProfile: FC<IProps> = ({ }) => {
             <Header className="sticky top-0 z-50 mb-3" />
             {isLoading ? <ProfileLayoutSkeleton /> : !fetchedUser ? <NotFound /> : <div className="container">
                 <div className="bg-white rounded-lg p-5 w-full">
-                    <img src={fetchedUser?.coverPicture || "https://pixner.net/circlehub/main/assets/images/profile-cover-img.png"} className="h-[270px] rounded-md w-full object-cover" />
+                    <div className="h-[270px] rounded-md w-full overflow-hidden">
+                        <Image preview={{ mask: <></> }} width={"100%"} height={270} src={fetchedUser?.coverPicture || "https://pixner.net/circlehub/main/assets/images/profile-cover-img.png"} className="object-cover" />
+                    </div>
                     <div className="flex items-center mt-3 gap-x-3">
-                        <Avatar shape="square" size={115} src={fetchedUser?.profilePicture || "/images/default-user.png"} />
+                        <div className="rounded-md w-[125px] h-[125px] overflow-hidden">
+                            <Image preview={{ mask: <></> }} width={125} height={125} className="object-cover" src={fetchedUser?.profilePicture || "/images/default-user.png"} />
+                        </div>
                         <div className="flex-1 md:self-center self-start">
                             <h1 className="text-xl font-bold text-neutral-800">{fetchedUser?.userFullName}</h1>
                             <div className="flex items-center gap-x-1 mt-1">
@@ -77,7 +81,9 @@ const UserProfile: FC<IProps> = ({ }) => {
                                         <Avatar key={index} size={20} src={user.profileImage || "/images/default-user.png"} />
                                     ))}
                                 </Avatar.Group>
-                                <span className="font-semibold text-gray-400">{`${fetchedUser?.friendsCount} bạn bè`}</span>
+                                <Link to={`/user/${fetchedUser.id}/friends`}>
+                                    <span className="font-semibold text-gray-400 hover:underline">{`${fetchedUser?.friendsCount} bạn bè`}</span>
+                                </Link>
                             </div>
                         </div>
                         {!isLoading && fetchedUser?.myAccount ? <Link to="/settings" className="md:block hidden self-start">

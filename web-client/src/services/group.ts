@@ -1,5 +1,5 @@
 import { http } from "../config";
-import { BaseGroup, Group, BaseResponse, CreateGroupRequest, GroupIdResponse, Member, ModerateMemberRequest, UpdateGroupRequest, GroupWithPending, PaginationResponse, JoinGroupResponse, HandleLeaveOrPendingRequest, InviteUsersRequest } from "../types";
+import { BaseGroup, Group, BaseResponse, CreateGroupRequest, GroupIdResponse, Member, ModerateMemberRequest, UpdateGroupRequest, GroupWithPending, PaginationResponse, JoinGroupResponse, HandleLeaveOrPendingRequest, InviteUsersRequest, PromoteToAdminRequest, PromoteToAdminResponse } from "../types";
 
 export const createGroup = async (payload: CreateGroupRequest): Promise<BaseResponse<GroupIdResponse>> => {
     const response: BaseResponse<GroupIdResponse> = await http.post("/groups", payload);
@@ -109,6 +109,12 @@ export const deleteGroup = async (groupId: string): Promise<BaseResponse<GroupId
 
 export const inviteUsers = async (payload: InviteUsersRequest): Promise<BaseResponse<void>> => {
     const response: BaseResponse<void> = await http.post(`/groups/member/invite`, payload);
+
+    return response;
+}
+
+export const handlePromoteAdmin = async (payload: PromoteToAdminRequest): Promise<BaseResponse<PromoteToAdminResponse>> => {
+    const response: BaseResponse<PromoteToAdminResponse> = await http.post(`/groups/member/promoteToAdmin`, payload);
 
     return response;
 }

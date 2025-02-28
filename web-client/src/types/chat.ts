@@ -7,6 +7,7 @@ export type Room = {
     roomName: string;
     roomImage: string;
     opponentUserId: string;
+    opponentLastSeenTime: string;
     online: boolean;
 }
 

@@ -1,6 +1,7 @@
 package vn.edu.tdtu.service.impl;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.Transformation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -26,14 +27,17 @@ public class FileServiceImpl implements IFileService {
                 || !filesValidation.isCorrectFormat(multipartFile)){
             return null;
         }
-        return cloudinary.uploader()
-                .upload(multipartFile.getBytes(),
-                        Map.of("public_id", UUID.randomUUID().toString(),
-                                "folder", folder.getFolderName(),
-                                "resource_type", "auto",
-                                "type", "upload"))
-                .get("url")
-                .toString();
+
+        Map<String, Object> uploadOptions = Map.of("public_id", UUID.randomUUID().toString(),
+                "folder", folder.getFolderName(),
+                "resource_type", folder.getResourceType(),
+                "type", "upload");
+
+        Map<?, ?> uploadResult = cloudinary.uploader().upload(multipartFile.getBytes(), uploadOptions);
+
+        String publicId = (String) uploadResult.get("public_id");
+
+        return generateOptimizedUrl(publicId, folder);
     }
 
     @Override
@@ -87,5 +91,16 @@ public class FileServiceImpl implements IFileService {
             );
         }
         return null;
+    }
+
+    private String generateOptimizedUrl(String publicId, EUploadFolder folder) {
+        Transformation<?> transformation = new Transformation<>()
+                .width(800).crop("scale")
+                .quality("auto")
+                .fetchFormat("auto");
+
+        return cloudinary.url().transformation(transformation)
+                .resourceType(folder.getResourceType())
+                .generate(publicId);
     }
 }

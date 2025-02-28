@@ -1,37 +1,39 @@
-import { faComment } from "@fortawesome/free-solid-svg-icons";
+import { faCancel, faComment, faEllipsisVertical } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Avatar } from "antd";
+import { Avatar, Popover } from "antd";
 import { FC, useContext } from "react";
 import { EFriendStatus, Member } from "../../types";
 import { AuthContext, ChatContext } from "../../context";
 import { getFriendRequestBtnDesc } from "@/utils";
 import { useNavigate } from "react-router-dom";
-import { useHandleFriendRequest } from "@/hooks";
+import { useHandleFriendRequest, useHandlePromoteAdmin } from "@/hooks";
 
 interface IProps {
     member?: Member;
     groupId?: string;
+    admin: boolean;
 };
 
-const GroupAdminItem: FC<IProps> = ({ member, groupId }) => {
+const GroupAdminItem: FC<IProps> = ({ member, groupId, admin }) => {
     const { user } = useContext(AuthContext);
     const { openChatDrawer } = useContext(ChatContext);
     const navigate = useNavigate();
 
     const { icon, text } = getFriendRequestBtnDesc(member?.user.friendStatus);
-    
+
     const { mutate: handleFQ } = useHandleFriendRequest(groupId);
+    const { mutate: handlePromoteAdmin } = useHandlePromoteAdmin();
 
     const memberUser = member?.user;
 
     const handleButton = () => {
-        if(memberUser) {
-            switch(memberUser.friendStatus) {
-                 case EFriendStatus.SENT_TO_YOU: 
+        if (memberUser) {
+            switch (memberUser.friendStatus) {
+                case EFriendStatus.SENT_TO_YOU:
                     navigate(`/user/${memberUser.id}`);
                     break;
-    
-                case EFriendStatus.IS_FRIEND: 
+
+                case EFriendStatus.IS_FRIEND:
                     openChatDrawer(memberUser.id);
                     break;
 
@@ -41,6 +43,13 @@ const GroupAdminItem: FC<IProps> = ({ member, groupId }) => {
                     });
             }
         }
+    }
+
+    const handlePromoteAdminClick = () => {
+        handlePromoteAdmin({
+            groupId: groupId || "",
+            memberId: member?.id || ""
+        });
     }
 
     return (
@@ -58,6 +67,18 @@ const GroupAdminItem: FC<IProps> = ({ member, groupId }) => {
                 <FontAwesomeIcon icon={icon} />
                 <span className="text-sm">{text}</span>
             </button>)}
+            {admin && <Popover
+                trigger={"click"}
+                content={<ul>
+                    <li onClick={handlePromoteAdminClick} className="px-3 py-2 text-sm items-center font-medium text-gray-600 rounded hover:bg-gray-100 flex cursor-pointer transition-all gap-x-2"><FontAwesomeIcon icon={faCancel} className="text-gray-500 text-sm" />
+                        {user?.id === memberUser?.id ? 'Từ chức Quản trị viên' : 'Thu hồi quyền Quản trị viên'}
+                    </li>
+                </ul>}
+            >
+                <div className="btn-secondary">
+                    <FontAwesomeIcon icon={faEllipsisVertical} />
+                </div>
+            </Popover>}
         </div>
     )
 };
