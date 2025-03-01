@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouteObject } from "react-router-dom";
 import { FriendsLayout, GroupLayout, HeaderLayout, MainLayout, MainNoRightSideBarLayout, SearchLayout, UserProfileLayout } from "../layouts";
-import { About, Blocked, CreateGroup, CreateStory, Favourite, ForgotPassword, Friends, GroupAbout, GroupDetails, GroupMembers, GroupPhotos, Groups, Home, Login, Main, ModerateMember, NotFound, People, Photos, Post, PostDetails, PostPhotos, ProfileAbout, Requests, Result, Saved, Settings, SignUp, Suggests, ViewStory } from "../pages";
+import { About, Blocked, CreateGroup, CreateStory, Favourite, ForgotPassword, Friends, Group, GroupAbout, GroupDetails, GroupMembers, GroupPhotos, Groups, Home, Login, Main, ModerateMember, NotFound, People, Photos, Post, PostDetails, PostPhotos, ProfileAbout, Requests, Result, Saved, Settings, SignUp, Suggests, ViewStory } from "../pages";
 import { AuthProvider, ChatProvider, NotificationProvider, StoryWrapper } from "../components";
 import { Provider } from "../components";
 import FavouriteDetails from "../pages/favourite/FavouriteDetails";
@@ -119,6 +119,7 @@ const privateRoutes = [
             { path: 'top', element: <Result /> },
             { path: 'post', element: <Post /> },
             { path: 'people', element: <People /> },
+            { path: 'group', element: <Group /> },
         ]
     },
     {

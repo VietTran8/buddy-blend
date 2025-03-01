@@ -17,7 +17,7 @@ const SearchLayout: FC<IProps> = ({ }) => {
 
     const { data: searchResponse, isLoading } = useSearchResult(query);
 
-    const searchResults = searchResponse?.data || { posts: [], users: [] };
+    const searchResults = searchResponse?.data || { posts: [], users: [], groups: [] };
 
     const context: SearchOutletContextType = { searchResults, isLoading }
 

@@ -7,6 +7,8 @@ import vn.edu.tdtu.enums.EGetMemberOption;
 import vn.edu.tdtu.enums.EHandleLeaveType;
 import vn.edu.tdtu.model.Group;
 
+import java.util.List;
+
 public interface GroupService {
     public ResDTO<GroupIdResponse> createGroup(CreateGroupRequest payload);
     public ResDTO<?> updateGroupInfo(String id, UpdateGroupRequest payload);
@@ -15,6 +17,7 @@ public interface GroupService {
     public ResDTO<?> handleCancelPendingAndLeaveGroup(LeaveGroupRequest payload, EHandleLeaveType type);
     public ResDTO<?> getMyGroups();
     public ResDTO<?> getGroupById(String accessToken, String groupId);
+    public ResDTO<?> getAllGroupByIds(List<String> groupId);
     public ResDTO<?> getGroupByIdForPost(String groupId);
     public ResDTO<?> moderateMember(ModerateMemberRequest payload);
     public void inviteUsers(String accessToken, InviteUsersRequest payload);

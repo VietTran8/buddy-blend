@@ -16,11 +16,12 @@ import vn.edu.tdtu.enums.*;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.mapper.GroupMapper;
+import vn.edu.tdtu.message.SyncGroupMsg;
 import vn.edu.tdtu.model.Group;
 import vn.edu.tdtu.model.GroupMember;
 import vn.edu.tdtu.model.Member;
 import vn.edu.tdtu.model.data.User;
-import vn.edu.tdtu.publisher.InviteUserPublisher;
+import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.repository.GroupMemberRepository;
 import vn.edu.tdtu.repository.GroupRepository;
 import vn.edu.tdtu.repository.MemberRepository;
@@ -48,7 +49,7 @@ public class GroupServiceImpl implements GroupService {
     private final GroupMemberService groupMemberService;
     private final GroupMapper groupMapper;
     private final UserClient userClient;
-    private final InviteUserPublisher kafkaPublisher;
+    private final KafkaEventPublisher kafkaPublisher;
 
     public ResDTO<GroupIdResponse> createGroup(CreateGroupRequest payload) {
         String userId = SecurityContextUtils.getUserId();
@@ -79,6 +80,12 @@ public class GroupServiceImpl implements GroupService {
 
         groupRepository.save(group);
 
+        kafkaPublisher.publishSyncGroupData(new SyncGroupMsg(
+                group.getId(),
+                group.getName(),
+                ESyncType.TYPE_CREATE
+        ));
+
         return new ResDTO<>(
                 Message.GROUP_CREATED_SUCCESS_MSG,
                 new GroupIdResponse(group.getId()),
@@ -98,8 +105,14 @@ public class GroupServiceImpl implements GroupService {
 
         groupAdminService.adminCheck(group.getId());
 
-        if(payload.getName() != null)
+        if(payload.getName() != null) {
             group.setName(payload.getName());
+            kafkaPublisher.publishSyncGroupData(new SyncGroupMsg(
+                    id,
+                    payload.getName(),
+                    ESyncType.TYPE_UPDATE
+            ));
+        }
 
         if(payload.getAvatar() != null)
             group.setAvatar(payload.getAvatar());
@@ -129,6 +142,12 @@ public class GroupServiceImpl implements GroupService {
 
         group.setDeleted(true);
         groupRepository.save(group);
+
+        kafkaPublisher.publishSyncGroupData(new SyncGroupMsg(
+                group.getId(),
+                group.getName(),
+                ESyncType.TYPE_DELETE
+        ));
 
         return response;
     }
@@ -215,9 +234,24 @@ public class GroupServiceImpl implements GroupService {
         Group group = groupRepository.findByIdAndIsDeleted(groupId, false)
                 .orElseThrow(() -> new BadRequestException(Message.GROUP_NOT_FOUND_MSG));
 
-        GroupResponse groupResponse = groupMapper.mapToDto(accessToken, group);
+        GroupResponse groupResponse = groupMapper.mapToDto(accessToken, group, false);
 
         response.setData(groupResponse);
+
+        return response;
+    }
+
+    @Override
+    public ResDTO<?> getAllGroupByIds(List<String> groupIds) {
+        ResDTO<List<GroupResponse>> response = new ResDTO<>();
+        response.setCode(HttpServletResponse.SC_OK);
+        response.setMessage(Message.GROUP_FETCHED_MSG);
+
+        List<Group> groups = groupRepository.findAllByIdInAndIsDeleted(groupIds, false);
+
+        response.setData(groups.stream().map(
+                group -> groupMapper.mapToDto(null, group, true)
+        ).toList());
 
         return response;
     }

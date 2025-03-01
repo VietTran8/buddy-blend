@@ -27,7 +27,7 @@ const MessagesPopoverContent: FC<IMessagesPopoverContentProps> = ({ className, o
                     </div>
                     <div className="flex-1 min-w-0">
                         <h1 className="font-semibold text-base line-clamp-1">{room.roomName}</h1>
-                        <span className="block text-sm truncate text-gray-400">{room.latestMessage ? (room.lastSentByYou ? `Bạn: ${room.latestMessage.content}` : room.latestMessage.content) :
+                        <span className="block text-sm truncate text-gray-400">{room.latestMessage ? (`${room.lastSentByYou ? 'Bạn: ' : ''} ${room.latestMessage.content || `Đã gửi ${room.latestMessage.medias.length} ảnh`}`) :
                             `Các bạn vừa được kết nối...`}</span>
                     </div>
                     <span>

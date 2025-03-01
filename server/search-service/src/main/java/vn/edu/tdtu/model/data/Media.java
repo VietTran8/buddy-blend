@@ -1,4 +1,4 @@
-package vn.edu.tdtu.model;
+package vn.edu.tdtu.model.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

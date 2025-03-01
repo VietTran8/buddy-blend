@@ -1,4 +1,4 @@
-package vn.edu.tdtu.model;
+package vn.edu.tdtu.model.data;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Entity;

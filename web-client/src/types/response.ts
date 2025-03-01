@@ -1,4 +1,5 @@
 import { EFriendReqStatus, EJoinGroupStatus } from "./enum";
+import { Group } from "./group";
 import { Post } from "./post";
 import { Story } from "./story";
 import { User } from "./user";
@@ -93,4 +94,5 @@ export type HandleSavePostResponse = {
 export type SearchResponse = {
     users: User[];
     posts: Post[];
+    groups: Group[];
 }

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import vn.edu.tdtu.config.openfeign.FeignConfig;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.FindByUserIdsReq;
-import vn.edu.tdtu.model.User;
+import vn.edu.tdtu.model.data.User;
 
 import java.util.List;
 

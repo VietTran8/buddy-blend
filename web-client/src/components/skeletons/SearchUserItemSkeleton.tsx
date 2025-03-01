@@ -11,7 +11,7 @@ const SearchUserItemSkeleton: FC<IProps> = ({ }) => {
             <div className="flex items-center gap-x-1 mt-2">
                 <Avatar.Group>
                     {Array(5).fill(null).map((_, index) => (
-                        <Skeleton.Avatar size={"small"} key={index} />
+                        <Skeleton.Avatar active size={"small"} key={index} />
                     ))}
                 </Avatar.Group>
                 <Skeleton.Node active style={{ width: "100px", height: "13px" }} children />

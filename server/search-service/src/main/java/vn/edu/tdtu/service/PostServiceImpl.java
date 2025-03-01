@@ -1,18 +1,20 @@
 package vn.edu.tdtu.service;
 
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.common.unit.Fuzziness;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.request.FindByIdsReq;
 import vn.edu.tdtu.exception.BadRequestException;
-import vn.edu.tdtu.model.Post;
+import vn.edu.tdtu.model.data.Post;
 import vn.edu.tdtu.model.es.SyncPost;
 import vn.edu.tdtu.repository.EsPostRepository;
 import vn.edu.tdtu.repository.httpclient.PostClient;
+import vn.edu.tdtu.service.interfaces.PostService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PostService {
+public class PostServiceImpl implements PostService {
     private final PostClient postClient;
     private final EsPostRepository postRepository;
     private final ElasticsearchOperations elasticsearchOperations;
@@ -44,14 +46,19 @@ public class PostService {
         postRepository.deleteById(post.getId());
     }
     
-    public List<Post> findByContentContaining(String token, String key) {
+    public List<Post> findByContentContaining(String token, String key, String fuzziness) {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q.match(mq -> mq
                         .field("content")
                         .query(key)
-                        .fuzziness(Fuzziness.ONE.asString())
+                        .fuzziness(fuzziness)
                     )
                 )
+                .withSort(SortOptions.of(so -> so
+                        .score(score -> score
+                                .order(SortOrder.Desc)
+                        )
+                ))
                 .build();
 
         SearchHits<SyncPost> searchHits = elasticsearchOperations.search(query, SyncPost.class);

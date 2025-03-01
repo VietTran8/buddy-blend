@@ -11,6 +11,8 @@ import vn.edu.tdtu.service.interfaces.GroupAdminService;
 import vn.edu.tdtu.service.interfaces.GroupMemberService;
 import vn.edu.tdtu.service.interfaces.GroupService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/groups")
 @RequiredArgsConstructor
@@ -18,6 +20,13 @@ public class GroupController {
     private final GroupService groupService;
     private final GroupMemberService groupMemberService;
     private final GroupAdminService groupAdminService;
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllGroupByIds(@RequestParam("ids") List<String> requestParam){
+        ResDTO<?> response = groupService.getAllGroupByIds(requestParam);
+
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
 
     @GetMapping("/{groupId}")
     public ResponseEntity<?> getGroupById(@RequestHeader("Authorization") String tokenHeader, @PathVariable("groupId") String groupId){

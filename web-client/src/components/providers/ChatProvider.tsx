@@ -243,7 +243,7 @@ const ChatProvider: FC<IProps> = ({ }) => {
                         <div className="flex-1">
                             <h1 className="text-base font-semibold flex-1 line-clamp-1 text-gray-600">{room.roomName || "Người dùng BuddyBlend"}</h1>
                             <div className="flex items-center gap-x-2">
-                                <p className="text-sm text-gray-500 flex-1 line-clamp-1">{room.latestMessage ? (room.lastSentByYou ? `Bạn: ${room.latestMessage.content}` : room.latestMessage.content) :
+                                <p className="text-sm text-gray-500 flex-1 line-clamp-1">{room.latestMessage ? (`${room.lastSentByYou ? 'Bạn: ' : ''} ${room.latestMessage.content || `Đã gửi ${room.latestMessage.medias.length} ảnh`}`) :
                                     `Các bạn vừa được kết nối...`}</p>
                                 <span className="text-xs text-gray-400">{room.latestMessage && getTimeDiff(room.latestMessage.createdAt)}</span>
                             </div>

@@ -91,6 +91,11 @@ export const searchMenuItems: MenuItem[] = [
         name: "Mọi người",
         linkTo: "people",
         icon: <FontAwesomeIcon icon={faUserGroup} />
+    },
+    {
+        name: "Nhóm",
+        linkTo: "group",
+        icon: <FontAwesomeIcon icon={faPeopleGroup} />
     }
 ]
 

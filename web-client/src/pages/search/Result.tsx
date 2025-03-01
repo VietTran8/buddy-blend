@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Post, PostSkeleton, SearchPeopleItem, SearchUserItemSkeleton } from "../../components";
+import { Post, PostSkeleton, SearchGroupItem, SearchGroupItemSkeleton, SearchPeopleItem, SearchUserItemSkeleton } from "../../components";
 import { useOutletContext } from "react-router-dom";
 import { SearchOutletContextType } from "@/layouts/SearchLayout";
 import { Empty } from "antd";
@@ -25,7 +25,15 @@ const Result: FC<IProps> = ({ }) => {
                     ))}
                 </div>
             </div>}
-            {!isLoading && [...searchResults.posts, ...searchResults.users].length === 0 && <div className="bg-white rounded-md p-5 mt-2">
+            {!isLoading && searchResults.groups.length > 0 && <div className="rounded-md bg-white p-5 mt-4">
+                <h1 className="lg:text-lg text-base font-semibold mb-4">Nhóm</h1>
+                <div className="flex flex-col gap-y-3">
+                    {searchResults.groups.map((group) => (
+                        <SearchGroupItem key={group.id} group={group} />
+                    ))}
+                </div>
+            </div>}
+            {!isLoading && (searchResults.posts.length + searchResults.users.length + searchResults.groups.length) === 0 && <div className="bg-white rounded-md p-5 mt-2">
                 <Empty description>
                     <span className="font-semibold text-gray-400">Không tìm thấy kết quả phù hợp...</span>
                 </Empty>
@@ -39,6 +47,11 @@ const Result: FC<IProps> = ({ }) => {
                 <div className="rounded-md bg-white p-5 mt-2 flex flex-col gap-y-2">
                     {Array(5).fill(null).map((_, index) => (
                         <PostSkeleton key={index} />
+                    ))}
+                </div>
+                <div className="rounded-md bg-white p-5 mt-2 flex flex-col gap-y-2">
+                    {Array(5).fill(null).map((_, index) => (
+                        <SearchGroupItemSkeleton key={index} />
                     ))}
                 </div>
             </>}

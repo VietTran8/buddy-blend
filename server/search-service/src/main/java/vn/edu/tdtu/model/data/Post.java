@@ -1,4 +1,4 @@
-package vn.edu.tdtu.model;
+package vn.edu.tdtu.model.data;
 
 import co.elastic.clients.elasticsearch.license.PostResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;

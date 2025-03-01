@@ -65,6 +65,7 @@ export { default as StoryItem } from './features/StoryItem';
 export { default as CollectionGrid } from './features/CollectionGrid';
 export { default as FriendSuggestion } from './features/FriendSuggestion';
 export { default as ReactedUserItem } from './features/ReactedUserItem';
+export { default as SearchGroupItem } from './features/SearchGroupItem';
 
 // Provider
 export { default as Provider } from './providers/Provider';
@@ -83,3 +84,4 @@ export { default as NotificationSkeleton } from './skeletons/NotificationSkeleto
 export { default as FriendPageItemSkeleton } from './skeletons/FriendPageItemSkeleton';
 export { default as MemberAboutSkeleton } from './skeletons/MemberAboutSkeleton';
 export { default as GroupItemSkeleton } from './skeletons/GroupItemSkeleton';
+export { default as SearchGroupItemSkeleton } from './skeletons/SearchGroupItemSkeleton';

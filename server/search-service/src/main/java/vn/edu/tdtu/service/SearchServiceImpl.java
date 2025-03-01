@@ -2,15 +2,19 @@ package vn.edu.tdtu.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.response.SearchResponse;
-import vn.edu.tdtu.model.SearchHistory;
+import vn.edu.tdtu.model.data.SearchHistory;
 import vn.edu.tdtu.repository.SearchHistoryRepository;
+import vn.edu.tdtu.service.interfaces.GroupService;
+import vn.edu.tdtu.service.interfaces.PostService;
 import vn.edu.tdtu.service.interfaces.SearchService;
+import vn.edu.tdtu.service.interfaces.UserService;
 import vn.edu.tdtu.util.SecurityContextUtils;
 
 import java.util.ArrayList;
@@ -23,12 +27,13 @@ import java.util.List;
 public class SearchServiceImpl implements SearchService {
     private final UserService userService;
     private final PostService postService;
+    private final GroupService groupService;
     private final SearchHistoryRepository repository;
 
     @CacheEvict(cacheNames = "search-history", allEntries = true)
-    @Cacheable(key = "T(java.util.Objects).hash(#p1)", value = "search-result", unless = "#result.data.users.isEmpty() and #result.data.posts.isEmpty()")
+    @Cacheable(key = "T(java.util.Objects).hash(#p0, #p1)", value = "search-result", unless = "#result.data.users.isEmpty() and #result.data.posts.isEmpty()")
     public ResDTO<?> search(String token, String key){
-        if(token != null){
+        if(token != null && !repository.existsByQuery(key)){
             SearchHistory searchHistory = new SearchHistory();
             searchHistory.setQuery(key);
             searchHistory.setUserId(SecurityContextUtils.getUserId());
@@ -38,8 +43,10 @@ public class SearchServiceImpl implements SearchService {
         }
 
         SearchResponse data = new SearchResponse();
-        data.setUsers(userService.searchUserFullName(token, key));
-        data.setPosts(postService.findByContentContaining(token, key));
+
+        data.setUsers(userService.searchUserFullName(token, key, null));
+        data.setPosts(postService.findByContentContaining(token, key, null));
+        data.setGroups(groupService.findByNameContaining(token, key, null));
 
         ResDTO<SearchResponse> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_OK);
@@ -49,11 +56,13 @@ public class SearchServiceImpl implements SearchService {
         return response;
     }
 
-    @Cacheable(key = "T(java.util.Objects).hash(#p1)", value = "fetch-result", unless = "#result.data.users.isEmpty() and #result.data.posts.isEmpty()")
+    @Cacheable(key = "T(java.util.Objects).hash(#p0, #p1)", value = "fetch-result", unless = "#result.data.users.isEmpty() and #result.data.posts.isEmpty()")
     public ResDTO<?> fetchResult(String token, String key){
         SearchResponse data = new SearchResponse();
-        data.setUsers(userService.searchUserFullName(token, key));
-        data.setPosts(postService.findByContentContaining(token, key));
+
+        data.setUsers(userService.searchUserFullName(token, key, Fuzziness.ONE.asString()));
+        data.setPosts(postService.findByContentContaining(token, key, Fuzziness.ONE.asString()));
+        data.setGroups(groupService.findByNameContaining(token, key, Fuzziness.ONE.asString()));
 
         ResDTO<SearchResponse> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_OK);
@@ -98,7 +107,9 @@ public class SearchServiceImpl implements SearchService {
     @CacheEvict(cacheNames = "search-history", allEntries = true)
     public ResDTO<?> deleteAllSearchHistory(){
         ResDTO<Object>  response = new ResDTO<>();
+
         repository.deleteByUserId(SecurityContextUtils.getUserId());
+
         response.setMessage("success");
         response.setCode(200);
 

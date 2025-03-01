@@ -12,6 +12,7 @@ import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.repository.httpclient.UserClient;
 import vn.edu.tdtu.utils.SecurityContextUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,10 +21,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GroupMapper {
     private final UserClient userClient;
-    public GroupResponse mapToDto(String accessToken, Group group) {
+    public GroupResponse mapToDto(String accessToken, Group group, boolean collectBaseInfo) {
         String userId = SecurityContextUtils.getUserId();
 
-        List<GroupMember> first10GroupMembers = group.getGroupMembers()
+        List<GroupMember> first10GroupMembers = new ArrayList<>();
+        if(!collectBaseInfo)
+            first10GroupMembers = group.getGroupMembers()
                 .stream()
                 .filter(member -> !member.isPending())
                 .limit(10)
@@ -34,16 +37,19 @@ public class GroupMapper {
                 .map(member -> member.getMember().getUserId())
                 .toList();
 
-        List<User> first10Members = userClient.findByIds(accessToken, new FindByIdsRequest(first10MemberIds)).getData();
+        List<User> first10Members = new ArrayList<>();
+
+        if(!collectBaseInfo)
+            first10Members = userClient.findByIds(accessToken, new FindByIdsRequest(first10MemberIds)).getData();
 
         Map<String, User> userMap = first10Members.stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
 
         List<GroupMemberResponse> response10MembersList = first10GroupMembers.stream()
-                .map(first10GroupMember -> {
-                    User user = userMap.remove(first10GroupMember.getMember().getUserId());
+                .map(member -> {
+                    User user = userMap.remove(member.getMember().getUserId());
 
-                    return new GroupMemberResponse(first10GroupMember, user);
+                    return new GroupMemberResponse(member, user);
                 })
                 .toList();
 
@@ -59,9 +65,10 @@ public class GroupMapper {
                 .stream()
                 .anyMatch(member -> member.getMember().getUserId().equals(userId) && !member.isPending()));
 
-        response.setAdmin(groupMembers
-                .stream()
-                .anyMatch(member -> member.getMember().getUserId().equals(userId) && member.isAdmin()));
+        if(!collectBaseInfo)
+            response.setAdmin(groupMembers
+                    .stream()
+                    .anyMatch(member -> member.getMember().getUserId().equals(userId) && member.isAdmin()));
 
         response.setMemberCount(groupMembers.stream()
                 .filter(groupMember -> !groupMember.isPending()).count());

@@ -23,6 +23,7 @@ export { default as PostPhotos } from './post/PostPhotos';
 export { default as Result } from './search/Result';
 export { default as People } from './search/People';
 export { default as Post } from './search/Post';
+export { default as Group } from './search/Group';
 
 // Profile
 export { default as Main } from './profile/Main';

@@ -1,4 +1,4 @@
-package vn.edu.tdtu.model;
+package vn.edu.tdtu.model.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
