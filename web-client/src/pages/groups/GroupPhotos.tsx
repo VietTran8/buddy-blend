@@ -31,7 +31,7 @@ const GroupPhotos: FC<IProps> = ({ }) => {
                             <Image height={190} preview={{
                                 destroyOnClose: true,
                                 mask: <FontAwesomeIcon icon={faPlay} className="text-[30px]" />,
-                                imageRender: () => (<VideoPlayer className="w-auto h-[90dvh]" src={media.url} />)
+                                imageRender: () => (<VideoPlayer className="w-auto h-[90dvh]" src={media.url} poster={media.thumbnail} />)
                             }} width={"100%"} src={media.thumbnail} className="object-cover" />
                         </div>
                     ))}

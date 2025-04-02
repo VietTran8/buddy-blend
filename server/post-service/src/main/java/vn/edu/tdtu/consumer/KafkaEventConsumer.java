@@ -11,7 +11,6 @@ import vn.edu.tdtu.model.Post;
 import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.repository.MediaRepository;
 import vn.edu.tdtu.repository.PostRepository;
-import vn.edu.tdtu.service.intefaces.FileService;
 
 import java.util.List;
 import java.util.Optional;

@@ -8,11 +8,11 @@ import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.message.ExitAllRoomMessage;
 import vn.edu.tdtu.message.JoinRoomMessage;
 import vn.edu.tdtu.message.SeenMessage;
 import vn.edu.tdtu.message.SendMessage;
-import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.util.JwtUtils;
 
 import java.util.Objects;

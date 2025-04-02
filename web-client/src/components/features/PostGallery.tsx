@@ -32,6 +32,7 @@ const PostGallery: FC<IProps> = ({ className, medias, postId }) => {
                     {item.type === EFileType.TYPE_VIDEO ? (
                         <VideoPlayer
                             src={item.url}
+                            poster={item.thumbnail}
                             className="w-full h-full object-cover"
                         />
                     ) : (
@@ -53,6 +54,7 @@ const PostGallery: FC<IProps> = ({ className, medias, postId }) => {
                 <div className="relative overflow-hidden col-span-3 h-[230px]">
                     {medias[maxVisibleItems - 1].type === EFileType.TYPE_VIDEO ? (
                         <VideoPlayer
+                            poster={medias[maxVisibleItems - 1].thumbnail}
                             src={medias[maxVisibleItems - 1].url}
                             className="w-full h-full object-cover opacity-50 rounded-md"
                         />

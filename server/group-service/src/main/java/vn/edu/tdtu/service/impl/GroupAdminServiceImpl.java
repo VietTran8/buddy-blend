@@ -1,7 +1,6 @@
 package vn.edu.tdtu.service.impl;
 
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.constant.Message;
@@ -9,8 +8,6 @@ import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.PromoteToAdminRequest;
 import vn.edu.tdtu.dto.response.PromoteToAdminResponse;
 import vn.edu.tdtu.exception.BadRequestException;
-import vn.edu.tdtu.exception.UnauthorizedException;
-import vn.edu.tdtu.model.Group;
 import vn.edu.tdtu.model.GroupMember;
 import vn.edu.tdtu.repository.GroupMemberRepository;
 import vn.edu.tdtu.service.interfaces.GroupAdminService;

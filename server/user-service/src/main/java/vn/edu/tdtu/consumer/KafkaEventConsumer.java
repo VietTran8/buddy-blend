@@ -5,7 +5,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.constant.RedisKey;
 import vn.edu.tdtu.message.UserConnectMessage;
-import vn.edu.tdtu.model.redis.UserStatus;
 import vn.edu.tdtu.service.interfaces.RedisService;
 
 @Component

@@ -4,12 +4,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.response.PaginationResponse;
 import vn.edu.tdtu.model.Media;
 import vn.edu.tdtu.service.intefaces.MediaService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/album")

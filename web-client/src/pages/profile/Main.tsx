@@ -85,7 +85,7 @@ const Main: FC<IProps> = ({ }) => {
                                     <Image preview={{
                                         mask: <FontAwesomeIcon icon={faPlay} className="text-[30px]"></FontAwesomeIcon>,
                                         destroyOnClose: true,
-                                        imageRender: () => (<VideoPlayer src={media.url}  className="w-auto h-[90dvh]" />)
+                                        imageRender: () => (<VideoPlayer src={media.url} poster={media.thumbnail}  className="w-auto h-[90dvh]" />)
                                     }} height={120} width={"100%"} src={media.thumbnail} className="object-cover" />
                                 </div>))}
                         </div>

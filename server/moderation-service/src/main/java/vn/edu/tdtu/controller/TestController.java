@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vn.edu.tdtu.dto.ModerateResponseDto;
 import vn.edu.tdtu.message.ModerateMessage;
-import vn.edu.tdtu.message.ModerateTextMessage;
 import vn.edu.tdtu.service.interfaces.ModerationService;
 
 @RestController

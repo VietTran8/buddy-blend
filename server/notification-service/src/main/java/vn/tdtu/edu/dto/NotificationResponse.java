@@ -7,8 +7,6 @@ import lombok.ToString;
 import vn.tdtu.edu.enums.ENotificationType;
 import vn.tdtu.edu.model.data.User;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.edu.tdtu.dto.response.MutualFriend;
 import vn.edu.tdtu.enums.EFriendStatus;
 
 import java.time.LocalDateTime;

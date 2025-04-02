@@ -262,9 +262,10 @@ public class GroupServiceImpl implements GroupService {
         response.setMessage(Message.GROUP_FETCHED_MSG);
 
         Group group = groupRepository.findByIdAndIsDeleted(groupId, false)
-                .orElseThrow(() -> new BadRequestException(Message.GROUP_NOT_FOUND_MSG));
+                .orElse(null);
 
-        group.setPrivate(group.getPrivacy().equals(EGroupPrivacy.PRIVACY_PRIVATE));
+        if(group != null)
+            group.setPrivate(group.getPrivacy().equals(EGroupPrivacy.PRIVACY_PRIVATE));
 
         response.setData(group);
 

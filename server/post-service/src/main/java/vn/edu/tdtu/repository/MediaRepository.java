@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import vn.edu.tdtu.model.Media;
 
 import java.util.Collection;
-import java.util.List;
 
 @Repository
 public interface MediaRepository extends MongoRepository<Media, String> {

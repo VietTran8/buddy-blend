@@ -3,7 +3,6 @@ package vn.tdtu.edu.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import vn.tdtu.edu.dto.NotificationResponse;
 import vn.tdtu.edu.dto.PaginationResponse;

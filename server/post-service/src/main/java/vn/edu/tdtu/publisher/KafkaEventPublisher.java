@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.response.InteractNotification;
-import vn.edu.tdtu.dto.response.PostResponse;
 import vn.edu.tdtu.enums.ESyncType;
 import vn.edu.tdtu.message.ModerateMessage;
 import vn.edu.tdtu.message.ModerationNotificationMsg;

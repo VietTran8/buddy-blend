@@ -8,9 +8,10 @@ import "./VideoPlayer.css";
 interface IProps {
     className?: string;
     src: string;
+    poster?: string;
 };
 
-const VideoPlayer: FC<IProps> = ({ className, src }) => {
+const VideoPlayer: FC<IProps> = ({ className, src, poster }) => {
     const [progress, setProgress] = useState<string>('0%');
     const [volume, setVolume] = useState<number>(1);
     const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
@@ -146,6 +147,7 @@ const VideoPlayer: FC<IProps> = ({ className, src }) => {
                 className="player__video viewer"
                 ref={videoRef}
                 src={isLoaded ? src : undefined}
+                poster={poster}
                 onClick={togglePlay}
                 onLoadStart={handleLoadStart}
                 onCanPlay={handleCanPlay}

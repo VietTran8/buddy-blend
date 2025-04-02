@@ -2,7 +2,6 @@ package vn.edu.tdtu.service.interfaces;
 
 import org.springframework.core.io.Resource;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public interface GeminiService {

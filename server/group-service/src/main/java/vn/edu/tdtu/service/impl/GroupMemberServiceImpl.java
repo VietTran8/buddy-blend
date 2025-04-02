@@ -6,13 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.tdtu.constant.Message;
 import vn.edu.tdtu.dto.ResDTO;
-import vn.edu.tdtu.exception.BadRequestException;
-import vn.edu.tdtu.model.Group;
 import vn.edu.tdtu.repository.GroupMemberRepository;
 import vn.edu.tdtu.repository.GroupRepository;
 import vn.edu.tdtu.service.interfaces.GroupAdminService;
 import vn.edu.tdtu.service.interfaces.GroupMemberService;
-import vn.edu.tdtu.service.interfaces.GroupService;
 
 @Service
 @RequiredArgsConstructor

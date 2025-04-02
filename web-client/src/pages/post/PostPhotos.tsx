@@ -53,7 +53,7 @@ const PostPhotos: FC<IProps> = ({ }) => {
         <div ref={containerRef} className="col-span-9 h-screen-except-header flex items-center justify-center group bg-black relative">
             {mediaLists && (mediaLists[currentIndex]?.type === EFileType.TYPE_IMG ? 
                 <img src={mediaLists[currentIndex]?.url} className={"max-w-full max-h-full object-contain"}/>
-            : <VideoPlayer className="max-w-full max-h-full object-contain" src={mediaLists[currentIndex]?.url} />)}
+            : <VideoPlayer className="max-w-full max-h-full object-contain" poster={mediaLists[currentIndex]?.thumbnail} src={mediaLists[currentIndex]?.url} />)}
             <Button
                 onClick={() => handleChangeMedia("prev")}
                 shape="circle"

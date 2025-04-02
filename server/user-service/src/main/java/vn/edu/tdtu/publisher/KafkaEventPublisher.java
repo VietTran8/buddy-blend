@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.message.FriendRequestMessage;
 import vn.edu.tdtu.enums.ESyncType;
+import vn.edu.tdtu.message.FriendRequestMessage;
 import vn.edu.tdtu.message.SyncUserMsg;
 import vn.edu.tdtu.model.User;
 

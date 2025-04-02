@@ -116,8 +116,6 @@ public class PostResponseMapper {
         postResponse.setPrivacy(post.getPrivacy());
         postResponse.setContent(post.getContent());
         postResponse.setType(post.getType());
-//        postResponse.setImageUrls(post.getImageUrls() != null ? post.getImageUrls() : new ArrayList<>());
-//        postResponse.setVideoUrls(post.getVideoUrls() != null ? post.getVideoUrls() : new ArrayList<>());
         postResponse.setMedias(mediaRepository.findAllById(post.getMediaIds() != null ? post.getMediaIds() : List.of()));
         postResponse.setCreatedAt(DateUtils.localDateTimeToDate(post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now()));
         postResponse.setUpdatedAt(DateUtils.localDateTimeToDate(post.getCreatedAt() != null ? post.getCreatedAt() : LocalDateTime.now()));

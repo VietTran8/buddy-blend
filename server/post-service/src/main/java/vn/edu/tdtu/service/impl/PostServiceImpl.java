@@ -25,7 +25,6 @@ import vn.edu.tdtu.model.Post;
 import vn.edu.tdtu.model.PostTag;
 import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.publisher.KafkaEventPublisher;
-import vn.edu.tdtu.repository.BannedWordRepository;
 import vn.edu.tdtu.repository.CustomPostRepository;
 import vn.edu.tdtu.repository.MediaRepository;
 import vn.edu.tdtu.repository.PostRepository;
@@ -248,9 +247,11 @@ public class PostServiceImpl implements PostService {
                     return postResponse;
                 }
         ).filter(post -> {
-            if(!post.getType().equals(EPostType.GROUP)) {
+            if(!post.getType().equals(EPostType.GROUP))
                 return true;
-            }
+
+            if(post.getGroupInfo() == null)
+                return false;
 
             if(post.getGroupInfo().isPrivate())
                 return groupIds.contains(post.getGroupInfo().getId());

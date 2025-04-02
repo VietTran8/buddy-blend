@@ -205,6 +205,7 @@ export const useDeleteGroup = () => {
         mutationFn: (groupId: string) => deleteGroup(groupId),
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["my-groups"] });
+            queryClient.invalidateQueries({ queryKey: ["group", data.data.groupId] });
             
             toast.success(data.message);
         },

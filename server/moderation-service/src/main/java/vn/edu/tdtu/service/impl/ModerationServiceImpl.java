@@ -20,7 +20,6 @@ import vn.edu.tdtu.dto.ModerateResponseDto;
 import vn.edu.tdtu.dto.ModerationResponse;
 import vn.edu.tdtu.dto.RejectReason;
 import vn.edu.tdtu.message.ModerateMessage;
-import vn.edu.tdtu.message.ModerateTextMessage;
 import vn.edu.tdtu.service.interfaces.GeminiService;
 import vn.edu.tdtu.service.interfaces.ModerationService;
 import vn.edu.tdtu.utils.BeanOutputParser;
