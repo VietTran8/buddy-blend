@@ -16,6 +16,7 @@ import java.util.List;
 public class PostServiceImpl implements PostService {
     private final PostClient postClient;
 
+    @Override
     public List<PostResponse> findByIds(String token, FindByIdsReq reqDTO) {
         return postClient.findAll(token, reqDTO).getData();
     }

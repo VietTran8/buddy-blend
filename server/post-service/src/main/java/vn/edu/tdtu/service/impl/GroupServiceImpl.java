@@ -17,6 +17,7 @@ import java.util.List;
 public class GroupServiceImpl implements GroupService {
     private final GroupClient groupClient;
 
+    @Override
     @Cacheable(key = "T(java.util.Objects).hash(#a0, #a1)", value = "single-group", unless = "#result == null")
     public GroupInfo getGroupById(String accessToken, String groupId) {
         ResDTO<GroupInfo> response = groupClient.getGroupInfoById(accessToken, groupId);
@@ -25,6 +26,7 @@ public class GroupServiceImpl implements GroupService {
         return response.getData();
     }
 
+    @Override
     public List<GroupInfo> getMyGroups(String accessToken) {
         ResDTO<List<GroupInfo>> response = groupClient.getMyGroups(accessToken);
         log.info("getMyGroups: " + response.toString());
@@ -32,6 +34,7 @@ public class GroupServiceImpl implements GroupService {
         return response.getData();
     }
 
+    @Override
     public boolean allowFetchPost(String accessToken, String groupId) {
         ResDTO<Boolean> allowResponse = groupClient.allowFetchPost(accessToken, groupId);
         log.info("getAllowFetch: " + allowResponse.toString());

@@ -35,6 +35,7 @@ public class CommentsServiceImpl implements CommentService {
     private final UserService userService;
     private final PostService postService;
 
+    @Override
     public ResDTO<?> addComment(String token, AddCommentRequest request) {
         String postId = request.getPostId();
         String parentCommentId = request.getParentId();
@@ -42,58 +43,56 @@ public class CommentsServiceImpl implements CommentService {
 
         User foundUser = userService.findById(token, userIdFromJwtToken);
 
-        if(foundUser != null){
-            Post foundPost = postService.findById(token, request.getPostId());
-            if(foundPost != null){
+        if(foundUser == null)
+            throw new RuntimeException("User not found with id: " + userIdFromJwtToken);
 
-                Comments comment = new Comments();
-                comment.setCreatedAt(LocalDateTime.now());
-                comment.setUpdatedAt(LocalDateTime.now());
-                comment.setUserId(userIdFromJwtToken);
-                comment.setContent(request.getContent());
-                comment.setImageUrls(request.getImageUrls());
-                comment.setPostId(postId);
-
-                if(parentCommentId != null && commentsRepository.existsById(parentCommentId)){
-                    comment.setParentId(request.getParentId());
-                }else if(parentCommentId != null && !commentsRepository.existsById(parentCommentId)){
-                    throw new RuntimeException("Parent comment not found with id: " + request.getParentId());
-                }
-
-                Comments savedComment = commentsRepository.save(comment);
-                CommentResponse commentResponse = commentResponseMapper.mapToDto(token, savedComment);
-                commentResponse.setMine(true);
-
-                //Send message if user comment on the post directly
-
-                log.info("comment user id: " + foundUser.getId());
-                log.info("posted user id: " + foundPost.getUser().getId());
-                log.info("result: " + !foundUser.getId().equals(foundPost.getUser().getId()));
-
-
-                if(parentCommentId == null && !foundUser.getId().equals(foundPost.getUser().getId())){
-                    InteractNotification interactNotification = new InteractNotification();
-                    interactNotification.setAvatarUrl(foundUser.getProfilePicture());
-                    interactNotification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
-                    interactNotification.setContent("đã bình luận về bài viết của bạn");
-                    interactNotification.setRefId(postId);
-                    interactNotification.setTitle("Có người tương tác nè!");
-                    interactNotification.setFromUserId(userIdFromJwtToken);
-                    interactNotification.setToUserIds(List.of(foundPost.getUser().getId()));
-                    interactNotification.setType(ENotificationType.COMMENT);
-                    interactNotification.setCreateAt(new Date().getTime() + "");
-
-                    kafkaMsgService.publishInteractNoti(interactNotification);
-                }
-
-                return new ResDTO<>("Comment added successfully", commentResponse, 200);
-            }
-
+        Post foundPost = postService.findById(token, request.getPostId());
+        if(foundPost == null)
             throw new RuntimeException("Post not found with id: " + request.getPostId());
+
+        Comments comment = new Comments();
+        comment.setCreatedAt(LocalDateTime.now());
+        comment.setUpdatedAt(LocalDateTime.now());
+        comment.setUserId(userIdFromJwtToken);
+        comment.setContent(request.getContent());
+        comment.setImageUrls(request.getImageUrls());
+        comment.setPostId(postId);
+
+        if(parentCommentId != null && commentsRepository.existsById(parentCommentId)){
+            comment.setParentId(request.getParentId());
+        }else if(parentCommentId != null && !commentsRepository.existsById(parentCommentId)){
+            throw new RuntimeException("Parent comment not found with id: " + request.getParentId());
         }
-        throw new RuntimeException("User not found with id: " + userIdFromJwtToken);
+
+        Comments savedComment = commentsRepository.save(comment);
+        CommentResponse commentResponse = commentResponseMapper.mapToDto(token, savedComment);
+        commentResponse.setMine(true);
+
+        //Send message if user comment on the post directly
+
+        log.info("comment user id: " + foundUser.getId());
+        log.info("posted user id: " + foundPost.getUser().getId());
+        log.info("result: " + !foundUser.getId().equals(foundPost.getUser().getId()));
+
+        if(parentCommentId == null && !foundUser.getId().equals(foundPost.getUser().getId())){
+            InteractNotification interactNotification = new InteractNotification();
+            interactNotification.setAvatarUrl(foundUser.getProfilePicture());
+            interactNotification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
+            interactNotification.setContent("đã bình luận về bài viết của bạn");
+            interactNotification.setRefId(postId);
+            interactNotification.setTitle("Có người tương tác nè!");
+            interactNotification.setFromUserId(userIdFromJwtToken);
+            interactNotification.setToUserIds(List.of(foundPost.getUser().getId()));
+            interactNotification.setType(ENotificationType.COMMENT);
+            interactNotification.setCreateAt(new Date().getTime() + "");
+
+            kafkaMsgService.publishInteractNoti(interactNotification);
+        }
+
+        return new ResDTO<>("Comment added successfully", commentResponse, 200);
     }
 
+    @Override
     public ResDTO<?> countCommentByPostId(String postId) {
         return new ResDTO<>(
                 "Comment counted successfully",
@@ -102,6 +101,7 @@ public class CommentsServiceImpl implements CommentService {
         );
     }
 
+    @Override
     public ResDTO<?> updateComment(String token, String id, UpdateCommentRequest comment) {
         String userId = SecurityContextUtils.getUserId();
 
@@ -125,6 +125,7 @@ public class CommentsServiceImpl implements CommentService {
         return new ResDTO<>("Comment updated successfully", updatedComment, 200);
     }
 
+    @Override
     public ResDTO<?> deleteComment(String id) {
         String userId = SecurityContextUtils.getUserId();
         ResDTO<?> response = new ResDTO<>();
@@ -150,6 +151,7 @@ public class CommentsServiceImpl implements CommentService {
         return response;
     }
 
+    @Override
     public ResDTO<?> findCommentById(String token, String id) {
         String userId = SecurityContextUtils.getUserId();
 
@@ -164,6 +166,7 @@ public class CommentsServiceImpl implements CommentService {
         return new ResDTO<>("Comment found successfully", comment, 200);
     }
 
+    @Override
     public ResDTO<?> findCommentsByPostId(String token, String postId) {
         String userId = SecurityContextUtils.getUserId();
 
@@ -183,6 +186,7 @@ public class CommentsServiceImpl implements CommentService {
         return new ResDTO<>("Comments retrieved successfully", commentResponses, 200);
     }
 
+    @Override
     public ResDTO<?> findAllComments(String token) {
         String userId = SecurityContextUtils.getUserId();
         List<CommentResponse> commentResponses = commentsRepository.findAll().stream().map(

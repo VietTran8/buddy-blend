@@ -18,6 +18,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserClient userClient;
 
+    @Override
     @Cacheable(key = "T(java.util.Objects).hash(#a0, #a1)", value = "single-user", unless = "#result == null")
     public User findById(String accessToken, String userId) {
         ResDTO<User> response = userClient.findById(accessToken, userId);
@@ -26,6 +27,7 @@ public class UserServiceImpl implements UserService {
         return response.getData();
     }
 
+    @Override
     public List<User> findByIds(String accessToken, List<String> ids) {
         ResDTO<List<User>> response = userClient.findByIds(accessToken, new FindByIdsRequest(ids));
         log.info("findByIds: " + response.toString());
@@ -33,6 +35,7 @@ public class UserServiceImpl implements UserService {
         return response.getData();
     }
 
+    @Override
     public List<User> findUserFriendIdsByUserToken(String token) {
         ResDTO<List<User>> response = userClient.findUserFriendIdsByUserToken(token);
         log.info("findFriends: " + response.toString());

@@ -17,6 +17,7 @@ import java.util.Map;
 public class BannedWordServiceImpl implements BannedWordService {
     private final BannedWordRepository bannedWordRepository;
 
+    @Override
     public ResDTO<?> saveBannedWord(CreateBannedWordReq request){
         if(!bannedWordRepository.existsByWord(request.getWord().toLowerCase())){
             BannedWord word = new BannedWord();
@@ -35,6 +36,7 @@ public class BannedWordServiceImpl implements BannedWordService {
         );
     }
 
+    @Override
     public ResDTO<?> removeBannedWord(CreateBannedWordReq request){
         ResDTO<?> response = new ResDTO<>();
 

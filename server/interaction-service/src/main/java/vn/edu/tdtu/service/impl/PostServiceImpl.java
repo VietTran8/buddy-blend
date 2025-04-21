@@ -14,6 +14,7 @@ import vn.edu.tdtu.service.interfaces.PostService;
 public class PostServiceImpl implements PostService {
     private final PostClient postClient;
 
+    @Override
     public Post findById(String token, String postId){
         ResDTO<Post> response = postClient.findById(token, postId);
 

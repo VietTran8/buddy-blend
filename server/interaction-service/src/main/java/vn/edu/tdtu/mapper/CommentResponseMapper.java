@@ -11,7 +11,7 @@ import vn.edu.tdtu.repository.CommentReactionRepository;
 import vn.edu.tdtu.repository.CommentsRepository;
 import vn.edu.tdtu.service.interfaces.UserService;
 import vn.edu.tdtu.util.DateUtils;
-import vn.edu.tdtu.util.JwtUtils;
+import vn.edu.tdtu.util.SecurityContextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CommentResponseMapper {
     private final UserService userService;
-    private final JwtUtils jwtUtils;
     private final CommentsRepository commentsRepository;
     private final CommentReactionRepository commentReactionRepository;
     public CommentResponse mapToDto(String token, Comments comment){
@@ -48,7 +47,10 @@ public class CommentResponseMapper {
         CommentResponse commentResponse = new CommentResponse();
 
         List<CommentReactions> commentReactions = commentReactionRepository.findByCmtId(comment.getId());
-        CommentReactions reacted = commentReactionRepository.findByUserIdAndCmtId(jwtUtils.getUserIdFromJwtToken(token), comment.getId())
+        CommentReactions reacted = commentReactionRepository.findByUserIdAndCmtId(
+                        SecurityContextUtils.getUserId(),
+                        comment.getId()
+                )
                 .orElse(null);
 
         commentResponse.setId(comment.getId());

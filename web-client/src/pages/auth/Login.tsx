@@ -5,9 +5,9 @@ import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
 import { Field, Form, Formik } from "formik";
 import { loginSchema } from "../../validations";
-import { useLocalStorage, useLogin } from "../../hooks";
+import { useLogin } from "../../hooks";
 import { SignInRequest } from "../../types";
-import { ACCESS_TOKEN_PREFIX } from "../../constants";
+import { getAccessToken } from "@/config";
 
 interface IProps { };
 
@@ -18,11 +18,11 @@ const initialValues: SignInRequest = {
 
 const Login: FC<IProps> = ({ }) => {
     const { mutate, isPending } = useLogin();
-    const [ accessToken ] = useLocalStorage<string | undefined>(ACCESS_TOKEN_PREFIX, undefined);
+    const userToken = getAccessToken();
     const navigate = useNavigate();
 
     useEffect(() => {
-        if(accessToken)
+        if(userToken)
             navigate("/");
     }, []);
 

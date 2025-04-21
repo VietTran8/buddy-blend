@@ -1,9 +1,11 @@
 package vn.tdtu.edu.repository.httpclient;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import vn.tdtu.edu.config.openfeign.FeignConfig;
 import vn.tdtu.edu.dto.FindByIdsRequest;
 import vn.tdtu.edu.dto.ResDTO;
@@ -15,8 +17,8 @@ import java.util.List;
 public interface UserClient {
 
     @GetMapping("/{userId}")
-    public ResDTO<User> findById(@PathVariable("userId") String userId);
+    ResDTO<User> findById(@PathVariable("userId") String userId);
 
     @GetMapping("/by-ids")
-    public ResDTO<List<User>> findByIds(@RequestBody FindByIdsRequest request);
+    ResDTO<List<User>> findByIds(@RequestBody FindByIdsRequest request);
 }

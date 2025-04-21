@@ -13,7 +13,6 @@ import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.repository.CommentReactionRepository;
 import vn.edu.tdtu.service.interfaces.CommentReactionService;
 import vn.edu.tdtu.service.interfaces.UserService;
-import vn.edu.tdtu.util.JwtUtils;
 import vn.edu.tdtu.util.SecurityContextUtils;
 
 import java.time.LocalDateTime;
@@ -24,12 +23,12 @@ import java.util.stream.Collectors;
 @Service
 public record CommentReactionServiceImpl(
         CommentReactionRepository commentReactionRepository,
-        JwtUtils jwtUtils,
         CommentReactionMapper commentReactionMapper,
         UserService userService,
         ReactResponseMapper reactResponseMapper
 ) implements CommentReactionService {
 
+    @Override
     public ResDTO<?> doReact(DoCommentReactRequest request) {
         ResDTO<List<TopReacts>> responseData = new ResDTO<>();
         responseData.setCode(200);
@@ -61,6 +60,7 @@ public record CommentReactionServiceImpl(
         return responseData;
     }
 
+    @Override
     public ResDTO<Map<EReactionType, List<ReactResponse>>> getReactsByCmtId(String token, String cmtId){
         ResDTO<Map<EReactionType, List<ReactResponse>>> response = new ResDTO<>();
         String userId = SecurityContextUtils.getUserId();

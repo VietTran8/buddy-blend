@@ -33,6 +33,7 @@ public class ReactionServiceImpl implements ReactionService {
     private final KafkaEventPublisher kafkaEventPublisher;
     private final UserService userService;
 
+    @Override
     public ResDTO<DoReactResponse> doReact(String accessToken, DoReactRequest payload){
         String userId = SecurityContextUtils.getUserId();
 

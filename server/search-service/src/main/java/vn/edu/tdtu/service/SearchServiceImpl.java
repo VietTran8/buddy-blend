@@ -30,6 +30,7 @@ public class SearchServiceImpl implements SearchService {
     private final GroupService groupService;
     private final SearchHistoryRepository repository;
 
+    @Override
     @CacheEvict(cacheNames = "search-history", allEntries = true)
     @Cacheable(key = "T(java.util.Objects).hash(#p0, #p1)", value = "search-result", unless = "#result.data.users.isEmpty() and #result.data.posts.isEmpty()")
     public ResDTO<?> search(String token, String key){
@@ -56,6 +57,7 @@ public class SearchServiceImpl implements SearchService {
         return response;
     }
 
+    @Override
     @Cacheable(key = "T(java.util.Objects).hash(#p0, #p1)", value = "fetch-result", unless = "#result.data.users.isEmpty() and #result.data.posts.isEmpty()")
     public ResDTO<?> fetchResult(String token, String key){
         SearchResponse data = new SearchResponse();
@@ -72,6 +74,7 @@ public class SearchServiceImpl implements SearchService {
         return response;
     }
 
+    @Override
     @Cacheable(key = "T(java.util.Objects).hash(#p0)", value = "search-history", unless = "#result.data.isEmpty() and #result.data.isEmpty()")
     public ResDTO<?> getSearchHistory(String token){
         ResDTO<List<SearchHistory>> response = new ResDTO<>();
@@ -90,6 +93,7 @@ public class SearchServiceImpl implements SearchService {
         return response;
     }
 
+    @Override
     @Transactional
     @CacheEvict(cacheNames = "search-history", allEntries = true)
     public ResDTO<?> deleteSearchHistory(String id){
@@ -103,6 +107,7 @@ public class SearchServiceImpl implements SearchService {
         return response;
     }
 
+    @Override
     @Transactional
     @CacheEvict(cacheNames = "search-history", allEntries = true)
     public ResDTO<?> deleteAllSearchHistory(){

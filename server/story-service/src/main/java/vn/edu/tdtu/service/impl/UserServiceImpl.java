@@ -17,6 +17,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserClient userClient;
 
+    @Override
     public List<User> getUsersByIds(String accessToken, List<String> userIds){
         ResDTO<List<User>> response =  userClient.findByIds(accessToken, new FindByIdsRequest(userIds));
         log.info(response.toString());
@@ -24,6 +25,7 @@ public class UserServiceImpl implements UserService {
         return response.getData();
     }
 
+    @Override
     public User getUserById(String accessToken, String userId){
         ResDTO<User> response =  userClient.findById(accessToken, userId);
         log.info(response.toString());
@@ -31,6 +33,7 @@ public class UserServiceImpl implements UserService {
         return response.getData();
     }
 
+    @Override
     public List<User> getUserFriends(String accessToken){
         ResDTO<List<User>> response =  userClient.findUserFriendIdsByUserToken(accessToken);
         log.info(response.toString());

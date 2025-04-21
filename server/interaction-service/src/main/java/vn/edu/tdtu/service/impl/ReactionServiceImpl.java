@@ -9,6 +9,7 @@ import vn.edu.tdtu.dto.response.ReactResponse;
 import vn.edu.tdtu.dto.response.TopReacts;
 import vn.edu.tdtu.enums.ENotificationType;
 import vn.edu.tdtu.enums.EReactionType;
+import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.DoReactMapper;
 import vn.edu.tdtu.mapper.ReactResponseMapper;
 import vn.edu.tdtu.model.Reactions;
@@ -36,6 +37,7 @@ public class ReactionServiceImpl implements ReactionService {
     private final KafkaEventPublisher kafkaMsgService;
     private final PostService postService;
 
+    @Override
     public ResDTO<?> doReaction(String token, DoReactRequest request){
         ResDTO<List<TopReacts>> response = new ResDTO<>();
         String userId = SecurityContextUtils.getUserId();
@@ -43,62 +45,61 @@ public class ReactionServiceImpl implements ReactionService {
 
         Post foundPost = postService.findById(token, request.getPostId());
 
-        if(foundPost != null){
-            AtomicReference<Boolean> isCreateNew = new AtomicReference<>();
-            isCreateNew.set(false);
+        if(foundPost == null)
+            throw new BadRequestException("Post not found with id: " + request.getPostId());
 
-            Reactions reaction = reactMapper.mapToObject(userId, request);
-            reaction.setPostId(postId);
+        AtomicReference<Boolean> isCreateNew = new AtomicReference<>();
+        isCreateNew.set(false);
 
-            reactionRepository.findByUserIdAndPostId(reaction.getUserId(), postId)
-                    .ifPresentOrElse(
-                            r -> {
-                                if(r.getType().equals(reaction.getType())){
-                                    reactionRepository.delete(r);
-                                    response.setMessage("Đã hủy tương tác");
-                                }else{
-                                    r.setType(reaction.getType());
-                                    r.setCreatedAt(LocalDateTime.now());
-                                    reactionRepository.save(r);
+        Reactions reaction = reactMapper.mapToObject(userId, request);
+        reaction.setPostId(postId);
 
-                                    response.setMessage("Đã cập nhật tương tác");
-                                    isCreateNew.set(true);
-                                }
-                            }, () -> {
-                                reactionRepository.save(reaction);
-                                response.setMessage("Đã tương tác");
+        reactionRepository.findByUserIdAndPostId(reaction.getUserId(), postId)
+                .ifPresentOrElse(
+                        r -> {
+                            if(r.getType().equals(reaction.getType())){
+                                reactionRepository.delete(r);
+                                response.setMessage("Đã hủy tương tác");
+                            }else{
+                                r.setType(reaction.getType());
+                                r.setCreatedAt(LocalDateTime.now());
+                                reactionRepository.save(r);
+
+                                response.setMessage("Đã cập nhật tương tác");
                                 isCreateNew.set(true);
                             }
-                    );
+                        }, () -> {
+                            reactionRepository.save(reaction);
+                            response.setMessage("Đã tương tác");
+                            isCreateNew.set(true);
+                        }
+                );
 
-            if(isCreateNew.get()){
-                User foundUser = userService.findById(token, userId);
-                if(foundUser != null && !foundUser.getId().equals(foundPost.getUser().getId())){
-                    InteractNotification notification = new InteractNotification();
-                    notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
-                    notification.setAvatarUrl(foundUser.getProfilePicture());
-                    notification.setContent("đã bày tỏ cảm xúc về bài viết của bạn.");
-                    notification.setRefId(reaction.getPostId());
-                    notification.setTitle("Có người tương tác nè!");
-                    notification.setFromUserId(userId);
-                    notification.setToUserIds(List.of(foundPost.getUser().getId()));
-                    notification.setType(ENotificationType.valueOf(reaction.getType().name()));
-                    notification.setCreateAt(new Date().getTime() + "");
+        if(isCreateNew.get()){
+            User foundUser = userService.findById(token, userId);
+            if(foundUser != null && !foundUser.getId().equals(foundPost.getUser().getId())){
+                InteractNotification notification = new InteractNotification();
+                notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
+                notification.setAvatarUrl(foundUser.getProfilePicture());
+                notification.setContent("đã bày tỏ cảm xúc về bài viết của bạn.");
+                notification.setRefId(reaction.getPostId());
+                notification.setTitle("Có người tương tác nè!");
+                notification.setFromUserId(userId);
+                notification.setToUserIds(List.of(foundPost.getUser().getId()));
+                notification.setType(ENotificationType.valueOf(reaction.getType().name()));
+                notification.setCreateAt(new Date().getTime() + "");
 
-                    kafkaMsgService.publishInteractNoti(notification);
-                }
+                kafkaMsgService.publishInteractNoti(notification);
             }
-
-            Map<EReactionType, List<ReactResponse>> newPostReacts = getReactsByPostId(token, reaction.getPostId()).getData();
-            List<TopReacts> topReacts = findTopReact(newPostReacts != null ? newPostReacts : new HashMap<>());
-
-            response.setData(topReacts);
-            response.setCode(200);
-
-            return response;
         }
 
-        throw new RuntimeException("Post not found with id: " + request.getPostId());
+        Map<EReactionType, List<ReactResponse>> newPostReacts = getReactsByPostId(token, reaction.getPostId()).getData();
+        List<TopReacts> topReacts = findTopReact(newPostReacts != null ? newPostReacts : new HashMap<>());
+
+        response.setData(topReacts);
+        response.setCode(200);
+
+        return response;
     }
 
     private List<TopReacts> findTopReact(Map<EReactionType, List<ReactResponse>> reactionsMap){
@@ -125,6 +126,7 @@ public class ReactionServiceImpl implements ReactionService {
         return topReacts;
     }
 
+    @Override
     public ResDTO<Map<EReactionType, List<ReactResponse>>> getReactsByPostId(String token, String postId){
         ResDTO<Map<EReactionType, List<ReactResponse>>> response = new ResDTO<>();
         String userId = SecurityContextUtils.getUserId();

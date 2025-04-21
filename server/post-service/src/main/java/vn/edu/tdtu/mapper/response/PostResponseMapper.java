@@ -19,7 +19,6 @@ import vn.edu.tdtu.service.impl.UserServiceImpl;
 import vn.edu.tdtu.service.intefaces.GroupService;
 import vn.edu.tdtu.service.intefaces.InteractionService;
 import vn.edu.tdtu.util.DateUtils;
-import vn.edu.tdtu.util.JwtUtils;
 import vn.edu.tdtu.util.SecurityContextUtils;
 
 import java.time.LocalDateTime;
@@ -36,7 +35,6 @@ public class PostResponseMapper {
     private final SavePostRepository savePostRepository;
     private final PostRepository postRepository;
     private final MediaRepository mediaRepository;
-    private final JwtUtils jwtUtils;
 
     public PostResponse mapToDto(String token, String postId, Post post, Map<String, Post> sharedPostsMap, boolean bulkFetch){
         PostResponse postResponse = mapToDto(token, postId, post, bulkFetch);
@@ -73,7 +71,7 @@ public class PostResponseMapper {
 
         String userId;
         if(token != null && !token.isEmpty()){
-            userId = jwtUtils.getUserIdFromJwtToken(token);
+            userId = SecurityContextUtils.getUserId();
 
             postResponse.setMine(userId.equals(post.getUserId()));
         }else{

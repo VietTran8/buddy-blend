@@ -14,6 +14,7 @@ import vn.edu.tdtu.service.interfaces.UserService;
 public class UserServiceImpl implements UserService {
     private final UserClient userClient;
 
+    @Override
     public User findById(String userId) {
         ResDTO<User> response = userClient.findById(userId);
         return response.getData();

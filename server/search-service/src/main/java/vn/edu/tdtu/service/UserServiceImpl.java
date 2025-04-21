@@ -26,10 +26,12 @@ public class UserServiceImpl implements UserService {
     private final UserClient userClient;
     private final ElasticsearchOperations elasticsearchOperations;
 
+    @Override
     public void saveUser(SyncUser user) {
         userRepository.save(user);
     }
 
+    @Override
     public void updateUser(SyncUser user) {
         userRepository.findById(user.getId()).ifPresentOrElse(
                 foundUser -> {
@@ -43,10 +45,12 @@ public class UserServiceImpl implements UserService {
         );
     }
 
+    @Override
     public void deleteUser(SyncUser user) {
         userRepository.deleteById(user.getId());
     }
-    
+
+    @Override
     public List<User> searchUserFullName(String accessToken, String name, String fuzziness) {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q

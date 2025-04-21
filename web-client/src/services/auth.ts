@@ -11,6 +11,12 @@ export const login = async (payload: SignInRequest): Promise<BaseResponse<any>> 
     return response;
 }
 
+export const refreshToken = async (): Promise<BaseResponse<SignInResponse>> => {
+    const response: BaseResponse<SignInResponse> = await http.post("/auth/refresh-token", {});
+
+    return response;
+}
+
 export const signUp = async (payload: SignUpRequest): Promise<BaseResponse<SignUpResponse>> => {
     const response: BaseResponse<SignUpResponse> = await http.post("/auth/sign-up", {
         ...payload,
@@ -40,6 +46,12 @@ export const changePassword = async (payload: ChangePasswordRequest): Promise<Ba
         ...payload,
         newPassword: hashMD5(payload.newPassword)
     });
+
+    return response;
+}
+
+export const logout = async (): Promise<BaseResponse<any>> => {
+    const response: BaseResponse<any> = await http.post("/auth/logout");
 
     return response;
 }

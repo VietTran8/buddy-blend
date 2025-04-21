@@ -2,17 +2,17 @@ import { FC, useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { BaseUser } from "../../types";
 import { AuthContext } from "../../context";
-import { useGetUserProfile, useLocalStorage } from "../../hooks";
+import { useGetUserProfile } from "../../hooks";
 import { Spin } from "antd";
-import { ACCESS_TOKEN_PREFIX } from "../../constants";
+import { getAccessToken } from "@/config";
 
 interface IProps { }
 
 const AuthProvider: FC<IProps> = () => {
-    const [accessToken] = useLocalStorage<string | undefined>(ACCESS_TOKEN_PREFIX, undefined);
+    const accessToken = getAccessToken();
     const [user, setUser] = useState<BaseUser | null>(null);
     const [accessTime, setAccessTime] = useState<Date>();
-    const { data, isLoading } = useGetUserProfile(accessToken);
+    const { data, isLoading } = useGetUserProfile(accessToken ? accessToken : undefined);
     const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
     const navigate = useNavigate();
 

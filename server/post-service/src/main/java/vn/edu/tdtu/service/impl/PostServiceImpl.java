@@ -54,10 +54,12 @@ public class PostServiceImpl implements PostService {
     private final MediaRepository mediaRepository;
     private final KafkaEventPublisher kafkaEventPublisher;
 
+    @Override
     public Post findPostById(String postId){
         return postRepository.findById(postId).orElse(null);
     }
 
+    @Override
     public ResDTO<?> findPostRespById(String token, String postId){
         ResDTO<PostResponse> response = new ResDTO<>();
 
@@ -71,6 +73,7 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
+    @Override
     public ResDTO<List<PostResponse>> findPostRespByIds(String token, FindByIdsReq req){
         String userId = SecurityContextUtils.getUserId();
 
@@ -118,6 +121,7 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
+    @Override
     public ResDTO<?> getUserIdByPostId(String postId){
         ResDTO<Map<String, String>> response = new ResDTO<>();
         Map<String, String> data = new HashMap<>();
@@ -133,6 +137,7 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
+    @Override
     public ResDTO<PostResponse> findDetachedPost(String token, String postId) {
         String authUserId = SecurityContextUtils.getUserId();
 
@@ -150,10 +155,12 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
+    @Override
     public PostResponse mapToPostResponse (String token, Post post) {
         return postResponseMapper.mapToDto(token, post.getId(), post, false);
     }
 
+    @Override
     public ResDTO<?> getGroupPosts(String token, String groupId, int page, int limit) {
         if(!groupService.allowFetchPost(token, groupId))
             throw new BadRequestException("This group is private and you are not joined it");
@@ -191,6 +198,7 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
+    @Override
 //    @Cacheable(key = "T(java.util.Objects).hash(#a1, #a2, #a3)", value = "news-feed", unless = "#result.data['posts'].isEmpty() or #result.data['posts'] == null")
     public ResDTO<?> getNewsFeed(String token, int page, int size, String startTime) {
         FetchNewsFeedReq req = new FetchNewsFeedReq();
@@ -290,6 +298,7 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    @Override
     public ResDTO<?> findByContentContaining(String token, String key){
         ResDTO<List<PostResponse>> response = new ResDTO<>();
         response.setData(postRepository.findByContent(key).stream().map(
@@ -301,6 +310,7 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
+    @Override
     public ResDTO<?> savePost(String token, CreatePostRequest postRequest){
         Post post = postPostRequestMapper.mapToObject(postRequest);
 
@@ -354,6 +364,7 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
+    @Override
     public ResDTO<?> updatePostContent(String token, UpdatePostContentRequest request){
         String userId = SecurityContextUtils.getUserId();
 
@@ -394,6 +405,7 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
+    @Override
     public ResDTO<?> deletePost(String postId){
         String userId = SecurityContextUtils.getUserId();
 
@@ -429,6 +441,7 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
+    @Override
     public ResDTO<?> sharePost(String token, SharePostRequest request){
         ResDTO<PostResponse> response = new ResDTO<>();
 
@@ -464,6 +477,7 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
+    @Override
     public ResDTO<PaginationResponse<PostResponse>> findUserPosts(String token, String uId, int page, int size) {
         String userId = SecurityContextUtils.getUserId();
 

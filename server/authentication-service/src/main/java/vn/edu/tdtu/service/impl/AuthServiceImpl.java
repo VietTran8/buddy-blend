@@ -3,15 +3,16 @@ package vn.edu.tdtu.service.impl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import vn.edu.tdtu.constant.KeycloakUserAttribute;
 import vn.edu.tdtu.constant.RedisKey;
 import vn.edu.tdtu.dto.ResDTO;
+import vn.edu.tdtu.dto.keycloak.KeycloakTokenResponse;
 import vn.edu.tdtu.dto.request.*;
+import vn.edu.tdtu.dto.response.AuthTokenResponse;
 import vn.edu.tdtu.dto.response.LoginResponse;
 import vn.edu.tdtu.dto.response.PasswordCheckingResponse;
 import vn.edu.tdtu.dto.response.SignUpResponse;
@@ -26,61 +27,85 @@ import vn.edu.tdtu.repository.AuthInfoRepository;
 import vn.edu.tdtu.service.interfaces.AuthService;
 import vn.edu.tdtu.service.interfaces.RedisService;
 import vn.edu.tdtu.service.interfaces.UserService;
+import vn.edu.tdtu.service.keycloak.interfaces.KeycloakService;
 import vn.edu.tdtu.util.JwtUtils;
 import vn.edu.tdtu.util.OTPUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthServiceImpl implements AuthService {
-    private final DaoAuthenticationProvider authenticationProvider;
-    private final JwtUtils jwtUtils;
     private final UserService userService;
     private final RedisService<String> redisService;
     private final KafkaEventPublisher publisher;
     private final PasswordEncoder passwordEncoder;
     private final AuthInfoRepository authInfoRepository;
-    public ResDTO<?> loginUser(LoginRequest loginRequest){
+    private final KeycloakService keycloakService;
+    private final JwtUtils jwtUtils;
+
+    @Override
+    public ResDTO<LoginResponse> loginUser(LoginRequest loginRequest){
         String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
 
-        try{
-            Authentication authentication = authenticationProvider.authenticate(
-                    new UsernamePasswordAuthenticationToken(email, password)
-            );
+        KeycloakTokenResponse keycloakTokenResponse = keycloakService.loginUser(email, password);
 
-            if(authentication.isAuthenticated()){
-                User foundUser = userService.getUserInfo(email);
+        User foundUser = userService.getUserInfo(email);
 
-                ResDTO<LoginResponse> responseDto = new ResDTO<>();
-                responseDto.setCode(HttpServletResponse.SC_OK);
-                responseDto.setMessage("User login successfully");
-                responseDto.setData(
-                        LoginResponse.builder()
-                                .id(foundUser.getId())
-                                .email(foundUser.getEmail())
-                                .username(foundUser.getEmail())
-                                .token(jwtUtils.generateJwtToken(foundUser.getId()))
-                                .tokenType("Bearer")
-                                .userAvatar(foundUser.getUserAvatar())
-                                .userFullName(foundUser.getUserFullName())
-                                .build()
-                );
-                return responseDto;
-            }
-        } catch (AuthenticationException e) {
-            log.error(e.getMessage());
-        }
+        String socketAccessToken = jwtUtils.generateJwtToken(foundUser.getId());
 
-        throw new UnauthorizedException("Sai tên đăng nhập hoặc mật khẩu!");
+        ResDTO<LoginResponse> responseDto = new ResDTO<>();
+        responseDto.setCode(HttpServletResponse.SC_OK);
+        responseDto.setMessage("User login successfully");
+        responseDto.setData(
+                LoginResponse.builder()
+                        .id(foundUser.getId())
+                        .email(foundUser.getEmail())
+                        .username(foundUser.getEmail())
+                        .token(AuthTokenResponse.from(keycloakTokenResponse, socketAccessToken))
+                        .userAvatar(foundUser.getUserAvatar())
+                        .userFullName(foundUser.getUserFullName())
+                        .build()
+        );
+
+        return responseDto;
     }
 
+    @Override
+    public ResDTO<LoginResponse> refreshToken(String refreshToken) {
+        if(refreshToken == null)
+            throw new UnauthorizedException("No refresh token");
+
+        KeycloakTokenResponse keycloakTokenResponse = keycloakService.refreshToken(refreshToken);
+
+        ResDTO<LoginResponse> responseDto = new ResDTO<>();
+        responseDto.setCode(HttpServletResponse.SC_OK);
+        responseDto.setMessage("Token refreshed successfully");
+        responseDto.setData(
+                LoginResponse.builder()
+                        .token(AuthTokenResponse.from(keycloakTokenResponse))
+                        .build()
+        );
+
+        return responseDto;
+    }
+
+    @Override
+    @Transactional
     public ResDTO<?> signUpUser(SignUpRequest request){
         if(authInfoRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Email này đã tồn tại!");
         }
 
-        ResDTO<SignUpResponse> response = new ResDTO<>();
+        String userId = UUID.randomUUID().toString();
+        request.setId(userId);
+
+        createKeycloakUser(request);
 
         SignUpResponse data = userService.saveUser(request);
 
@@ -89,10 +114,10 @@ public class AuthServiceImpl implements AuthService {
         authInfo.setRole(EUserRole.ROLE_USER);
         authInfo.setUserId(data.getId());
         authInfo.setEmail(request.getEmail());
-        authInfo.setHashedPassword(passwordEncoder.encode(request.getPassword()));
 
         authInfoRepository.save(authInfo);
 
+        ResDTO<SignUpResponse> response = new ResDTO<>();
         response.setData(data);
         response.setMessage("Đăng ký tài khoản thành công");
         response.setCode(HttpServletResponse.SC_CREATED);
@@ -100,12 +125,34 @@ public class AuthServiceImpl implements AuthService {
         return response;
     }
 
+    private void createKeycloakUser(SignUpRequest request) {
+        Map<String, List<String>> userAttributes = new HashMap<>();
+        userAttributes.put(KeycloakUserAttribute.USER_ID, List.of(request.getId()));
+
+        UserRepresentation userRepresentation = getUserRepresentation(request, userAttributes);
+
+        String createdKeycloakUserId = keycloakService.createUser(userRepresentation);
+
+        keycloakService.resetPassword(createdKeycloakUserId, request.getPassword());
+        keycloakService.assignRealmRole(createdKeycloakUserId, List.of(EUserRole.ROLE_USER));
+    }
+
+    private static UserRepresentation getUserRepresentation(SignUpRequest request, Map<String, List<String>> userAttributes) {
+        UserRepresentation userRepresentation = new UserRepresentation();
+        userRepresentation.setEmail(request.getEmail());
+        userRepresentation.setUsername(request.getEmail());
+        userRepresentation.setRealmRoles(List.of(EUserRole.ROLE_USER.name()));
+        userRepresentation.setFirstName(request.getFirstName());
+        userRepresentation.setLastName(request.getLastName());
+        userRepresentation.setEnabled(true);
+        userRepresentation.setEmailVerified(true);
+        userRepresentation.setAttributes(userAttributes);
+        return userRepresentation;
+    }
+
     @Override
     public ResDTO<?> createChangePasswordOTP(CreateChangePasswordRequest request) {
-        AuthInfo foundAuthInfo = authInfoRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("Người dùng không tồn tại"));
-
-        if(!passwordEncoder.matches(request.getOldPassword(), foundAuthInfo.getHashedPassword())) {
+        if(!keycloakService.passwordChecking(request.getEmail(), request.getOldPassword())) {
             throw new BadRequestException("Mật khẩu cũ không đúng");
         }
 
@@ -132,14 +179,10 @@ public class AuthServiceImpl implements AuthService {
         if(otp == null || !otp.equals(request.getOtp()))
             throw new BadRequestException("Mã OTP không hợp lệ");
 
-        AuthInfo foundAuthInfo = authInfoRepository.findByEmail(request.getEmail())
+        UserRepresentation foundUser = keycloakService.findUserByEmail(request.getEmail())
                 .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng"));
 
-        foundAuthInfo.setHashedPassword(
-                passwordEncoder.encode(request.getNewPassword())
-        );
-
-        authInfoRepository.save(foundAuthInfo);
+        keycloakService.resetPassword(foundUser.getId(), request.getNewPassword());
 
         redisService.delete(RedisKey.combineKey(RedisKey.OTP_KEY, request.getEmail()));
 
@@ -192,10 +235,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResDTO<?> passwordChecking(PasswordCheckingRequest request) {
-        AuthInfo foundUser = authInfoRepository.findByEmail(request.getEmail())
+        authInfoRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadRequestException("User not found with email: " + request.getEmail()));
 
-        boolean result = passwordEncoder.matches(request.getPassword(), foundUser.getHashedPassword());
+        boolean result = keycloakService.passwordChecking(request.getEmail(), request.getPassword());
 
         String token = null;
 

@@ -17,6 +17,7 @@ import java.util.Map;
 public class FileServiceImpl implements FileService {
     private final FileClient fileClient;
 
+    @Override
     public String upload(MultipartFile file, EFileType type) throws Exception {
         ResDTO<Map<String, String>> response = fileClient.uploadFile(type.getType(), file);
 

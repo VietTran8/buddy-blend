@@ -17,11 +17,13 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserClient userClient;
 
+    @Override
     public User findById(String accessToken, String userId) {
         ResDTO<User> response = userClient.findById(accessToken, userId);
         return response.getData();
     }
 
+    @Override
     public List<User> findByIds(String accessToken, List<String> ids) {
         ResDTO<List<User>> response = userClient.findByIds(
                 accessToken,

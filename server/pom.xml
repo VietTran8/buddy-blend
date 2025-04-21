@@ -32,6 +32,9 @@
         <spring.boot.maven.plugin.version>3.2.1</spring.boot.maven.plugin.version>
         <maven.compiler.source>20</maven.compiler.source>
         <maven.compiler.target>20</maven.compiler.target>
+      <keycloak-spring-security-adapter.version>25.0.3</keycloak-spring-security-adapter.version>
+      <org.keycloak.version>26.0.1</org.keycloak.version>
+      <keycloak-spring-boot-starter.version>25.0.3</keycloak-spring-boot-starter.version>
     </properties>
 
   <dependencies>
@@ -72,6 +75,21 @@
         <version>${spring.boot.dependencies.version}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-spring-security-adapter</artifactId>
+        <version>${keycloak-spring-security-adapter.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-spring-boot-starter</artifactId>
+        <version>${keycloak-spring-boot-starter.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.keycloak</groupId>
+        <artifactId>keycloak-admin-client</artifactId>
+        <version>${org.keycloak.version}</version>
       </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>

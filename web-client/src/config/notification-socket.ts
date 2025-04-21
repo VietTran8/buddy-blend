@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-import { getAccessToken } from './axios';
+import { getSocketAccessToken } from './axios';
 
 export const notificationSocket = io('http://localhost:8098', {
     autoConnect: false,
@@ -9,7 +9,7 @@ export const notificationSocket = io('http://localhost:8098', {
 
 export const connectNotificationSocket = () => {
     notificationSocket.io.opts.extraHeaders = {
-        "Authorization": getAccessToken() || ""
+        "Authorization": getSocketAccessToken() || ""
     };
     notificationSocket.connect();
 };

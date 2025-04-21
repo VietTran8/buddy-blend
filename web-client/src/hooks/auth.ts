@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChangePasswordRequest, CreateChangePasswordRequest, CreateForgotPasswordRequest, PasswordCheckingRequest, SignInRequest, SignUpRequest, ValidateOTPRequest } from "../types/request";
-import { changePassword, createChangePasswordOtp, createForgotPasswordOtp, login, passwordChecking, signUp, validateOtp } from "../services";
+import { changePassword, createChangePasswordOtp, createForgotPasswordOtp, login, logout, passwordChecking, signUp, validateOtp } from "../services";
 import { BaseResponse, SignInResponse } from "../types";
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
@@ -9,18 +9,27 @@ import toast from "react-hot-toast";
 import useLocalStorage from "./local-storage";
 import { AxiosError } from "axios";
 import { getErrorRespMsg } from "../utils";
-import { ACCESS_TOKEN_PREFIX } from "../constants";
+import { USER_TOKEN_PREFIX } from "../constants";
 import { disconnectChatSocket } from "@/config/chat-socket";
+
+export type UserTokenType = {
+    acs: string;
+    sAcs: string;
+}
 
 export const useLogin = () => {
     const navigate = useNavigate();
-    const [_, setAccessToken] = useLocalStorage<string | undefined>(ACCESS_TOKEN_PREFIX, undefined);
+    const [_, setUserToken] = useLocalStorage<UserTokenType | undefined>(USER_TOKEN_PREFIX, undefined);
 
     return useMutation({
         mutationFn: (payload: SignInRequest) => login(payload),
         onSuccess: (data: BaseResponse<SignInResponse>) => {
-            const accessToken = `${data.data.tokenType} ${data.data.token}`;
-            setAccessToken(accessToken);
+            const tokenResponse = data.data.token;
+
+            setUserToken({
+                acs: tokenResponse.accessToken,
+                sAcs: tokenResponse.socketAccessToken
+            });
 
             toast.success("Đăng nhập thành công!");
 
@@ -49,23 +58,29 @@ export const useSignUp = () => {
 }
 
 export const useLogout = () => {
-    const [_, __, removeValue] = useLocalStorage<string | undefined>(ACCESS_TOKEN_PREFIX, undefined);
+    const [_, __, removeUserToken] = useLocalStorage<UserTokenType | undefined>(USER_TOKEN_PREFIX, undefined);
     const { setUser } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const queryClient = useQueryClient();
 
-    return () => {
-        queryClient.removeQueries({
-            queryKey: ['news-feed']
-        });
+    return async () => {
+        try {
+            await logout();
 
-        removeValue();
-        setUser?.(null);
+            queryClient.removeQueries({
+                queryKey: ['news-feed']
+            });
 
-        disconnectChatSocket();
+            removeUserToken();
+            setUser?.(null);
 
-        navigate("/login");
+            disconnectChatSocket();
+
+            navigate("/login");
+        } catch (logoutError) {
+            toast.error("Error when logout: " + (logoutError as AxiosError).message);
+        }
     };
 }
 
@@ -105,6 +120,6 @@ export const useValidateOtp = () => {
 
 export const useCheckPassword = () => {
     return useMutation({
-        mutationFn: (payload: PasswordCheckingRequest) => passwordChecking(payload), 
+        mutationFn: (payload: PasswordCheckingRequest) => passwordChecking(payload),
     })
 }

@@ -23,6 +23,7 @@ public class SavePostServiceImpl implements SavePostService {
     private final SavePostRepository savePostRepository;
     private final PostService postService;
 
+    @Override
     public ResDTO<SavePostResponse> handleSavePost(String postId) {
         String userId = SecurityContextUtils.getUserId();
 
@@ -58,6 +59,7 @@ public class SavePostServiceImpl implements SavePostService {
         return response;
     }
 
+    @Override
     public ResDTO<List<PostResponse>> getUserSavedPost(String token){
         ResDTO<List<PostResponse>> response = new ResDTO<>();
         response.setMessage("Posts fetched successfully");

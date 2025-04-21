@@ -39,6 +39,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     private final MinimizedUserMapper minimizedUserMapper;
     private final FriendRequestResponseMapper friendRequestResponseMapper;
 
+    @Override
     public ResDTO<?> handleFriendRequest(FriendReqDTO request){
         String fromUserId = SecurityContextUtils.getUserId();
         ResDTO<HandleFriendRequestResponse> response = new ResDTO<>();
@@ -97,6 +98,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         return response;
     }
 
+    @Override
     public List<User> getListFriends(String userId) {
         return userRepository.findByIdAndActive(userId, true)
                 .map(user -> {
@@ -117,6 +119,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 : request.getFromUser();
     }
 
+    @Override
     public ResDTO<?> getListFriendsResp(String token, String id){
         ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
         String userId = id == null ? SecurityContextUtils.getUserId() : id;
@@ -153,6 +156,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         throw new BadRequestException("User id can not be null");
     }
 
+    @Override
     public List<FriendRequest> getListFriendRequest(String userId){
         User foundUser = userRepository.findByIdAndActive(userId, true).orElse(null);
 
@@ -163,6 +167,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         return friendRequestRepository.findByFromUserAndStatusOrToUserAndStatus(foundUser, EFriendReqStatus.PENDING, foundUser, EFriendReqStatus.PENDING);
     }
 
+    @Override
     public ResDTO<?> getListFriendRequestResp(String token){
         ResDTO<List<FriendRequestResponse>> response = new ResDTO<>();
 
@@ -198,10 +203,12 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         );
     }
 
+    @Override
     public List<User> getFromUsersViaRequests(List<FriendRequest> friendRequests){
         return friendRequests.stream().map(FriendRequest::getFromUser).filter(User::isActive).toList();
     }
 
+    @Override
     public ResDTO<?> friendRequestAcceptation(FQAcceptationDTO request){
         ResDTO<Map<String, String>> response = new ResDTO<>();
         Map<String, String> data = new HashMap<>();

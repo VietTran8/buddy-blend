@@ -29,6 +29,7 @@ public class UserFavouriteServiceImpl implements UserFavouriteService {
     private final UserService userService;
     private final FavDetailResponseMapper favDetailResponseMapper;
 
+    @Override
     public ResDTO<?> getUserFavById(String token, String favId) {
         String userId = SecurityContextUtils.getUserId();
         ResDTO<UserFavouriteDetailResp> response = new ResDTO<>();
@@ -50,6 +51,7 @@ public class UserFavouriteServiceImpl implements UserFavouriteService {
         return response;
     }
 
+    @Override
     public ResDTO<?> getUserFavourites() {
         String userId = SecurityContextUtils.getUserId();
         ResDTO<List<UserFavouriteResponse>> response = new ResDTO<>();
@@ -75,6 +77,7 @@ public class UserFavouriteServiceImpl implements UserFavouriteService {
         throw new BadRequestException("User not found with id: " + userId);
     }
 
+    @Override
     public ResDTO<?> saveUserFavorite(SaveUserFavouriteDTO request){
         AtomicReference<String> message = new AtomicReference<>();
         AtomicReference<String> savedId = new AtomicReference<>();
@@ -91,7 +94,7 @@ public class UserFavouriteServiceImpl implements UserFavouriteService {
                                     f.getPostIds().remove(request.getPostId());
                                     message.set("Đã xóa khỏi danh sách yêu thích: " + request.getName());
                                 }
-                            }else{
+                            } else {
                                 List<String> postIds = new ArrayList<>();
                                 postIds.add(request.getPostId());
                                 f.setPostIds(postIds);
@@ -130,6 +133,7 @@ public class UserFavouriteServiceImpl implements UserFavouriteService {
         return response;
     }
 
+    @Override
     public ResDTO<?> deleteUserFavourite(String id){
         userFavouriteRepository.deleteById(id);
 

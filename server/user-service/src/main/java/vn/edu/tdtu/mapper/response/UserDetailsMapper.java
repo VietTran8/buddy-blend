@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.response.MutualFriend;
 import vn.edu.tdtu.dto.response.UserDetailsResponse;
 import vn.edu.tdtu.exception.BadRequestException;
+import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.model.User;
 import vn.edu.tdtu.repository.UserRepository;
 import vn.edu.tdtu.util.SecurityContextUtils;

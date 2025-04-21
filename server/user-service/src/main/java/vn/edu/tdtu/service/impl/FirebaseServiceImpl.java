@@ -33,6 +33,8 @@ public class FirebaseServiceImpl implements FirebaseService {
     private String projectId;
     private final WebClient webClient;
     private final static String SCOPES = "https://www.googleapis.com/auth/firebase.messaging";
+
+    @Override
     public String getAccessToken() {
         try {
             GoogleCredentials googleCredentials = GoogleCredentials
@@ -48,6 +50,7 @@ public class FirebaseServiceImpl implements FirebaseService {
         }
     }
 
+    @Override
     public void removeUserRegistrationId(User user, List<String> registrationIds) {
         String notificationKey = user.getNotificationKey();
 
@@ -57,6 +60,7 @@ public class FirebaseServiceImpl implements FirebaseService {
 
     }
 
+    @Override
     public void saveUserDeviceGroup(User user, List<String> registrationIds){
         String notificationKey = user.getNotificationKey();
 
@@ -71,6 +75,7 @@ public class FirebaseServiceImpl implements FirebaseService {
 
     }
 
+    @Override
     public FcmResponse getNotificationKey(String notificationKeyName) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder

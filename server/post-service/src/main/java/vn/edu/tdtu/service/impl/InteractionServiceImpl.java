@@ -19,6 +19,7 @@ import java.util.Map;
 public class InteractionServiceImpl implements InteractionService {
     private final InteractionClient interactionClient;
 
+    @Override
     public List<Comment> findCommentsByPostId(String token ,String postId){
         ResDTO<List<Comment>> response = interactionClient.findCommentsByPostId(token, postId);
         log.info(response.toString());
@@ -26,6 +27,7 @@ public class InteractionServiceImpl implements InteractionService {
         return response.getData();
     }
 
+    @Override
     public long countCommentByPostId(String token ,String postId){
         ResDTO<Long> response = interactionClient.countCommentByPostId(token, postId);
         log.info(response.toString());
@@ -33,6 +35,7 @@ public class InteractionServiceImpl implements InteractionService {
         return response.getData();
     }
 
+    @Override
     public Map<EReactionType, List<Reacts>> findReactionsByPostId(String token, String postId){
         ResDTO<Map<EReactionType, List<Reacts>>> response = interactionClient.findReactionsByPostId(token, postId);
         log.info(response.toString());

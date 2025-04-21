@@ -21,12 +21,21 @@ export type PaginationResponse<D> = {
 export type IdResponse = StoryIdResponse;
 
 // Auth
+export type TokenResponse = {
+    accessToken: string;
+    socketAccessToken: string;
+    refreshToken: string;
+    expiresIn: string;
+    refreshExpiresIn: string;
+    scope: string;
+    tokenType: string;
+}
+
 export type SignInResponse = {
     id: string;
     username: string;
-    tokenType: string;
     email: string;
-    token: string;
+    token: TokenResponse;
     userFullName: string;
     userAvatar: string;
 }

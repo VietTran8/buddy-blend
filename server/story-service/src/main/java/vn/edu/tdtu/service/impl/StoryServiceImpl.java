@@ -40,6 +40,7 @@ public class StoryServiceImpl implements StoryService {
     private final StoryMapper storyMapper;
     private final ViewerMapper viewerMapper;
 
+    @Override
     public ResDTO<StoryIdResponse> createStory(CreateStoryRequest payload) {
         String userId = SecurityContextUtils.getUserId();
         Story story = new Story();
@@ -65,6 +66,7 @@ public class StoryServiceImpl implements StoryService {
         );
     }
 
+    @Override
     public ResDTO<StoryIdResponse> deleteStory(String storyId) {
         String userId = SecurityContextUtils.getUserId();
         Story foundStory = storyRepository.findById(storyId)
@@ -82,6 +84,7 @@ public class StoryServiceImpl implements StoryService {
         );
     }
 
+    @Override
     public ResDTO<StoryIdResponse> countView(String storyId) {
         Story foundStory = storyRepository.findById(storyId)
                 .orElseThrow(() -> new BadRequestException(Message.STORY_NOT_FOUND_MSG));
@@ -108,6 +111,7 @@ public class StoryServiceImpl implements StoryService {
         );
     }
 
+    @Override
     public ResDTO<?> getViewers(String accessToken, String storyId) {
         Story foundStory = storyRepository.findById(storyId)
                 .orElseThrow(() -> new BadRequestException(Message.STORY_FETCHED_MSG));
@@ -134,6 +138,7 @@ public class StoryServiceImpl implements StoryService {
         );
     }
 
+    @Override
     public ResDTO<?> getUserStory(String accessTokenHeader, String userId) {
         User foundUser = userService.getUserById(accessTokenHeader, userId);
 
@@ -165,6 +170,7 @@ public class StoryServiceImpl implements StoryService {
         return response;
     }
 
+    @Override
     public ResDTO<?> getStories(String accessToken) {
         String userId = SecurityContextUtils.getUserId();
         List<User> friends = userService.getUserFriends(accessToken);

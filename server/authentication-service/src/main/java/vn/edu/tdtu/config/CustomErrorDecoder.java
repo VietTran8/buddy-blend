@@ -30,15 +30,11 @@ public class CustomErrorDecoder implements ErrorDecoder {
 
         String message = res.getMessage();
 
-        switch (status) {
-            case NOT_FOUND:
-                return new UnauthorizedException(message);
-            case BAD_REQUEST:
-                return new BadRequestException(message);
-            case INTERNAL_SERVER_ERROR:
-                return new Exception(message);
-            default:
-                return defaultErrorDecoder.decode(s, response);
-        }
+        return switch (status) {
+            case NOT_FOUND -> new UnauthorizedException(message);
+            case BAD_REQUEST -> new BadRequestException(message);
+            case INTERNAL_SERVER_ERROR -> new Exception(message);
+            default -> defaultErrorDecoder.decode(s, response);
+        };
     }
 }

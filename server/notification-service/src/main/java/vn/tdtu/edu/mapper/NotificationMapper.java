@@ -15,15 +15,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class NotificationMapper {
     private final UserService userService;
-    public NotificationResponse mapToDto(CommonNotification commonNotification) {
-        User foundFromUser = userService.findById(commonNotification.getFromUserId());
-
-        NotificationResponse response = baseMap(commonNotification);
-
-        response.setFromUser(foundFromUser);
-
-        return response;
-    }
 
     private NotificationResponse baseMap(CommonNotification commonNotification) {
         String authUserId = SecurityContextUtils.getUserId();

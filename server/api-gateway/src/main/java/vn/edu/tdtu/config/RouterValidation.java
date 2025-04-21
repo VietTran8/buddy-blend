@@ -1,4 +1,4 @@
-package vn.edu.tdtu.configs;
+package vn.edu.tdtu.config;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;

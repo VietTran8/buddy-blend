@@ -1,4 +1,5 @@
-export const ACCESS_TOKEN_PREFIX = "acs";
+export const USER_TOKEN_PREFIX = "utk";
+
 export const PAGE_LIMIT = 10;
 export const STORY_FONTS = {
     FONT_NEAT: "font-alata",

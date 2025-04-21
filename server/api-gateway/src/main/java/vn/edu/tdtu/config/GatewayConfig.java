@@ -1,4 +1,4 @@
-package vn.edu.tdtu.configs;
+package vn.edu.tdtu.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableHystrix
 @RequiredArgsConstructor
 public class GatewayConfig {
-    private final AuthenticationFilter filter;
+    private final ForwardTokenFilter filter;
 
     @Bean
     public RouteLocator routes(RouteLocatorBuilder builder) {

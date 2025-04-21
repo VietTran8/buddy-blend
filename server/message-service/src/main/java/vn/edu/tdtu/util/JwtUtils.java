@@ -62,14 +62,5 @@ public class JwtUtils {
         }
         return false;
     }
-
-    public static ResDTO<Object> generateInvalidTokenResp(){
-        ResDTO<Object> response = new ResDTO<>();
-        response.setCode(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setData(null);
-        response.setMessage("You are not authenticated");
-
-        return response;
-    }
 }
 

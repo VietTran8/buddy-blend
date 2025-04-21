@@ -18,6 +18,7 @@ import java.util.Objects;
 public class UserServiceImpl implements UserService {
     private final UserClient userClient;
 
+    @Override
     public User findById(String userId) {
         if(userId == null)
             return null;
@@ -29,6 +30,7 @@ public class UserServiceImpl implements UserService {
         return response.getData();
     }
 
+    @Override
     public List<User> findByIds(List<String> ids){
         ResDTO<List<User>> response = userClient.findByIds(new FindByIdsRequest(ids
                 .stream()

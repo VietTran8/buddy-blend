@@ -51,6 +51,7 @@ public class GroupServiceImpl implements GroupService {
     private final UserClient userClient;
     private final KafkaEventPublisher kafkaPublisher;
 
+    @Override
     public ResDTO<GroupIdResponse> createGroup(CreateGroupRequest payload) {
         String userId = SecurityContextUtils.getUserId();
 
@@ -93,6 +94,7 @@ public class GroupServiceImpl implements GroupService {
         );
     }
 
+    @Override
     public ResDTO<?> updateGroupInfo(String id, UpdateGroupRequest payload) {
         ResDTO<GroupIdResponse> response = new ResDTO<GroupIdResponse>(
                 Message.GROUP_UPDATED_SUCCESS_MSG,
@@ -128,6 +130,7 @@ public class GroupServiceImpl implements GroupService {
         return response;
     }
 
+    @Override
     public ResDTO<?> deleteGroup(String id) {
         ResDTO<GroupIdResponse> response = new ResDTO<GroupIdResponse>(
                 Message.GROUP_DELETED_SUCCESS_MSG,
@@ -152,6 +155,7 @@ public class GroupServiceImpl implements GroupService {
         return response;
     }
 
+    @Override
     public ResDTO<?> joinGroup(String groupId) {
         ResDTO<JoinGroupResponse> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_OK);
@@ -193,6 +197,7 @@ public class GroupServiceImpl implements GroupService {
         return response;
     }
 
+    @Override
     @Transactional
     public ResDTO<?> handleCancelPendingAndLeaveGroup(LeaveGroupRequest payload, EHandleLeaveType type){
         String userId = SecurityContextUtils.getUserId();
@@ -218,6 +223,7 @@ public class GroupServiceImpl implements GroupService {
         return response;
     }
 
+    @Override
     public ResDTO<?> getMyGroups() {
         return new ResDTO<>(
                 Message.GROUP_FETCHED_MSG,
@@ -226,6 +232,7 @@ public class GroupServiceImpl implements GroupService {
         );
     }
 
+    @Override
     public ResDTO<?> getGroupById(String accessToken, String groupId) {
         ResDTO<GroupResponse> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_OK);
@@ -256,6 +263,7 @@ public class GroupServiceImpl implements GroupService {
         return response;
     }
 
+    @Override
     public ResDTO<?> getGroupByIdForPost(String groupId) {
         ResDTO<Group> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_OK);
@@ -272,6 +280,7 @@ public class GroupServiceImpl implements GroupService {
         return response;
     }
 
+    @Override
     public ResDTO<?> moderateMember(ModerateMemberRequest payload){
         Group foundGroup = groupRepository.findByIdAndIsDeleted(payload.getGroupId(), false)
                 .orElseThrow(() -> new BadRequestException(Message.GROUP_NOT_FOUND_MSG));
@@ -298,6 +307,7 @@ public class GroupServiceImpl implements GroupService {
         );
     }
 
+    @Override
     public void inviteUsers(String accessToken, InviteUsersRequest payload){
         Notification notification = new Notification();
         String userId = SecurityContextUtils.getUserId();
@@ -323,6 +333,7 @@ public class GroupServiceImpl implements GroupService {
         kafkaPublisher.publishInviteUsers(notification);
     }
 
+    @Override
     public ResDTO<?> getPendingMembersList(String accessToken, String groupId) {
         ResDTO<List<GroupMemberResponse>> response = new ResDTO<>();
         response.setMessage(Message.GROUP_MEMBER_FETCHED_SUCCESS_MSG);
@@ -348,6 +359,7 @@ public class GroupServiceImpl implements GroupService {
         return response;
     }
 
+    @Override
     public ResDTO<?> getGroupMembers(String accessToken, String groupId, int page, int size, EGetMemberOption option) {
         ResDTO<PaginationResponse<GroupMemberResponse>> response = new ResDTO<>();
         Page<GroupMember> memberPage;
@@ -410,6 +422,7 @@ public class GroupServiceImpl implements GroupService {
         return response;
     }
 
+    @Override
     public ResDTO<?> getAllFriendGroupMemberUserIds(String accessToken, String groupId) {
         ResDTO<List<String>> response = new ResDTO<>();
 
@@ -425,6 +438,7 @@ public class GroupServiceImpl implements GroupService {
         return response;
     }
 
+    @Override
     public ResDTO<?> isPrivateGroupOrUserJoined(String groupId) {
         String userId = SecurityContextUtils.getUserId();
 

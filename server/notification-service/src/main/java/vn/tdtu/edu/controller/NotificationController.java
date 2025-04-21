@@ -1,6 +1,7 @@
 package vn.tdtu.edu.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.tdtu.edu.dto.ResDTO;
@@ -18,24 +19,27 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping()
-    public ResponseEntity<?> getAllNotifications(
-            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(name = "size", required = false, defaultValue = "10") int size
+    public ResponseEntity<?> getAllNotifications(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                                 @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+                                                 @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenHeader
     ) {
-        ResDTO<?> response = notificationService.findAllUserNotifications(page, size);
+        ResDTO<?> response = notificationService.findAllUserNotifications(tokenHeader, page, size);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/detach/{id}")
-    public ResponseEntity<?> detachNotification(@PathVariable("id") String id) {
-        ResDTO<?> response = notificationService.detachNotification(id);
+    public ResponseEntity<?> detachNotification(@PathVariable("id") String id,
+                                                @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenHeader) {
+        ResDTO<?> response = notificationService.detachNotification(tokenHeader, id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
 
     @PostMapping("/read/{id}")
-    public ResponseEntity<?> readNotification(@PathVariable("id") String id) {
-        ResDTO<?> response = notificationService.readNotification(id);
+    public ResponseEntity<?> readNotification(@PathVariable("id") String id,
+                                              @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenHeader
+    ) {
+        ResDTO<?> response = notificationService.readNotification(tokenHeader, id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 }

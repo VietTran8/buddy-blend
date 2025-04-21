@@ -27,10 +27,12 @@ public class PostServiceImpl implements PostService {
     private final EsPostRepository postRepository;
     private final ElasticsearchOperations elasticsearchOperations;
 
+    @Override
     public void savePost(SyncPost post) {
         postRepository.save(post);
     }
 
+    @Override
     public void updatePost(SyncPost post) {
         postRepository.findById(post.getId()).ifPresentOrElse(
                 foundPost -> {
@@ -41,11 +43,13 @@ public class PostServiceImpl implements PostService {
                 }
         );
     }
-    
+
+    @Override
     public void deletePost(SyncPost post) {
         postRepository.deleteById(post.getId());
     }
-    
+
+    @Override
     public List<Post> findByContentContaining(String token, String key, String fuzziness) {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q.match(mq -> mq

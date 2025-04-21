@@ -27,10 +27,13 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationMapper notificationMapper;
     private final UserService userService;
 
+    @Override
     public void save(CommonNotification obj){
         repository.save(obj);
     }
-    public ResDTO<PaginationResponse<NotificationResponse>> findAllUserNotifications(int page, int size) {
+
+    @Override
+    public ResDTO<PaginationResponse<NotificationResponse>> findAllUserNotifications(String tokenHeader, int page, int size) {
         String userId = SecurityContextUtils.getUserId();
         ResDTO<PaginationResponse<NotificationResponse>> response = new ResDTO<>();
 
@@ -57,7 +60,9 @@ public class NotificationServiceImpl implements NotificationService {
 
         return response;
     }
-    public ResDTO<?> detachNotification(String notificationId) {
+
+    @Override
+    public ResDTO<?> detachNotification(String tokenHeader, String notificationId) {
         CommonNotification notification = repository.findById(notificationId)
                 .orElseThrow(() -> new BadRequestException("Notification not found!"));
 
@@ -72,7 +77,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public ResDTO<?> readNotification(String notificationId) {
+    public ResDTO<?> readNotification(String tokenHeader, String notificationId) {
         CommonNotification notification = repository.findById(notificationId)
                 .orElseThrow(() -> new BadRequestException("Notification not found!"));
 

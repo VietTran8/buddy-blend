@@ -21,19 +21,23 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final RoomResponseMapper roomResponseMapper;
 
+    @Override
     public void saveRoom(Room room){
         roomRepository.save(room);
     }
 
+    @Override
     public Room findById(String id){
         return roomRepository.findById(id).orElse(null);
     }
 
+    @Override
     public Room findExistingRoom(String fromUserId, String toUserId){
         return roomRepository.findByUserId1AndUserId2OrUserId2AndUserId1(fromUserId, toUserId, fromUserId, toUserId)
                 .orElse(null);
     }
 
+    @Override
     public ResDTO<?> findRoomsByUser(){
         String userId = SecurityContextUtils.getUserId();
         List<Room> rooms = roomRepository.findByUserId1OrUserId2(userId, userId);

@@ -2,18 +2,18 @@ import { Image } from "antd";
 import { FC, useContext } from "react";
 import EditGeneralInfoForm from "./forms/EditGeneralInfoForm";
 import EditPasswordForm from "./forms/EditPasswordForm";
-import { useGetUserProfile, useLocalStorage, useUpdateUserCoverPic, useUpdateUserProfilePic } from "../../hooks";
-import { ACCESS_TOKEN_PREFIX } from "../../constants";
+import { useGetUserProfile, useUpdateUserCoverPic, useUpdateUserProfilePic } from "../../hooks";
 import { AuthContext } from "../../context";
 import EditDisplayInfoForm from "./forms/EditDisplayInfoForm";
+import { getAccessToken } from "@/config";
 
 interface IProps { };
 
 
 const SettingPageContent: FC<IProps> = ({ }) => {
-    const [token] = useLocalStorage<string>(ACCESS_TOKEN_PREFIX, "");
+    const token = getAccessToken();
     const { setUser } = useContext(AuthContext);
-    const { data: userResponse } = useGetUserProfile(token);
+    const { data: userResponse } = useGetUserProfile(token ? token : undefined);
     const { mutate: updateProfilePic, isPending: isUpdatingProfilePic } = useUpdateUserProfilePic();
     const { mutate: updateCoverPic, isPending: isUpdatingCoverPic } = useUpdateUserCoverPic();
 

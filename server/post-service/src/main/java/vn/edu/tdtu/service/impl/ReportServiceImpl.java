@@ -16,7 +16,6 @@ import vn.edu.tdtu.model.Report;
 import vn.edu.tdtu.repository.PostRepository;
 import vn.edu.tdtu.repository.ReportRepository;
 import vn.edu.tdtu.service.intefaces.ReportService;
-import vn.edu.tdtu.util.JwtUtils;
 import vn.edu.tdtu.util.SecurityContextUtils;
 
 import java.util.*;
@@ -26,9 +25,9 @@ import java.util.*;
 public class ReportServiceImpl implements ReportService {
     private final ReportRepository reportRepository;
     private final PostRepository postRepository;
-    private final JwtUtils jwtUtils;
     private final ReportResponseMapper reportResponseMapper;
 
+    @Override
     @CacheEvict(cacheNames = "reports", allEntries = true)
     public ResDTO<?> reportPost(ReportRequest request){
         String userId = SecurityContextUtils.getUserId();
@@ -57,6 +56,7 @@ public class ReportServiceImpl implements ReportService {
         return response;
     }
 
+    @Override
     @Cacheable(key = "T(java.util.Objects).hash(#a1, #a2)", value = "reports", unless = "#result.data.reports.isEmpty()")
     public ResDTO<?> getAllReport(String token, int page, int size){
         Page<Report> reportPage = reportRepository

@@ -15,6 +15,7 @@ import vn.edu.tdtu.service.intefaces.FileService;
 public class FileServiceImpl implements FileService {
     private final FileClient fileClient;
 
+    @Override
     @Async
     public void delete(String url, EFileType type) {
         fileClient.deleteFile(type.getType(), new FileReq(url));

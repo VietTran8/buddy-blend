@@ -3,6 +3,7 @@ package vn.edu.tdtu.exception;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -65,7 +66,7 @@ public class ApiExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ResDTO<Object>(
-                        ex.getMessage(),
+                        StringUtils.join(ex.getMessage(), " - Path: ", webRequest.getContextPath()),
                         null,
                         HttpServletResponse.SC_UNAUTHORIZED
                 ));

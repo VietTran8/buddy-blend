@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @JsonIgnoreProperties
 public class SaveUserReqDTO {
+    private String id;
     private String email;
     private String firstName;
     private String lastName;

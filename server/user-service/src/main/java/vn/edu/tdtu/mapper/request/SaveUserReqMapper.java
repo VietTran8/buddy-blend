@@ -15,6 +15,7 @@ public class SaveUserReqMapper {
     public User mapToObject(SaveUserReqDTO dto){
         User user = new User();
 
+        user.setId(dto.getId());
         user.setActive(true);
         user.setRole(EUserRole.ROLE_USER);
         user.setBio(dto.getBio());

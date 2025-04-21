@@ -13,6 +13,7 @@ import java.util.List;
 public class GroupServiceImpl implements GroupService {
     private final GroupClient groupClient;
 
+    @Override
     public List<String> getFriendUserIdsInGroup(String accessToken, String groupId) {
         ResDTO<List<String>> response = groupClient.getFriendUserIdsInGroup(accessToken, groupId);
 

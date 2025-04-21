@@ -82,6 +82,7 @@ public class FileServiceImpl implements IFileService {
                 .toString();
     }
 
+    @Override
     public String parsePublicId(String url, EUploadFolder folder){
         if(url.contains("http://res.cloudinary.com/dt8itomae")){
             String[] splitUrl = url.split("/");

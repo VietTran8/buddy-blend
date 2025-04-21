@@ -18,11 +18,13 @@ public class GroupMemberServiceImpl implements GroupMemberService {
     private final GroupRepository groupRepository;
     private final GroupAdminService groupAdminService;
 
+    @Override
     @Transactional
     public void removeGroupMemberById(String id) {
         groupMemberRepository.deleteMemberById(id);
     }
 
+    @Override
     @Transactional
     public ResDTO<?> removeMember(String groupId, String memberId) {
         groupAdminService.adminCheck(groupId);

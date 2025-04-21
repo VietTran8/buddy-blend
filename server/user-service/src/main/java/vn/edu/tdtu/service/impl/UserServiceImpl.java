@@ -43,6 +43,7 @@ public class UserServiceImpl implements UserService {
     private final GroupService groupService;
     private final AuthService authService;
 
+    @Override
     public ResDTO<?> findAll(){
         ResDTO<List<User>> response = new ResDTO<>();
 
@@ -53,6 +54,7 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public ResDTO<?> findProfile(String id){
         String userId = SecurityContextUtils.getUserId();
         ResDTO<UserDetailsResponse> response = new ResDTO<>();
@@ -67,12 +69,14 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public ResDTO<List<MinimizedUserResponse>> getUserSuggestionForGroup(String tokenHeader, String groupId) {
         List<String> friendUserIdsInGroup = groupService.getFriendUserIdsInGroup(tokenHeader, groupId);
 
         return findFriendsByNotInIds(tokenHeader, new FindByIdsReqDTO(friendUserIdsInGroup));
     }
 
+    @Override
     public ResDTO<?> findByEmailResp(String email){
         User foundUser = findByEmail(email);
         ResDTO<AuthUserResponse> response = new ResDTO<>();
@@ -95,10 +99,12 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public User findByEmail(String email){
         return userRepository.findByEmailAndActive(email, true).orElse(null);
     }
 
+    @Override
     public ResDTO<?> findResById(String id){
         ResDTO<MinimizedUserResponse> response = new ResDTO<>();
 
@@ -114,6 +120,7 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public ResDTO<List<MinimizedUserResponse>> findResByIds(String token, FindByIdsReqDTO request){
         ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
 
@@ -130,6 +137,7 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public ResDTO<List<MinimizedUserResponse>> findFriendsByNotInIds(String token, FindByIdsReqDTO request){
         ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
 
@@ -151,10 +159,12 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public User findById(String id){
         return userRepository.findByIdAndActive(id, true).orElse(null);
     }
 
+    @Override
     public ResDTO<?> existsById(String id){
         ResDTO<Boolean> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_OK);
@@ -163,6 +173,7 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public ResDTO<?> searchByName(String token, String name){
         ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
 
@@ -178,6 +189,7 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public ResDTO<?> saveUser(SaveUserReqDTO user){
         ResDTO<SaveUserResponse> response = new ResDTO<>();
 
@@ -199,6 +211,7 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public ResDTO<?> updateBio(UpdateBioReqDTO userBio){
         String userId = SecurityContextUtils.getUserId();
         User user = findById(userId);
@@ -217,6 +230,7 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public ResDTO<?> renameUser( RenameReqDTO request){
         String userId = SecurityContextUtils.getUserId();
         User user = findById(userId);
@@ -251,6 +265,7 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public ResDTO<?> updatePicture(MultipartFile pic, boolean isProfilePic){
         String userId = SecurityContextUtils.getUserId();
         User foundUser = findById(userId);
@@ -279,6 +294,7 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public ResDTO<?> updateInfo(UpdateInfoReqDTO request){
         String userId = SecurityContextUtils.getUserId();
         User user = findById(userId);
@@ -303,6 +319,7 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public ResDTO<?> disableAccount(DisableAccountReqDTO account){
         User user = findById(account.getUserId());
         ResDTO<User> response = new ResDTO<>();
@@ -322,6 +339,7 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
+    @Override
     public ResDTO<?> saveUserRegistrationId(SaveUserResIdReq requestBody){
         String userId = SecurityContextUtils.getUserId();
         User foundUser = findById(userId);
@@ -345,6 +363,7 @@ public class UserServiceImpl implements UserService {
         throw new BadRequestException("User not found with id: " + userId);
     }
 
+    @Override
     public ResDTO<?> removeUserRegistrationId(SaveUserResIdReq requestBody){
         String userId = SecurityContextUtils.getUserId();
         User foundUser = findById(userId);

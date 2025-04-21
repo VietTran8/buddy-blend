@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { getAccessToken } from "./axios";
+import { getSocketAccessToken } from "./axios";
 
 export const chatSocket = io('http://localhost:8095', {
     autoConnect: false,
@@ -9,7 +9,7 @@ export const chatSocket = io('http://localhost:8095', {
 
 export const connectChatSocket = () => {
     chatSocket.io.opts.extraHeaders = {
-        "Authorization": getAccessToken() || ""
+        "Authorization": getSocketAccessToken() || ""
     }
     chatSocket.connect();
 }

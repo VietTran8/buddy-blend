@@ -21,10 +21,12 @@ import java.util.Date;
 public class ChatMessageServiceImpl implements ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
 
+    @Override
     public ChatMessage saveMessage(ChatMessage message) {
         return chatMessageRepository.save(message);
     }
 
+    @Override
     public ResDTO<PaginationResponse<MessageResponse>> getRoomMessages(String roomId, Date anchorDate, int page, int size) {
         ResDTO<PaginationResponse<MessageResponse>> response = new ResDTO<>();
         Page<ChatMessage> messagePage = chatMessageRepository.findByRoomIdAndCreatedAtBeforeOrderByCreatedAtDesc(roomId, anchorDate, PageRequest.of(page - 1, size));
