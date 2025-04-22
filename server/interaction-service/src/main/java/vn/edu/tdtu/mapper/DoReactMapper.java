@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Component
 public class DoReactMapper {
-    public Reactions mapToObject(String userId, DoReactRequest request){
+    public Reactions mapToObject(String userId, DoReactRequest request) {
         Reactions reaction = new Reactions();
 
         reaction.setType(request.getType());

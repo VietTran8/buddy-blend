@@ -11,7 +11,10 @@
       "search_analyzer": {
         "type": "custom",
         "tokenizer": "standard",
-        "filter": ["lowercase", "asciifolding"]
+        "filter": [
+          "lowercase",
+          "asciifolding"
+        ]
       },
       "autocomplete_analyzer": {
         "type": "custom",

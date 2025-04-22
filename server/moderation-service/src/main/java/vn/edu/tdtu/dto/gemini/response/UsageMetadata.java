@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UsageMetadata{
+public class UsageMetadata {
     public int promptTokenCount;
     public int candidatesTokenCount;
     public int totalTokenCount;

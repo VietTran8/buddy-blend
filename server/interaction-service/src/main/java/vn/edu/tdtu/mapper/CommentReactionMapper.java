@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Component
 public class CommentReactionMapper {
-    public CommentReactions mapToObject(String userId, DoCommentReactRequest dto){
+    public CommentReactions mapToObject(String userId, DoCommentReactRequest dto) {
         CommentReactions commentReactions = new CommentReactions();
         commentReactions.setType(dto.getType());
         commentReactions.setUserId(userId);

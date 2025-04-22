@@ -24,7 +24,8 @@ public class CommentResponseMapper {
     private final UserService userService;
     private final CommentsRepository commentsRepository;
     private final CommentReactionRepository commentReactionRepository;
-    public CommentResponse mapToDto(String token, Comments comment){
+
+    public CommentResponse mapToDto(String token, Comments comment) {
         CommentResponse commentResponse = mapToBaseDto(token, comment);
 
         commentResponse.setChildren(commentsRepository.findByParentId(comment.getId())
@@ -35,7 +36,7 @@ public class CommentResponseMapper {
         return commentResponse;
     }
 
-    private CommentResponse mapToChildrenCommentDTO(String token, Comments comment){
+    private CommentResponse mapToChildrenCommentDTO(String token, Comments comment) {
         CommentResponse commentResponse = mapToBaseDto(token, comment);
 
         commentResponse.setChildren(new ArrayList<>());
@@ -66,6 +67,7 @@ public class CommentResponseMapper {
 
         return commentResponse;
     }
+
     private List<TopReacts> getTopCmtReacts(List<CommentReactions> commentReactions) {
         return commentReactions.stream()
                 .collect(Collectors.groupingBy(CommentReactions::getType, Collectors.counting()))

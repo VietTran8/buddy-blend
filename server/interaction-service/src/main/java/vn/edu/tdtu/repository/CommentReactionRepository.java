@@ -10,6 +10,8 @@ import java.util.Optional;
 @Repository
 public interface CommentReactionRepository extends MongoRepository<CommentReactions, String> {
     Optional<CommentReactions> findByUserIdAndCmtId(String userId, String cmtId);
+
     List<CommentReactions> findByCmtId(String cmtId);
+
     List<CommentReactions> findReactionsByCmtIdOrderByCreatedAtDesc(String cmtId);
 }

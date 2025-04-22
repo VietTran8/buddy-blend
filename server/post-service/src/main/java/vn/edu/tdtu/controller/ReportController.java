@@ -12,8 +12,9 @@ import vn.edu.tdtu.service.intefaces.ReportService;
 @RequiredArgsConstructor
 public class ReportController {
     private final ReportService reportService;
+
     @PostMapping()
-    public ResponseEntity<?> report(@RequestBody ReportRequest requestBody){
+    public ResponseEntity<?> report(@RequestBody ReportRequest requestBody) {
         ResDTO<?> response = reportService.reportPost(requestBody);
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -21,7 +22,7 @@ public class ReportController {
     @GetMapping()
     public ResponseEntity<?> reports(@RequestHeader("Authorization") String token,
                                      @RequestParam(name = "page", required = false, defaultValue = "1") int page,
-                                     @RequestParam(name = "size", required = false, defaultValue = "10") int size){
+                                     @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
         ResDTO<?> response = reportService.getAllReport(token, page, size);
         return ResponseEntity.status(response.getCode()).body(response);
     }

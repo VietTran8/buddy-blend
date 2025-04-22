@@ -14,11 +14,11 @@ import vn.edu.tdtu.model.User;
 public class KafkaEventPublisher {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     @Value("${kafka.topic.friend-request.name}")
-    private  String friendRequestTopicName;
+    private String friendRequestTopicName;
     @Value("${kafka.topic.sync-user.name}")
-    private  String syncUserTopicName;
+    private String syncUserTopicName;
 
-    public void pubFriendRequestNoti(FriendRequestMessage notification){
+    public void pubFriendRequestNoti(FriendRequestMessage notification) {
         kafkaTemplate.send(friendRequestTopicName, notification);
     }
 

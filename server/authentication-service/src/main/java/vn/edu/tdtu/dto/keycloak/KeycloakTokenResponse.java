@@ -19,4 +19,5 @@ public record KeycloakTokenResponse(
         String sessionState,
         @JsonProperty("scope")
         String scope
-) {}
+) {
+}

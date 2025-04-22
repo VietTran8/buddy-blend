@@ -9,13 +9,13 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class AppConfig {
     @Bean
-    public NewTopic chattingTopic(){
+    public NewTopic chattingTopic() {
         return new NewTopic("chatting", 2, (short) 1);
     }
 
     @Bean
     @LoadBalanced
-    public RestTemplate restTemplate(){
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 }

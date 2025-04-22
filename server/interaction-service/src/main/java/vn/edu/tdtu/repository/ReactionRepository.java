@@ -10,5 +10,6 @@ import java.util.Optional;
 @Repository
 public interface ReactionRepository extends MongoRepository<Reactions, String> {
     Optional<Reactions> findByUserIdAndPostId(String userId, String postId);
+
     List<Reactions> findReactionsByPostIdOrderByCreatedAtDesc(String postId);
 }

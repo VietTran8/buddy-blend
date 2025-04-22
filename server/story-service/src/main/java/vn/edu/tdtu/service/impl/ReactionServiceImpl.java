@@ -3,7 +3,7 @@ package vn.edu.tdtu.service.impl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.Message;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.DoReactRequest;
 import vn.edu.tdtu.dto.response.DoReactResponse;
@@ -34,17 +34,17 @@ public class ReactionServiceImpl implements ReactionService {
     private final UserService userService;
 
     @Override
-    public ResDTO<DoReactResponse> doReact(String accessToken, DoReactRequest payload){
+    public ResDTO<DoReactResponse> doReact(String accessToken, DoReactRequest payload) {
         String userId = SecurityContextUtils.getUserId();
 
         Story foundStory = storyRepository.findById(payload.getStoryId())
-                .orElseThrow(() -> new BadRequestException(Message.STORY_NOT_FOUND_MSG));
+                .orElseThrow(() -> new BadRequestException(MessageCode.STORY_NOT_FOUND));
 
-        if(foundStory.getUserId().equals(userId))
-            throw new BadRequestException(Message.STORY_CAN_NOT_SELF_REACT_MSG);
+        if (foundStory.getUserId().equals(userId))
+            throw new BadRequestException(MessageCode.STORY_CAN_NOT_SELF_REACT);
 
         Viewer foundViewer = viewerRepository.findTopByStoryAndUserId(foundStory, userId)
-                .orElseThrow(() -> new BadRequestException(Message.VIEWER_NOT_FOUND_MSG));
+                .orElseThrow(() -> new BadRequestException(MessageCode.VIEWER_NOT_FOUND));
 
         foundViewer.getReactions().add(newReaction(foundViewer, userId, payload));
 
@@ -53,7 +53,7 @@ public class ReactionServiceImpl implements ReactionService {
         sendNotification(accessToken, payload, userId, foundStory);
 
         return new ResDTO<>(
-                Message.REACTION_CREATED_MSG,
+                MessageCode.REACTION_CREATED,
                 new DoReactResponse(payload),
                 HttpServletResponse.SC_CREATED
         );
@@ -62,7 +62,7 @@ public class ReactionServiceImpl implements ReactionService {
     private void sendNotification(String accessToken, DoReactRequest payload, String userId, Story foundStory) {
         User foundUser = userService.getUserById(accessToken, userId);
 
-        if(foundUser != null) {
+        if (foundUser != null) {
             InteractNotification notification = new InteractNotification();
 
             notification.setUserFullName(foundUser.getUserFullName());

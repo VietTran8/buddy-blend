@@ -6,9 +6,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.ReportRequest;
-import vn.edu.tdtu.dto.response.GetAllReportResponse;
+import vn.edu.tdtu.dto.response.PaginationResponse;
 import vn.edu.tdtu.dto.response.ReportResponse;
 import vn.edu.tdtu.mapper.response.ReportResponseMapper;
 import vn.edu.tdtu.model.Post;
@@ -29,7 +30,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     @CacheEvict(cacheNames = "reports", allEntries = true)
-    public ResDTO<?> reportPost(ReportRequest request){
+    public ResDTO<?> reportPost(ReportRequest request) {
         String userId = SecurityContextUtils.getUserId();
 
         ResDTO<Map<String, String>> response = new ResDTO<>();
@@ -42,11 +43,11 @@ public class ReportServiceImpl implements ReportService {
         report.setCreateAt(new Date());
 
         Post post = postRepository.findById(request.getPostId())
-                        .orElseThrow(() -> new RuntimeException("post not found with id: " + request.getPostId()));
+                .orElseThrow(() -> new RuntimeException("post not found with id: " + request.getPostId()));
 
         report.setPostId(post.getId());
 
-        response.setMessage("submitted");
+        response.setMessage(MessageCode.REPORT_SUBMITTED);
         response.setData(data);
         response.setCode(200);
 
@@ -58,7 +59,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     @Cacheable(key = "T(java.util.Objects).hash(#a1, #a2)", value = "reports", unless = "#result.data.reports.isEmpty()")
-    public ResDTO<?> getAllReport(String token, int page, int size){
+    public ResDTO<?> getAllReport(String token, int page, int size) {
         Page<Report> reportPage = reportRepository
                 .findAll(PageRequest.of(page - 1, size));
 
@@ -67,15 +68,16 @@ public class ReportServiceImpl implements ReportService {
                 .map(p -> reportResponseMapper.mapToDto(token, p))
                 .toList();
 
-        GetAllReportResponse allReportResponse = new GetAllReportResponse();
-        allReportResponse.setCurrentPage(page);
-        allReportResponse.setTotalPages(reportPage.getTotalPages());
-        allReportResponse.setReports(reports);
+        PaginationResponse<ReportResponse> paginationResponse = new PaginationResponse<>();
+        paginationResponse.setData(reports);
+        paginationResponse.setPage(page);
+        paginationResponse.setTotalPages(reportPage.getTotalPages());
+        paginationResponse.setLimit(size);
 
-        ResDTO<GetAllReportResponse> response = new ResDTO<>();
-        response.setData(allReportResponse);
+        ResDTO<PaginationResponse<ReportResponse>> response = new ResDTO<>();
+        response.setData(paginationResponse);
         response.setCode(200);
-        response.setMessage("reports fetched successfully");
+        response.setMessage(MessageCode.REPORT_FETCHED);
 
         return response;
     }

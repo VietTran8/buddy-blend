@@ -11,6 +11,6 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CitationMetadata{
+public class CitationMetadata {
     public ArrayList<CitationSource> citationSources;
 }

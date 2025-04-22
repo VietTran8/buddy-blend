@@ -3,6 +3,7 @@ package vn.edu.tdtu.service.impl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.response.BlockingResponse;
 import vn.edu.tdtu.dto.response.IdResponse;
@@ -28,36 +29,36 @@ public class BlockingServiceImpl implements BlockingService {
     private final MinimizedUserMapper minimizedUserMapper;
 
     @Override
-    public ResDTO<?> handleUserBlocking(String banUserId) {
+    public ResDTO<?> handleUserBlocking(String blockUserId) {
         String authUserId = SecurityContextUtils.getUserId();
 
-        Map<String, User> userMap = userRepository.findByIdInAndActive(List.of(banUserId, authUserId), true)
+        Map<String, User> userMap = userRepository.findByIdInAndActive(List.of(blockUserId, authUserId), true)
                 .stream().collect(Collectors.toMap(
                         User::getId,
                         user -> user
                 ));
 
-        if(userMap.size() != 2)
-            throw new BadRequestException("Không tìm thấy người dùng");
+        if (userMap.size() != 2)
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND);
 
         User authUser = userMap.get(authUserId);
-        User banUser = userMap.get(banUserId);
+        User blockUser = userMap.get(blockUserId);
 
         List<Blocking> blockingList = authUser.getBlockingList();
-        List<Blocking> opponentBlockingList = banUser.getBlockingList();
+        List<Blocking> opponentBlockingList = blockUser.getBlockingList();
 
-        if(opponentBlockingList.stream()
+        if (opponentBlockingList.stream()
                 .anyMatch(blocking -> blocking.getBlockedUser().getId().equals(authUser.getId())))
-            throw new BadRequestException("Người kia đã chặn bạn rồi!");
+            throw new BadRequestException(MessageCode.BLOCKING_OPPONENT_BLOCKED);
 
         ResDTO<IdResponse> response = new ResDTO<>();
 
         response.setCode(HttpServletResponse.SC_OK);
-        response.setData(new IdResponse(banUser.getId()));
+        response.setData(new IdResponse(blockUser.getId()));
 
         blockingList.stream()
                 .filter(
-                        blocking -> blocking.getBlockedUser().getId().equals(banUser.getId())
+                        blocking -> blocking.getBlockedUser().getId().equals(blockUser.getId())
                 ).findFirst()
                 .ifPresentOrElse(
                         blocking -> {
@@ -65,19 +66,19 @@ public class BlockingServiceImpl implements BlockingService {
 
                             userRepository.save(authUser);
 
-                            response.setMessage("Đã hủy chặn người dùng thành công!");
-                        },  () -> {
+                            response.setMessage(MessageCode.BLOCKING_UNBLOCKED);
+                        }, () -> {
                             Blocking newBlocking = new Blocking();
 
                             newBlocking.setBlockedAt(LocalDateTime.now());
-                            newBlocking.setBlockedUser(banUser);
+                            newBlocking.setBlockedUser(blockUser);
                             newBlocking.setBlockedByUser(authUser);
 
                             blockingList.add(newBlocking);
 
                             userRepository.save(authUser);
 
-                            response.setMessage("Đã chặn người dùng thành công!");
+                            response.setMessage(MessageCode.BLOCKING_BLOCKED);
                         }
                 );
 
@@ -88,8 +89,8 @@ public class BlockingServiceImpl implements BlockingService {
     public ResDTO<?> getBlockedUserList() {
         String authUserId = SecurityContextUtils.getUserId();
 
-        User authUser = userRepository.findByIdAndActive(authUserId,  true)
-                .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng!"));
+        User authUser = userRepository.findByIdAndActive(authUserId, true)
+                .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND));
 
         List<BlockingResponse> responseData = authUser.getBlockingList()
                 .stream()
@@ -108,7 +109,7 @@ public class BlockingServiceImpl implements BlockingService {
 
         response.setData(responseData);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("Banning user fetched successfully!");
+        response.setMessage(MessageCode.BLOCKING_FETCHED);
 
         return response;
     }

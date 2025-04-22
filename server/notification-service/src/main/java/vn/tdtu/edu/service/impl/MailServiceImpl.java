@@ -33,8 +33,7 @@ public class MailServiceImpl implements MailService {
             helper.setSubject(details.getSubject());
 
             mailSender.send(message);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
         }
     }

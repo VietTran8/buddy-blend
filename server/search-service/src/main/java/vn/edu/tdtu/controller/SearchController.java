@@ -16,7 +16,7 @@ public class SearchController {
 
     @GetMapping()
     public ResponseEntity<?> search(@RequestHeader(name = "Authorization", required = false) String token,
-                                    @RequestParam("key") String key){
+                                    @RequestParam("key") String key) {
         ResDTO<?> response = searchService.search(token, key);
 
         return ResponseEntity.status(response.getCode()).body(response);
@@ -24,14 +24,14 @@ public class SearchController {
 
     @GetMapping("/fetch")
     public ResponseEntity<?> fetch(@RequestHeader(name = "Authorization", required = false) String token,
-                                    @RequestParam("key") String key){
+                                   @RequestParam("key") String key) {
         ResDTO<?> response = searchService.fetchResult(token, key);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/history")
-    public ResponseEntity<?> getSearchHistory(@RequestHeader(name = "Authorization") String token){
+    public ResponseEntity<?> getSearchHistory(@RequestHeader(name = "Authorization") String token) {
         ResDTO<?> response = searchService.getSearchHistory(token);
 
         return ResponseEntity.status(response.getCode()).body(response);

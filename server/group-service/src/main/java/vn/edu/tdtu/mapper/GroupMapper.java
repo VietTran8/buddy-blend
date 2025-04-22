@@ -21,16 +21,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GroupMapper {
     private final UserClient userClient;
+
     public GroupResponse mapToDto(String accessToken, Group group, boolean collectBaseInfo) {
         String userId = SecurityContextUtils.getUserId();
 
         List<GroupMember> first10GroupMembers = new ArrayList<>();
-        if(!collectBaseInfo)
+        if (!collectBaseInfo)
             first10GroupMembers = group.getGroupMembers()
-                .stream()
-                .filter(member -> !member.isPending())
-                .limit(10)
-                .toList();
+                    .stream()
+                    .filter(member -> !member.isPending())
+                    .limit(10)
+                    .toList();
 
         List<String> first10MemberIds = first10GroupMembers
                 .stream()
@@ -39,7 +40,7 @@ public class GroupMapper {
 
         List<User> first10Members = new ArrayList<>();
 
-        if(!collectBaseInfo)
+        if (!collectBaseInfo)
             first10Members = userClient.findByIds(accessToken, new FindByIdsRequest(first10MemberIds)).getData();
 
         Map<String, User> userMap = first10Members.stream()
@@ -65,7 +66,7 @@ public class GroupMapper {
                 .stream()
                 .anyMatch(member -> member.getMember().getUserId().equals(userId) && !member.isPending()));
 
-        if(!collectBaseInfo)
+        if (!collectBaseInfo)
             response.setAdmin(groupMembers
                     .stream()
                     .anyMatch(member -> member.getMember().getUserId().equals(userId) && member.isAdmin()));
@@ -89,7 +90,7 @@ public class GroupMapper {
     }
 
     private EJoinGroupStatus getJoinStatus(Boolean joined, String userId, List<GroupMember> groupMembers) {
-        if(joined)
+        if (joined)
             return EJoinGroupStatus.SUCCESS;
 
         return groupMembers.stream().anyMatch(member -> member.isPending() && member.getMember().getUserId().equals(userId)) ?

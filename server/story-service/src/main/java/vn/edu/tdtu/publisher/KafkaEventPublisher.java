@@ -13,7 +13,7 @@ public class KafkaEventPublisher {
     @Value("${kafka.topic.interact-noti.name}")
     private String notificationTopic;
 
-    public void publishInteractNoti(InteractNotification notification){
+    public void publishInteractNoti(InteractNotification notification) {
         kafkaTemplate.send(notificationTopic, notification);
     }
 }

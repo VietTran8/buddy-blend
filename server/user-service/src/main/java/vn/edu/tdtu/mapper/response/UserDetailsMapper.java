@@ -3,10 +3,10 @@ package vn.edu.tdtu.mapper.response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.response.MutualFriend;
 import vn.edu.tdtu.dto.response.UserDetailsResponse;
 import vn.edu.tdtu.exception.BadRequestException;
-import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.model.User;
 import vn.edu.tdtu.repository.UserRepository;
 import vn.edu.tdtu.util.SecurityContextUtils;
@@ -21,17 +21,17 @@ public class UserDetailsMapper {
     private final UserRepository userRepository;
     private final BaseUserMapper baseUserMapper;
 
-    public UserDetailsResponse mapToDTO(User user){
-        if(user == null) {
+    public UserDetailsResponse mapToDTO(User user) {
+        if (user == null) {
             return null;
         }
 
         String authUserId = SecurityContextUtils.getUserId();
 
         User authUser = userRepository.findByIdAndActive(authUserId, true)
-                .orElseThrow(() -> new BadRequestException("Người dùng không tìm thấy"));
+                .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND));
 
-        if(isBanned(authUser, user)) {
+        if (isBanned(authUser, user)) {
             return null;
         }
 

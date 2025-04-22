@@ -114,14 +114,14 @@ services:
       KC_LOG_LEVEL: info
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin123
-    command: ["start-dev"]
+    command: [ "start-dev" ]
     ports:
       - "9000:8080"
     depends_on:
       keycloak_postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health/ready" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -139,18 +139,18 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "keycloak", "-d", "keycloak_db"]
+      test: [ "CMD", "pg_isready", "-U", "keycloak", "-d", "keycloak_db" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
 
 volumes:
-  data: {}
-  redis_data: {}
+  data: { }
+  redis_data: { }
   esdata:
     driver: local
-  mysqldata: {}
+  mysqldata: { }
   keycloak_postgres_data:
     driver: local
 

@@ -10,5 +10,6 @@ import java.util.Map;
 
 public interface CommentReactionService {
     public ResDTO<?> doReact(DoCommentReactRequest request);
+
     public ResDTO<Map<EReactionType, List<ReactResponse>>> getReactsByCmtId(String token, String cmtId);
 }

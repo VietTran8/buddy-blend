@@ -24,35 +24,42 @@ public class AppConfig {
 
     @Bean
     @LoadBalanced
-    public RestTemplate restTemplate(){
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+
     @Bean
-    public ObjectMapper objectMapper(){
+    public ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
+
     @Bean
-    public JsonMessageConverter jsonMessageConverter(){
+    public JsonMessageConverter jsonMessageConverter() {
         return new JsonMessageConverter();
     }
+
     @Bean
-    public NewTopic interactTopic(){
+    public NewTopic interactTopic() {
         return new NewTopic(notificationName, 2, (short) 1);
     }
+
     @Bean
-    public NewTopic syncPost(){
+    public NewTopic syncPost() {
         return new NewTopic(syncPostTopicName, 2, (short) 1);
     }
+
     @Bean
-    public NewTopic moderationResultNotiTopic(){
+    public NewTopic moderationResultNotiTopic() {
         return new NewTopic(moderationResultNotiTopicName, 2, (short) 1);
     }
+
     @Bean
-    public NewTopic moderationTopic(){
+    public NewTopic moderationTopic() {
         return new NewTopic(moderationTopicName, 2, (short) 1);
     }
+
     @Bean
-    public NewTopic newPostTopic(){
+    public NewTopic newPostTopic() {
         return new NewTopic(newPostTopicName, 2, (short) 1);
     }
 }

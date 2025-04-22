@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.web.server.Cookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
-import vn.edu.tdtu.constant.CommonConstant;
 
 import java.time.Duration;
 

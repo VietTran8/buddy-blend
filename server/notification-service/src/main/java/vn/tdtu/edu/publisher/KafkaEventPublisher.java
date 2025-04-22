@@ -15,11 +15,11 @@ public class KafkaEventPublisher {
     @Value("${kafka.topic.user-disconnected.name}")
     private String userDisconnectedTopicName;
 
-    public void publishUserConnected (UserConnectMessage message) {
+    public void publishUserConnected(UserConnectMessage message) {
         kafkaTemplate.send(userConnectedTopicName, message);
     }
 
-    public void publishUserDisconnected (UserConnectMessage message) {
+    public void publishUserDisconnected(UserConnectMessage message) {
         kafkaTemplate.send(userDisconnectedTopicName, message);
     }
 }

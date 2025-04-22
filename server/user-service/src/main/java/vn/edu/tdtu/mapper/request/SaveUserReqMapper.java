@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Component
 @RequiredArgsConstructor
 public class SaveUserReqMapper {
-    public User mapToObject(SaveUserReqDTO dto){
+    public User mapToObject(SaveUserReqDTO dto) {
         User user = new User();
 
         user.setId(dto.getId());

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.FQAcceptationDTO;
 import vn.edu.tdtu.dto.request.FriendReqDTO;
@@ -40,37 +41,37 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     private final FriendRequestResponseMapper friendRequestResponseMapper;
 
     @Override
-    public ResDTO<?> handleFriendRequest(FriendReqDTO request){
+    public ResDTO<?> handleFriendRequest(FriendReqDTO request) {
         String fromUserId = SecurityContextUtils.getUserId();
         ResDTO<HandleFriendRequestResponse> response = new ResDTO<>();
 
         log.info(fromUserId);
-        if(fromUserId == null) {
-            throw new BadRequestException("Chưa đăng nhập");
+        if (fromUserId == null) {
+            throw new BadRequestException(MessageCode.AUTH_UNAUTHORIZED);
         }
 
-        if(fromUserId.equals(request.getToUserId())) {
-            throw new BadRequestException("Không thể gửi lời mời kết bạn");
+        if (fromUserId.equals(request.getToUserId())) {
+            throw new BadRequestException(MessageCode.FRIEND_REQUEST_CAN_NOT_SEND);
         }
 
         FriendRequest newRequest = addFriendReqMapper.mapToObject(fromUserId, request);
 
-        if(newRequest.getFromUser() == null) {
-            throw new BadRequestException("Không tìm thấy người dùng với id: " + fromUserId);
+        if (newRequest.getFromUser() == null) {
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, fromUserId);
         }
 
-        if(newRequest.getToUser() == null) {
-            throw new BadRequestException("Không tìm thấy người dùng với id: " + request.getToUserId());
+        if (newRequest.getToUser() == null) {
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, request.getToUserId());
         }
 
         User fromUser = newRequest.getFromUser(),
                 toUser = newRequest.getToUser();
 
-        if(friendRequestRepository
+        if (friendRequestRepository
                 .findByToUserAndFromUserOrFromUserAndToUser(toUser, fromUser, toUser, fromUser)
                 .stream().anyMatch(req -> fromUserId.equals(req.getToUser().getId()) && req.getStatus().equals(EFriendReqStatus.PENDING))) {
 
-            throw new BadRequestException("Can not send friend request to user id: " + request.getToUserId());
+            throw new BadRequestException(MessageCode.FRIEND_REQUEST_CAN_NOT_SEND_TO_USER_ID, request.getToUserId());
         }
 
         List<User> toUserListFriends = getListFriends(toUser.getId());
@@ -84,17 +85,17 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
         HandleFriendRequestResponse responseData = new HandleFriendRequestResponse();
 
-        if(!isFriendOrAlreadySentReq) {
+        if (!isFriendOrAlreadySentReq) {
             sendFriendRequest(newRequest, responseData, response);
             return response;
         }
 
-        if(isFriend) {
+        if (isFriend) {
             unfriend(responseData, response, fromUser, toUser);
             return response;
         }
 
-        cancelFriendRequest(responseData, response, fromUser,toUser);
+        cancelFriendRequest(responseData, response, fromUser, toUser);
         return response;
     }
 
@@ -120,7 +121,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
     @Override
-    public ResDTO<?> getListFriendsResp(String token, String id){
+    public ResDTO<?> getListFriendsResp(String token, String id) {
         ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
         String userId = id == null ? SecurityContextUtils.getUserId() : id;
 
@@ -128,15 +129,15 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 minimizedUserMapper::mapToDTO
         ).filter(friend -> !friend.isHiddenBanned()).toList();
 
-        if(userId != null){
-            response.setMessage("friends list fetched successfully");
+        if (userId != null) {
+            response.setMessage(MessageCode.FRIEND_REQUEST_FRIEND_LIST_FETCHED);
             response.setCode(HttpServletResponse.SC_OK);
             response.setData(minimizedUsers);
 
             return response;
         }
 
-        throw new UnauthorizedException("You are not authenticated");
+        throw new UnauthorizedException(MessageCode.AUTH_UNAUTHORIZED);
     }
 
     @Override
@@ -145,22 +146,22 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
         List<User> minimizedUsers = getListFriends(userId);
 
-        if(userId != null){
-            response.setMessage("friends list fetched successfully");
+        if (userId != null) {
+            response.setMessage(MessageCode.FRIEND_REQUEST_FRIEND_LIST_FETCHED);
             response.setCode(HttpServletResponse.SC_OK);
             response.setData(minimizedUsers.stream().map(User::getId).toList());
 
             return response;
         }
 
-        throw new BadRequestException("User id can not be null");
+        throw new BadRequestException(MessageCode.USER_ID_NOT_NULL);
     }
 
     @Override
-    public List<FriendRequest> getListFriendRequest(String userId){
+    public List<FriendRequest> getListFriendRequest(String userId) {
         User foundUser = userRepository.findByIdAndActive(userId, true).orElse(null);
 
-        if(foundUser == null){
+        if (foundUser == null) {
             return new ArrayList<>();
         }
 
@@ -168,16 +169,16 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
     @Override
-    public ResDTO<?> getListFriendRequestResp(String token){
+    public ResDTO<?> getListFriendRequestResp(String token) {
         ResDTO<List<FriendRequestResponse>> response = new ResDTO<>();
 
         String userId = SecurityContextUtils.getUserId();
 
-        if(userId == null){
-            throw new UnauthorizedException("You are not authenticated");
+        if (userId == null) {
+            throw new UnauthorizedException(MessageCode.AUTH_UNAUTHORIZED);
         }
 
-        response.setMessage("friend request list fetched successfully");
+        response.setMessage(MessageCode.FRIEND_REQUEST_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(
                 getListFriendRequest(userId)
@@ -194,44 +195,44 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     @Override
     public ResDTO<?> getFriendRequestIdByFromUserId(String fromUserId) {
         FriendRequest foundFriendRequest = friendRequestRepository.findByFromUserIdAndToUserId(fromUserId, SecurityContextUtils.getUserId())
-                .orElseThrow(() -> new BadRequestException("Friend request not found"));
+                .orElseThrow(() -> new BadRequestException(MessageCode.FRIEND_REQUEST_NOT_FOUND));
 
         return new ResDTO<>(
-                "Friend request id fetched successfully",
+                MessageCode.FRIEND_REQUEST_FETCHED,
                 foundFriendRequest.getId(),
                 HttpServletResponse.SC_OK
         );
     }
 
     @Override
-    public List<User> getFromUsersViaRequests(List<FriendRequest> friendRequests){
+    public List<User> getFromUsersViaRequests(List<FriendRequest> friendRequests) {
         return friendRequests.stream().map(FriendRequest::getFromUser).filter(User::isActive).toList();
     }
 
     @Override
-    public ResDTO<?> friendRequestAcceptation(FQAcceptationDTO request){
+    public ResDTO<?> friendRequestAcceptation(FQAcceptationDTO request) {
         ResDTO<Map<String, String>> response = new ResDTO<>();
         Map<String, String> data = new HashMap<>();
 
-        FriendRequest fRequest =  friendRequestRepository.findById(request.getFriendReqId()).orElseThrow(
-                () -> new BadRequestException("Không tìm thấy lời mời kết bạn!")
+        FriendRequest fRequest = friendRequestRepository.findById(request.getFriendReqId()).orElseThrow(
+                () -> new BadRequestException(MessageCode.FRIEND_REQUEST_NOT_FOUND)
         );
 
-        if(!fRequest.getToUser().getId().equals(SecurityContextUtils.getUserId())){
-            throw new BadRequestException("Bạn không có quyền!");
+        if (!fRequest.getToUser().getId().equals(SecurityContextUtils.getUserId())) {
+            throw new BadRequestException(MessageCode.AUTH_NOT_PERMITTED);
         }
 
         data.put("requestId", fRequest.getId());
         data.put("status", fRequest.getStatus().name());
 
-        if(!fRequest.getStatus().equals(EFriendReqStatus.PENDING))
-            throw new BadRequestException("Chỉ có thể xử lý các yêu cầu đang chờ!");
+        if (!fRequest.getStatus().equals(EFriendReqStatus.PENDING))
+            throw new BadRequestException(MessageCode.FRIEND_REQUEST_JUST_HANDLE_PENDING);
 
-        if(request.getIsAccept()){
+        if (request.getIsAccept()) {
             acceptFriend(fRequest, data, response);
             friendRequestRepository.save(fRequest);
 
-        }else {
+        } else {
             rejectFriendRequest(fRequest, data, response);
             friendRequestRepository.delete(fRequest);
 
@@ -266,7 +267,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
         response.setData(responseData);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("Friend suggestions fetched successfully!");
+        response.setMessage(MessageCode.FRIEND_REQUEST_SUGGESTION_FETCHED);
 
         return response;
 
@@ -279,7 +280,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         data.put("status", fRequest.getStatus().name());
 
         response.setData(data);
-        response.setMessage("Đã từ chối lời mời kết bạn");
+        response.setMessage(MessageCode.FRIEND_REQUEST_REJECTED);
         response.setCode(HttpServletResponse.SC_OK);
     }
 
@@ -289,11 +290,11 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         data.put("status", fRequest.getStatus().name());
 
         response.setData(data);
-        response.setMessage("Đã chấp nhận lời mời kết bạn");
+        response.setMessage(MessageCode.FRIEND_REQUEST_ACCEPTED);
         response.setCode(HttpServletResponse.SC_OK);
     }
 
-    private void sendFriendRequest(FriendRequest newRequest, HandleFriendRequestResponse responseData, ResDTO<HandleFriendRequestResponse> response){
+    private void sendFriendRequest(FriendRequest newRequest, HandleFriendRequestResponse responseData, ResDTO<HandleFriendRequestResponse> response) {
         friendRequestRepository.save(newRequest);
 
         responseData.setRequestId(newRequest.getId());
@@ -304,7 +305,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         kafkaEventPublisher.pubFriendRequestNoti(notification);
 
         response.setData(responseData);
-        response.setMessage("Đã gửi lời mời kết bạn");
+        response.setMessage(MessageCode.FRIEND_REQUEST_SENT);
         response.setCode(HttpServletResponse.SC_OK);
     }
 
@@ -319,12 +320,12 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         return notification;
     }
 
-    private void unfriend(HandleFriendRequestResponse data, ResDTO<HandleFriendRequestResponse> response, User fromUser, User toUser){
+    private void unfriend(HandleFriendRequestResponse data, ResDTO<HandleFriendRequestResponse> response, User fromUser, User toUser) {
         List<FriendRequest> friendRequests = friendRequestRepository.findByToUserAndFromUserOrFromUserAndToUser(toUser, fromUser, toUser, fromUser).stream().filter(req -> req.isActive() && req.getStatus().equals(EFriendReqStatus.ACCEPTED)).toList();
         FriendRequest friendRequest = friendRequests.stream().findFirst().orElse(null);
 
-        if(friendRequest == null){
-            throw new BadRequestException("Không tìm thấy lời mời kết bạn");
+        if (friendRequest == null) {
+            throw new BadRequestException(MessageCode.FRIEND_REQUEST_NOT_FOUND);
         }
 
         friendRequestRepository.delete(friendRequest);
@@ -332,16 +333,16 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         data.setStatus(EFriendReqStatus.CANCELLED);
 
         response.setData(data);
-        response.setMessage("Đã hủy kết bạn");
+        response.setMessage(MessageCode.FRIEND_REQUEST_UNFRIENDED);
         response.setCode(HttpServletResponse.SC_OK);
     }
 
-    private void cancelFriendRequest(HandleFriendRequestResponse data, ResDTO<HandleFriendRequestResponse> response, User fromUser, User toUser){
+    private void cancelFriendRequest(HandleFriendRequestResponse data, ResDTO<HandleFriendRequestResponse> response, User fromUser, User toUser) {
         List<FriendRequest> friendRequests = friendRequestRepository.findByToUserAndFromUserOrFromUserAndToUser(toUser, fromUser, toUser, fromUser).stream().filter(req -> req.isActive() && req.getStatus().equals(EFriendReqStatus.PENDING)).toList();
         FriendRequest friendRequest = friendRequests.stream().findFirst().orElse(null);
 
-        if(friendRequest == null){
-            throw new BadRequestException("Không tìm thấy lời mời kết bạn");
+        if (friendRequest == null) {
+            throw new BadRequestException(MessageCode.FRIEND_REQUEST_NOT_FOUND);
         }
 
         friendRequestRepository.delete(friendRequest);
@@ -349,7 +350,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         data.setStatus(EFriendReqStatus.CANCELLED);
 
         response.setData(data);
-        response.setMessage("Đã hủy gửi lời mời kết bạn");
+        response.setMessage(MessageCode.FRIEND_REQUEST_CANCELLED);
         response.setCode(HttpServletResponse.SC_OK);
     }
 }

@@ -25,7 +25,7 @@ public class KafkaEventConsumer {
 
     @KafkaListener(groupId = "ModerateResultGroup", topics = "${kafka.topic.moderation-result.name}")
     public void consumeModerationResult(ModerateResultsMessage message) {
-        if(!message.isAccept()) {
+        if (!message.isAccept()) {
             Optional<Post> optionalPost = postRepository.findById(message.getRefId());
 
             optionalPost.ifPresent((post) -> {

@@ -11,6 +11,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.config.keycloak.KeycloakPropsConfig;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.keycloak.KeycloakAuthTokenRequest;
 import vn.edu.tdtu.dto.keycloak.KeycloakRefreshTokenRequest;
 import vn.edu.tdtu.dto.keycloak.KeycloakTokenResponse;
@@ -71,7 +72,7 @@ public class KeycloakServiceImpl implements KeycloakService {
 
         int createStatus = createUserResponse.getStatus();
 
-        if(createStatus == HttpStatus.SC_CREATED)
+        if (createStatus == HttpStatus.SC_CREATED)
             return createUserResponse.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
 
         throw new BadRequestException(String.format("[%s] Failed to create new user: {%s}", createStatus, createUserResponse.readEntity(String.class)));
@@ -119,7 +120,7 @@ public class KeycloakServiceImpl implements KeycloakService {
                 password
         );
 
-        try{
+        try {
             keycloakClientService.login(request);
             return true;
         } catch (UnauthorizedException e) {
@@ -138,11 +139,11 @@ public class KeycloakServiceImpl implements KeycloakService {
                 refreshToken
         );
 
-        try{
+        try {
             return keycloakClientService.refreshToken(request);
         } catch (AuthenticationException e) {
             log.error(e.getMessage());
-            throw new UnauthorizedException("Invalid refresh token");
+            throw new UnauthorizedException(MessageCode.AUTH_INVALID_REFRESH_TOKEN);
         }
     }
 }

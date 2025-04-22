@@ -17,7 +17,7 @@ public class StoryMapper {
     private final StoryRepository storyRepository;
 
     public StoryResponse mapToDto(Story story) {
-        if(story == null)
+        if (story == null)
             return new StoryResponse();
 
         String userId = SecurityContextUtils.getUserId();

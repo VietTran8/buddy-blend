@@ -85,12 +85,12 @@ public class ModerationServiceImpl implements ModerationService {
             for (List<String> urls : urlsPartitioned) {
                 ModerateResponseDto responseDto = bulkModerating(urls, httpPost, httpClient);
 
-                if(!responseDto.isAccept()) {
+                if (!responseDto.isAccept()) {
                     rejectBuilder
                             .append(responseDto.getRejectReason())
                             .append("; ");
 
-                    if(accept) {
+                    if (accept) {
                         accept = false;
                     }
                 }
@@ -152,7 +152,7 @@ public class ModerationServiceImpl implements ModerationService {
                     .filter(reason -> reason != null && !reason.isBlank())
                     .collect(Collectors.joining("; "));
 
-            if(!isAccepted) {
+            if (!isAccepted) {
                 rejectReasons = getVietnameseRejectReason(rejectReasons);
             }
 
@@ -226,7 +226,7 @@ public class ModerationServiceImpl implements ModerationService {
             ObjectMapper mapper = new ObjectMapper();
             BulkModerationResponse moderationResponse = mapper.readValue(responseBody, BulkModerationResponse.class);
 
-            if(moderationResponse.getData() != null) {
+            if (moderationResponse.getData() != null) {
                 return handleBulkResponseData(moderationResponse);
             }
 
@@ -246,7 +246,7 @@ public class ModerationServiceImpl implements ModerationService {
         StringBuilder rejectReason = new StringBuilder();
 
         for (ModerationResponse data : moderationResponse.getData()) {
-            if("reject".equalsIgnoreCase(data.getSummary().getAction())) {
+            if ("reject".equalsIgnoreCase(data.getSummary().getAction())) {
                 result = false;
                 rejectReason.append(data.getSummary().getReject_reason()
                                 .stream()
@@ -265,7 +265,7 @@ public class ModerationServiceImpl implements ModerationService {
     }
 
     private static void handleRejectMessage(StringBuilder rejectReason) {
-        if(!rejectReason.isEmpty())
+        if (!rejectReason.isEmpty())
             rejectReason.delete(rejectReason.length() - 2, rejectReason.length());
     }
 

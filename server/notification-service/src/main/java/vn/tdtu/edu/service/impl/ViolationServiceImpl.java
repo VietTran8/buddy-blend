@@ -3,6 +3,7 @@ package vn.tdtu.edu.service.impl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.tdtu.edu.constant.MessageCode;
 import vn.tdtu.edu.dto.ResDTO;
 import vn.tdtu.edu.exception.BadRequestException;
 import vn.tdtu.edu.model.Violation;
@@ -17,12 +18,12 @@ public class ViolationServiceImpl implements ViolationService {
     @Override
     public ResDTO<Violation> findByRefId(String refId) {
         Violation foundViolation = violationRepository.findByRefId(refId)
-                .orElseThrow(() -> new BadRequestException("Violation not found!"));
+                .orElseThrow(() -> new BadRequestException(MessageCode.VIOLATION_NOT_FOUND));
 
         ResDTO<Violation> response = new ResDTO<>();
         response.setData(foundViolation);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("Violation fetched successfully!");
+        response.setMessage(MessageCode.VIOLATION_FETCHED);
 
         return response;
     }
@@ -30,12 +31,12 @@ public class ViolationServiceImpl implements ViolationService {
     @Override
     public ResDTO<Violation> findById(String id) {
         Violation foundViolation = violationRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException("Violation not found!"));
+                .orElseThrow(() -> new BadRequestException(MessageCode.VIOLATION_NOT_FOUND));
 
         ResDTO<Violation> response = new ResDTO<>();
         response.setData(foundViolation);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("Violation fetched successfully!");
+        response.setMessage(MessageCode.VIOLATION_FETCHED);
 
         return response;
     }

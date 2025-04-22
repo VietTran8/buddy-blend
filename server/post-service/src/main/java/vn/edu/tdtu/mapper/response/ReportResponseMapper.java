@@ -24,7 +24,7 @@ public class ReportResponseMapper {
         response.setCreateAt(report.getCreateAt());
 
         User foundUser = userService.findById(token, report.getUserId());
-        if(foundUser != null) {
+        if (foundUser != null) {
             ReportUserResponse reportUserResponse = new ReportUserResponse();
             reportUserResponse.setId(foundUser.getId());
             reportUserResponse.setFullName(foundUser.getUserFullName());
@@ -34,7 +34,7 @@ public class ReportResponseMapper {
         }
 
         Post foundPost = postService.findPostById(report.getPostId());
-        if(foundPost != null) {
+        if (foundPost != null) {
             PostResponse postResponse = postService.mapToPostResponse(token, foundPost);
             response.setPost(postResponse);
         }

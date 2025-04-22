@@ -20,7 +20,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findById(String userId) {
-        if(userId == null)
+        if (userId == null)
             return null;
 
         ResDTO<User> response = userClient.findById(userId);
@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findByIds(List<String> ids){
+    public List<User> findByIds(List<String> ids) {
         ResDTO<List<User>> response = userClient.findByIds(new FindByIdsRequest(ids
                 .stream()
                 .filter(Objects::nonNull)

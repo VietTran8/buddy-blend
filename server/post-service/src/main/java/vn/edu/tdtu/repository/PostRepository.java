@@ -15,33 +15,34 @@ import java.util.Optional;
 public interface PostRepository extends MongoRepository<Post, String> {
     @Query("{ 'normalizedContent' : { $regex: ?0, $options: 'i' }, 'detached': { $ne: true } }")
     List<Post> findByContent(String key);
+
     @Query("""
-      {
-           '$and': [
-             { 'detached': { $ne: true } },
-             {  'type': { '$ne': 'GROUP' } },
-             {
-               '$or': [
-                 { 'userId': ?0 },
-                 { 'postTags.taggedUserId': ?1 }
-               ]
-             },
-             {
-               '$or': [
-                 {
-                   'privacy': 'ONLY_FRIENDS',
-                   '$or': [
-                     { 'userId': { '$in': ?2 } },
-                     { 'userId': ?3 }
+              {
+                   '$and': [
+                     { 'detached': { $ne: true } },
+                     {  'type': { '$ne': 'GROUP' } },
+                     {
+                       '$or': [
+                         { 'userId': ?0 },
+                         { 'postTags.taggedUserId': ?1 }
+                       ]
+                     },
+                     {
+                       '$or': [
+                         {
+                           'privacy': 'ONLY_FRIENDS',
+                           '$or': [
+                             { 'userId': { '$in': ?2 } },
+                             { 'userId': ?3 }
+                           ]
+                         },
+                         { 'privacy': 'PRIVATE', 'userId': ?3 },
+                         { 'privacy': 'PUBLIC' },
+                       ]
+                     }
                    ]
-                 },
-                 { 'privacy': 'PRIVATE', 'userId': ?3 },
-                 { 'privacy': 'PUBLIC' },
-               ]
              }
-           ]
-     }
-    """)
+            """)
     Page<Post> findByUserIdOrPostTagsTaggedUserIdWithPrivacy(
             String userId,
             String taggedUserId,
@@ -49,7 +50,10 @@ public interface PostRepository extends MongoRepository<Post, String> {
             String authUserId,
             Pageable pageable
     );
+
     Page<Post> findByGroupIdAndDetachedNotOrderByCreatedAtDesc(String groupId, boolean detached, Pageable pageable);
+
     List<Post> findByIdInAndDetachedNot(Collection<String> id, boolean detached);
+
     Optional<Post> findByIdAndDetachedAndUserId(String id, boolean detached, String userId);
 }

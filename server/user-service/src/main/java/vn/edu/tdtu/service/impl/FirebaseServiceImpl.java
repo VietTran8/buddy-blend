@@ -54,18 +54,18 @@ public class FirebaseServiceImpl implements FirebaseService {
     public void removeUserRegistrationId(User user, List<String> registrationIds) {
         String notificationKey = user.getNotificationKey();
 
-        if(notificationKey != null && !notificationKey.isEmpty()) {
+        if (notificationKey != null && !notificationKey.isEmpty()) {
             user.setNotificationKey(handleRegistrationIds(ERIDHandleType.TYPE_REMOVE, user.getId(), registrationIds));
         }
 
     }
 
     @Override
-    public void saveUserDeviceGroup(User user, List<String> registrationIds){
+    public void saveUserDeviceGroup(User user, List<String> registrationIds) {
         String notificationKey = user.getNotificationKey();
 
         //If user already have notification key, then add
-        if(notificationKey != null && !notificationKey.isEmpty()){
+        if (notificationKey != null && !notificationKey.isEmpty()) {
             handleRegistrationIds(ERIDHandleType.TYPE_ADD, user.getId(), registrationIds);
             return;
         }
@@ -92,7 +92,7 @@ public class FirebaseServiceImpl implements FirebaseService {
                 .block();
     }
 
-    private String handleRegistrationIds(ERIDHandleType type, String notiKeyName, List<String> regisIds){
+    private String handleRegistrationIds(ERIDHandleType type, String notiKeyName, List<String> regisIds) {
         String notificationKey = getNotificationKey(notiKeyName).getNotification_key();
 
         String notificationUrl = "https://fcm.googleapis.com/fcm/notification";
@@ -103,7 +103,7 @@ public class FirebaseServiceImpl implements FirebaseService {
         requestBody.setNotification_key_name(notiKeyName);
         requestBody.setOperation(type.getName());
 
-        if(type == ERIDHandleType.TYPE_ADD || type == ERIDHandleType.TYPE_REMOVE){
+        if (type == ERIDHandleType.TYPE_ADD || type == ERIDHandleType.TYPE_REMOVE) {
             log.info("Notification key: " + notificationKey);
             requestBody.setNotification_key(notificationKey);
         }
@@ -126,9 +126,9 @@ public class FirebaseServiceImpl implements FirebaseService {
                     EntityUtils.toString(httpResponse.getEntity()));
 
             JsonNode root = objectMapper.readTree(responseBody);
-            log.info("Response body: "+ responseBody);
+            log.info("Response body: " + responseBody);
 
-            if(root.path("notification_key").asText().isEmpty()){
+            if (root.path("notification_key").asText().isEmpty()) {
                 log.error("Failed to send notification request: " + root.path("error").asText());
                 return "";
             }

@@ -17,7 +17,7 @@ public class AppConfig {
     }
 
     @Bean
-    public JsonMessageConverter jsonMessageConverter(){
+    public JsonMessageConverter jsonMessageConverter() {
         return new JsonMessageConverter();
     }
 }

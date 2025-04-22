@@ -5,6 +5,7 @@ import feign.Util;
 import feign.codec.ErrorDecoder;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.exception.UnauthorizedException;
 
@@ -42,7 +43,7 @@ public class KeycloakErrorDecoder implements ErrorDecoder {
 
         return switch (status) {
             case NOT_FOUND, BAD_REQUEST -> new BadRequestException(message);
-            case UNAUTHORIZED -> new UnauthorizedException("Invalid credentials");
+            case UNAUTHORIZED -> new UnauthorizedException(MessageCode.AUTH_INVALID_CREDENTIALS);
             case INTERNAL_SERVER_ERROR -> new Exception(message);
             default -> defaultErrorDecoder.decode(methodKey, response);
         };
@@ -112,10 +113,10 @@ public class KeycloakErrorDecoder implements ErrorDecoder {
         }
 
         private static Charset getResponseCharset(Map<String, Collection<String>> headers) {
-            Collection<String> strings = (Collection)headers.get("content-type");
+            Collection<String> strings = (Collection) headers.get("content-type");
             if (strings != null && !strings.isEmpty()) {
                 Pattern pattern = Pattern.compile(".*charset=([^\\s|^;]+).*");
-                Matcher matcher = pattern.matcher((CharSequence)strings.iterator().next());
+                Matcher matcher = pattern.matcher((CharSequence) strings.iterator().next());
                 if (!matcher.lookingAt()) {
                     return null;
                 } else {

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Content{
+public class Content {
     public ArrayList<Part> parts;
     public String role;
 }

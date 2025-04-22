@@ -8,10 +8,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableCaching
 @EnableFeignClients
-public class SearchServiceApp
-{
-    public static void main( String[] args )
-    {
+public class SearchServiceApp {
+    public static void main(String[] args) {
         SpringApplication.run(SearchServiceApp.class, args);
     }
 }

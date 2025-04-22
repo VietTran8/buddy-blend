@@ -23,7 +23,7 @@ public class SocketModule {
     private final SocketService socketService;
     private final JwtUtils jwtUtils;
 
-    public SocketModule(SocketIOServer server, JwtUtils jwtUtils, SocketService socketService){
+    public SocketModule(SocketIOServer server, JwtUtils jwtUtils, SocketService socketService) {
         this.socketService = socketService;
         this.jwtUtils = jwtUtils;
 
@@ -34,21 +34,21 @@ public class SocketModule {
         server.addEventListener("seen", SeenMessage.class, onSeen());
     }
 
-    public ConnectListener onConnected(){
+    public ConnectListener onConnected() {
         return new ConnectListener() {
             @Override
             public void onConnect(SocketIOClient client) {
                 HandshakeData handshakeData = client.getHandshakeData();
                 String bearerToken = handshakeData.getHttpHeaders().get("Authorization");
 
-                if(bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+                if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
                     client.disconnect();
                     throw new IllegalArgumentException("Invalid JWT token format");
                 }
 
                 String token = bearerToken.split(" ")[1];
 
-                if(!jwtUtils.validateJwtToken(token)) {
+                if (!jwtUtils.validateJwtToken(token)) {
                     client.disconnect();
                     throw new UnauthorizedException("You are not authenticated");
                 }
@@ -62,7 +62,7 @@ public class SocketModule {
         };
     }
 
-    public DataListener<SendMessage> onMessageReceived(){
+    public DataListener<SendMessage> onMessageReceived() {
         return new DataListener<SendMessage>() {
             @Override
             public void onData(SocketIOClient socketIOClient, SendMessage sendMessage, AckRequest ackRequest) throws Exception {
@@ -72,7 +72,7 @@ public class SocketModule {
         };
     }
 
-    public DataListener<JoinRoomMessage> onJoinRoom(){
+    public DataListener<JoinRoomMessage> onJoinRoom() {
         return new DataListener<JoinRoomMessage>() {
             @Override
             public void onData(SocketIOClient client, JoinRoomMessage joinRoomMessage, AckRequest ackRequest) throws Exception {

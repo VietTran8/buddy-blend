@@ -16,7 +16,8 @@ public class UserDetailsImpl implements UserDetails {
     private String password;
     private List<GrantedAuthority> roles;
     private Boolean active;
-    public static UserDetailsImpl build(AuthInfo user){
+
+    public static UserDetailsImpl build(AuthInfo user) {
         UserDetailsImpl userDetails = new UserDetailsImpl();
         userDetails.email = user.getEmail();
         userDetails.password = user.getHashedPassword();
@@ -26,6 +27,7 @@ public class UserDetailsImpl implements UserDetails {
 
         return userDetails;
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles;

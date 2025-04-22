@@ -22,7 +22,7 @@ public class MessageNoti {
     private String fromUserId;
     private String toUserId;
 
-    public MessageNoti(ChatMessage message){
+    public MessageNoti(ChatMessage message) {
         this.id = message.getId();
         this.createdAt = message.getCreatedAt();
         this.content = message.getContent();

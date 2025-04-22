@@ -25,6 +25,6 @@ public class Viewer {
     @JsonIgnore
     private Story story;
     @JsonIgnore
-    @OneToMany(mappedBy = "viewer", cascade = { CascadeType.MERGE, CascadeType.REMOVE })
+    @OneToMany(mappedBy = "viewer", cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     private List<Reaction> reactions;
 }

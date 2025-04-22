@@ -7,6 +7,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.response.SearchResponse;
 import vn.edu.tdtu.model.data.SearchHistory;
@@ -33,8 +34,8 @@ public class SearchServiceImpl implements SearchService {
     @Override
     @CacheEvict(cacheNames = "search-history", allEntries = true)
     @Cacheable(key = "T(java.util.Objects).hash(#p0, #p1)", value = "search-result", unless = "#result.data.users.isEmpty() and #result.data.posts.isEmpty()")
-    public ResDTO<?> search(String token, String key){
-        if(token != null && !repository.existsByQuery(key)){
+    public ResDTO<?> search(String token, String key) {
+        if (token != null && !repository.existsByQuery(key)) {
             SearchHistory searchHistory = new SearchHistory();
             searchHistory.setQuery(key);
             searchHistory.setUserId(SecurityContextUtils.getUserId());
@@ -52,14 +53,14 @@ public class SearchServiceImpl implements SearchService {
         ResDTO<SearchResponse> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(data);
-        response.setMessage("success");
+        response.setMessage(MessageCode.SEARCH_SEARCHED);
 
         return response;
     }
 
     @Override
     @Cacheable(key = "T(java.util.Objects).hash(#p0, #p1)", value = "fetch-result", unless = "#result.data.users.isEmpty() and #result.data.posts.isEmpty()")
-    public ResDTO<?> fetchResult(String token, String key){
+    public ResDTO<?> fetchResult(String token, String key) {
         SearchResponse data = new SearchResponse();
 
         data.setUsers(userService.searchUserFullName(token, key, Fuzziness.ONE.asString()));
@@ -69,16 +70,16 @@ public class SearchServiceImpl implements SearchService {
         ResDTO<SearchResponse> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(data);
-        response.setMessage("success");
+        response.setMessage(MessageCode.SEARCH_RESULT_FETCHED);
 
         return response;
     }
 
     @Override
     @Cacheable(key = "T(java.util.Objects).hash(#p0)", value = "search-history", unless = "#result.data.isEmpty() and #result.data.isEmpty()")
-    public ResDTO<?> getSearchHistory(String token){
+    public ResDTO<?> getSearchHistory(String token) {
         ResDTO<List<SearchHistory>> response = new ResDTO<>();
-        response.setMessage("success");
+        response.setMessage(MessageCode.SEARCH_HISTORY_FETCHED);
         response.setData(new ArrayList<>());
         response.setCode(HttpServletResponse.SC_OK);
 
@@ -86,7 +87,7 @@ public class SearchServiceImpl implements SearchService {
                 .stream().sorted(Comparator.comparingLong(s -> ((SearchHistory) s).getCreatedAt().getTime()).reversed())
                 .toList();
 
-        if(token != null){
+        if (token != null) {
             response.setData(searchHistories);
         }
 
@@ -96,12 +97,12 @@ public class SearchServiceImpl implements SearchService {
     @Override
     @Transactional
     @CacheEvict(cacheNames = "search-history", allEntries = true)
-    public ResDTO<?> deleteSearchHistory(String id){
-        ResDTO<Object>  response = new ResDTO<>();
+    public ResDTO<?> deleteSearchHistory(String id) {
+        ResDTO<Object> response = new ResDTO<>();
 
         repository.deleteByUserIdAndId(SecurityContextUtils.getUserId(), id);
 
-        response.setMessage("success");
+        response.setMessage(MessageCode.SEARCH_HISTORY_DELETED);
         response.setCode(200);
 
         return response;
@@ -110,12 +111,12 @@ public class SearchServiceImpl implements SearchService {
     @Override
     @Transactional
     @CacheEvict(cacheNames = "search-history", allEntries = true)
-    public ResDTO<?> deleteAllSearchHistory(){
-        ResDTO<Object>  response = new ResDTO<>();
+    public ResDTO<?> deleteAllSearchHistory() {
+        ResDTO<Object> response = new ResDTO<>();
 
         repository.deleteByUserId(SecurityContextUtils.getUserId());
 
-        response.setMessage("success");
+        response.setMessage(MessageCode.SEARCH_HISTORY_DELETED);
         response.setCode(200);
 
         return response;

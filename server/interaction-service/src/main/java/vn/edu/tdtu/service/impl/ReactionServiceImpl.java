@@ -2,6 +2,7 @@ package vn.edu.tdtu.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.requests.DoReactRequest;
 import vn.edu.tdtu.dto.response.InteractNotification;
@@ -38,15 +39,15 @@ public class ReactionServiceImpl implements ReactionService {
     private final PostService postService;
 
     @Override
-    public ResDTO<?> doReaction(String token, DoReactRequest request){
+    public ResDTO<?> doReaction(String token, DoReactRequest request) {
         ResDTO<List<TopReacts>> response = new ResDTO<>();
         String userId = SecurityContextUtils.getUserId();
         String postId = request.getPostId();
 
         Post foundPost = postService.findById(token, request.getPostId());
 
-        if(foundPost == null)
-            throw new BadRequestException("Post not found with id: " + request.getPostId());
+        if (foundPost == null)
+            throw new BadRequestException(MessageCode.POST_NOT_FOUND_ID, request.getPostId());
 
         AtomicReference<Boolean> isCreateNew = new AtomicReference<>();
         isCreateNew.set(false);
@@ -57,27 +58,27 @@ public class ReactionServiceImpl implements ReactionService {
         reactionRepository.findByUserIdAndPostId(reaction.getUserId(), postId)
                 .ifPresentOrElse(
                         r -> {
-                            if(r.getType().equals(reaction.getType())){
+                            if (r.getType().equals(reaction.getType())) {
                                 reactionRepository.delete(r);
-                                response.setMessage("Đã hủy tương tác");
-                            }else{
+                                response.setMessage(MessageCode.REACTION_UNCREATED);
+                            } else {
                                 r.setType(reaction.getType());
                                 r.setCreatedAt(LocalDateTime.now());
                                 reactionRepository.save(r);
 
-                                response.setMessage("Đã cập nhật tương tác");
+                                response.setMessage(MessageCode.REACTION_UPDATED);
                                 isCreateNew.set(true);
                             }
                         }, () -> {
                             reactionRepository.save(reaction);
-                            response.setMessage("Đã tương tác");
+                            response.setMessage(MessageCode.REACTION_CREATED);
                             isCreateNew.set(true);
                         }
                 );
 
-        if(isCreateNew.get()){
+        if (isCreateNew.get()) {
             User foundUser = userService.findById(token, userId);
-            if(foundUser != null && !foundUser.getId().equals(foundPost.getUser().getId())){
+            if (foundUser != null && !foundUser.getId().equals(foundPost.getUser().getId())) {
                 InteractNotification notification = new InteractNotification();
                 notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
                 notification.setAvatarUrl(foundUser.getProfilePicture());
@@ -102,7 +103,7 @@ public class ReactionServiceImpl implements ReactionService {
         return response;
     }
 
-    private List<TopReacts> findTopReact(Map<EReactionType, List<ReactResponse>> reactionsMap){
+    private List<TopReacts> findTopReact(Map<EReactionType, List<ReactResponse>> reactionsMap) {
         Map<EReactionType, List<ReactResponse>> sortedMap = reactionsMap.entrySet()
                 .stream()
                 .sorted((entry1, entry2) -> Integer.compare(entry2.getValue().size(), entry1.getValue().size()))
@@ -127,7 +128,7 @@ public class ReactionServiceImpl implements ReactionService {
     }
 
     @Override
-    public ResDTO<Map<EReactionType, List<ReactResponse>>> getReactsByPostId(String token, String postId){
+    public ResDTO<Map<EReactionType, List<ReactResponse>>> getReactsByPostId(String token, String postId) {
         ResDTO<Map<EReactionType, List<ReactResponse>>> response = new ResDTO<>();
         String userId = SecurityContextUtils.getUserId();
 
@@ -142,7 +143,7 @@ public class ReactionServiceImpl implements ReactionService {
 
         response.setCode(200);
         response.setData(reactResponses);
-        response.setMessage("success");
+        response.setMessage(MessageCode.REACTION_FETCHED);
 
         return response;
     }

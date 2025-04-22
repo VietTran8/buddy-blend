@@ -18,7 +18,7 @@ public class UserServiceImpl implements UserService {
     private final UserClient userClient;
 
     @Override
-    public User getUserInfo(String email){
+    public User getUserInfo(String email) {
         try {
             ResDTO<User> response = userClient.getUserInfo(email);
             return response.getData();
@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public SignUpResponse saveUser(SignUpRequest user){
+    public SignUpResponse saveUser(SignUpRequest user) {
         ResDTO<SignUpResponse> response = userClient.saveUser(user);
         return response.getData();
     }

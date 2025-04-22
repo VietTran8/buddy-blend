@@ -12,7 +12,7 @@ import java.util.List;
 @Component
 public class ReactResponseMapper {
 
-    public ReactResponse mapToDto(String userId, Reactions reaction, List<User> users){
+    public ReactResponse mapToDto(String userId, Reactions reaction, List<User> users) {
         ReactResponse response = new ReactResponse();
 
         response.setId(reaction.getId());
@@ -27,7 +27,7 @@ public class ReactResponseMapper {
         return response;
     }
 
-    public ReactResponse mapToCommentDto(String userId, CommentReactions reaction, List<User> users){
+    public ReactResponse mapToCommentDto(String userId, CommentReactions reaction, List<User> users) {
         ReactResponse response = new ReactResponse();
 
         response.setId(reaction.getId());

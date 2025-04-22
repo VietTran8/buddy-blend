@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateBioReqDTO {
-//    private String userId;
+    //    private String userId;
     private String bio;
 }

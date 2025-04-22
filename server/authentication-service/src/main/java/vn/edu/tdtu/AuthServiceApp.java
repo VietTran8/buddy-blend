@@ -10,21 +10,19 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableFeignClients
-public class AuthServiceApp
-{
-    public static void main( String[] args )
-    {
+public class AuthServiceApp {
+    public static void main(String[] args) {
         SpringApplication.run(AuthServiceApp.class, args);
     }
 
     @Bean
     @LoadBalanced
-    public RestTemplate restTemplate(){
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 
     @Bean
-    public ObjectMapper objectMapper(){
+    public ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
 }

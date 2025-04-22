@@ -6,5 +6,6 @@ import vn.edu.tdtu.model.data.User;
 
 public interface UserService {
     public User getUserInfo(String email);
+
     public SignUpResponse saveUser(SignUpRequest user);
 }

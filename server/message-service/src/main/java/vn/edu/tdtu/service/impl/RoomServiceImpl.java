@@ -3,6 +3,7 @@ package vn.edu.tdtu.service.impl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.RoomResponse;
 import vn.edu.tdtu.exception.BadRequestException;
@@ -22,29 +23,29 @@ public class RoomServiceImpl implements RoomService {
     private final RoomResponseMapper roomResponseMapper;
 
     @Override
-    public void saveRoom(Room room){
+    public void saveRoom(Room room) {
         roomRepository.save(room);
     }
 
     @Override
-    public Room findById(String id){
+    public Room findById(String id) {
         return roomRepository.findById(id).orElse(null);
     }
 
     @Override
-    public Room findExistingRoom(String fromUserId, String toUserId){
+    public Room findExistingRoom(String fromUserId, String toUserId) {
         return roomRepository.findByUserId1AndUserId2OrUserId2AndUserId1(fromUserId, toUserId, fromUserId, toUserId)
                 .orElse(null);
     }
 
     @Override
-    public ResDTO<?> findRoomsByUser(){
+    public ResDTO<?> findRoomsByUser() {
         String userId = SecurityContextUtils.getUserId();
         List<Room> rooms = roomRepository.findByUserId1OrUserId2(userId, userId);
 
         ResDTO<List<RoomResponse>> response = new ResDTO<>();
         response.setCode(200);
-        response.setMessage("success");
+        response.setMessage(MessageCode.ROOM_FETCHED);
         response.setData(rooms.stream()
                 .map(room -> roomResponseMapper.mapToDTO(userId, room))
                 .sorted((room1, room2) -> {
@@ -63,8 +64,8 @@ public class RoomServiceImpl implements RoomService {
         String authUserId = SecurityContextUtils.getUserId();
         Room foundRoom = findExistingRoom(authUserId, opponentId);
 
-        if(foundRoom == null)
-            throw new BadRequestException("Room not found!");
+        if (foundRoom == null)
+            throw new BadRequestException(MessageCode.ROOM_NOT_FOUND);
 
         foundRoom.setArchived(archived);
 

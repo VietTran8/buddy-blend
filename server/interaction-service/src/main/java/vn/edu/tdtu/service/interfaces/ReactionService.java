@@ -10,5 +10,6 @@ import java.util.Map;
 
 public interface ReactionService {
     public ResDTO<?> doReaction(String token, DoReactRequest request);
+
     public ResDTO<Map<EReactionType, List<ReactResponse>>> getReactsByPostId(String token, String postId);
 }

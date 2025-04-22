@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.AuthUserResponse;
@@ -44,26 +45,26 @@ public class UserServiceImpl implements UserService {
     private final AuthService authService;
 
     @Override
-    public ResDTO<?> findAll(){
+    public ResDTO<?> findAll() {
         ResDTO<List<User>> response = new ResDTO<>();
 
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("users fetched successfully");
+        response.setMessage(MessageCode.USER_FETCHED);
         response.setData(userRepository.findByActive(true));
 
         return response;
     }
 
     @Override
-    public ResDTO<?> findProfile(String id){
+    public ResDTO<?> findProfile(String id) {
         String userId = SecurityContextUtils.getUserId();
         ResDTO<UserDetailsResponse> response = new ResDTO<>();
 
         User foundUser = userRepository.findByIdAndActive(id.isEmpty() ? userId : id, true)
-                        .orElseThrow(() -> new BadRequestException("User not found"));
+                .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND));
 
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("users fetched successfully");
+        response.setMessage(MessageCode.USER_FETCHED);
         response.setData(userDetailsMapper.mapToDTO(foundUser));
 
         return response;
@@ -77,16 +78,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResDTO<?> findByEmailResp(String email){
+    public ResDTO<?> findByEmailResp(String email) {
         User foundUser = findByEmail(email);
         ResDTO<AuthUserResponse> response = new ResDTO<>();
 
-        if(foundUser == null) {
-            throw new BadRequestException(String.format("User not found with email: %s", email));
+        if (foundUser == null) {
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND_EMAIL, email);
         }
 
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("User fetched successfully");
+        response.setMessage(MessageCode.USER_FETCHED);
         response.setData(AuthUserResponse.builder()
                 .id(foundUser.getId())
                 .email(foundUser.getEmail())
@@ -100,28 +101,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByEmail(String email){
+    public User findByEmail(String email) {
         return userRepository.findByEmailAndActive(email, true).orElse(null);
     }
 
     @Override
-    public ResDTO<?> findResById(String id){
+    public ResDTO<?> findResById(String id) {
         ResDTO<MinimizedUserResponse> response = new ResDTO<>();
 
         User foundUser = userRepository.findByIdAndActive(id, true)
-                .orElseThrow(() -> new BadRequestException("User not found"));
+                .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND));
 
         MinimizedUserResponse mappedUser = minimizedUserMapper.mapToDTO(foundUser);
 
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("user fetched successfully");
+        response.setMessage(MessageCode.USER_FETCHED);
         response.setData(mappedUser.isHiddenBanned() ? null : mappedUser);
 
         return response;
     }
 
     @Override
-    public ResDTO<List<MinimizedUserResponse>> findResByIds(String token, FindByIdsReqDTO request){
+    public ResDTO<List<MinimizedUserResponse>> findResByIds(String token, FindByIdsReqDTO request) {
         ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
 
         List<MinimizedUserResponse> users = userRepository.findByIdInAndActive(request.getUserIds(), true)
@@ -131,14 +132,14 @@ public class UserServiceImpl implements UserService {
                 .toList();
 
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("users fetched successfully");
+        response.setMessage(MessageCode.USER_FETCHED);
         response.setData(users);
 
         return response;
     }
 
     @Override
-    public ResDTO<List<MinimizedUserResponse>> findFriendsByNotInIds(String token, FindByIdsReqDTO request){
+    public ResDTO<List<MinimizedUserResponse>> findFriendsByNotInIds(String token, FindByIdsReqDTO request) {
         ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
 
         String userId = SecurityContextUtils.getUserId();
@@ -153,54 +154,54 @@ public class UserServiceImpl implements UserService {
                 .toList();
 
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("users fetched successfully");
+        response.setMessage(MessageCode.USER_FETCHED);
         response.setData(users);
 
         return response;
     }
 
     @Override
-    public User findById(String id){
+    public User findById(String id) {
         return userRepository.findByIdAndActive(id, true).orElse(null);
     }
 
     @Override
-    public ResDTO<?> existsById(String id){
+    public ResDTO<?> existsById(String id) {
         ResDTO<Boolean> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("success");
+        response.setMessage(MessageCode.USER_FETCHED);
         response.setData(userRepository.existsById(id));
         return response;
     }
 
     @Override
-    public ResDTO<?> searchByName(String token, String name){
+    public ResDTO<?> searchByName(String token, String name) {
         ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
 
         List<MinimizedUserResponse> userResponses = userRepository.findByNamesContaining(name).stream().map(
-                minimizedUserMapper::mapToDTO
-        )
+                        minimizedUserMapper::mapToDTO
+                )
                 .filter(u -> !u.isHiddenBanned())
                 .toList();
 
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("success");
+        response.setMessage(MessageCode.USER_FETCHED);
         response.setData(userResponses);
         return response;
     }
 
     @Override
-    public ResDTO<?> saveUser(SaveUserReqDTO user){
+    public ResDTO<?> saveUser(SaveUserReqDTO user) {
         ResDTO<SaveUserResponse> response = new ResDTO<>();
 
-        if(userRepository.existsByEmail(user.getEmail())){
-            throw new BadRequestException("Email này đã tồn tại!");
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new BadRequestException(MessageCode.USER_EMAIL_EXISTS);
         }
 
         User savedUser = userRepository.save(saveUserReqMapper.mapToObject(user));
 
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("Đăng ký thành công");
+        response.setMessage(MessageCode.USER_SAVED);
         response.setData(SaveUserResponse.builder()
                 .id(savedUser.getId())
                 .email(savedUser.getEmail())
@@ -212,18 +213,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResDTO<?> updateBio(UpdateBioReqDTO userBio){
+    public ResDTO<?> updateBio(UpdateBioReqDTO userBio) {
         String userId = SecurityContextUtils.getUserId();
         User user = findById(userId);
         ResDTO<User> response = new ResDTO<>();
 
-        if(user == null){
-            throw new BadRequestException(String.format("Không tìm thấy người dùng với id: %s", userId));
+        if (user == null) {
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, userId);
         }
 
         user.setBio(userBio.getBio());
 
-        response.setMessage("Cập nhật thành công!");
+        response.setMessage(MessageCode.USER_UPDATED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(userRepository.save(user));
 
@@ -231,32 +232,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResDTO<?> renameUser( RenameReqDTO request){
+    public ResDTO<?> renameUser(RenameReqDTO request) {
         String userId = SecurityContextUtils.getUserId();
         User user = findById(userId);
         ResDTO<User> response = new ResDTO<>();
 
-        if(user == null){
-            throw new BadRequestException(String.format("Không tìm thấy người dùng với id: %s", userId));
+        if (user == null) {
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, userId);
         }
 
         ConfirmTokenCheckingRequest checkingRequest = new ConfirmTokenCheckingRequest();
         checkingRequest.setEmail(user.getEmail());
         checkingRequest.setToken(request.getToken());
 
-        if(!authService.confirmationTokenChecking(checkingRequest))
-            throw new BadRequestException("Invalid token!");
+        if (!authService.confirmationTokenChecking(checkingRequest))
+            throw new BadRequestException(MessageCode.AUTH_INVALID_TOKEN);
 
-        if(request.getFirstName() != null)
+        if (request.getFirstName() != null)
             user.setFirstName(request.getFirstName());
 
         if (request.getMiddleName() != null)
             user.setMiddleName(request.getMiddleName());
 
-        if(request.getLastName() != null)
+        if (request.getLastName() != null)
             user.setLastName(request.getLastName());
 
-        response.setMessage("Cập nhật thành công!");
+        response.setMessage(MessageCode.USER_UPDATED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(userRepository.save(user));
 
@@ -266,28 +267,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResDTO<?> updatePicture(MultipartFile pic, boolean isProfilePic){
+    public ResDTO<?> updatePicture(MultipartFile pic, boolean isProfilePic) {
         String userId = SecurityContextUtils.getUserId();
         User foundUser = findById(userId);
         ResDTO<User> response = new ResDTO<>();
 
-        if(foundUser == null){
-            throw new BadRequestException(String.format("Không tìm thấy người dùng với id: %s", userId));
+        if (foundUser == null) {
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, userId);
         }
 
-        try{
+        try {
             String fileName = fileService.upload(pic, EFileType.TYPE_IMG);
 
-            if(isProfilePic)
+            if (isProfilePic)
                 foundUser.setProfilePicture(fileName);
             else
                 foundUser.setCover(fileName);
 
             response.setData(userRepository.save(foundUser));
             response.setCode(HttpServletResponse.SC_OK);
-            response.setMessage("Cập nhật thành công!");
+            response.setMessage(MessageCode.USER_UPDATED);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new BadRequestException(String.format("Lỗi xảy ra: %s", e.getMessage()));
         }
 
@@ -295,24 +296,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResDTO<?> updateInfo(UpdateInfoReqDTO request){
+    public ResDTO<?> updateInfo(UpdateInfoReqDTO request) {
         String userId = SecurityContextUtils.getUserId();
         User user = findById(userId);
         ResDTO<User> response = new ResDTO<>();
 
-        if(user == null){
-            throw new BadRequestException(String.format("Không tìm thấy người dùng với id: %s", userId));
+        if (user == null) {
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, userId);
         }
 
-        if(request.getGender() != null) user.setGender(request.getGender());
+        if (request.getGender() != null) user.setGender(request.getGender());
 
-        if(request.getFromCity() != null) user.setFromCity(request.getFromCity());
+        if (request.getFromCity() != null) user.setFromCity(request.getFromCity());
 
-        if(request.getPhone() != null) user.setPhone(request.getPhone());
+        if (request.getPhone() != null) user.setPhone(request.getPhone());
 
-        if(request.getBio() != null) user.setBio(request.getBio());
+        if (request.getBio() != null) user.setBio(request.getBio());
 
-        response.setMessage("Cập nhật thành công");
+        response.setMessage(MessageCode.USER_UPDATED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(userRepository.save(user));
 
@@ -320,17 +321,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResDTO<?> disableAccount(DisableAccountReqDTO account){
+    public ResDTO<?> disableAccount(DisableAccountReqDTO account) {
         User user = findById(account.getUserId());
         ResDTO<User> response = new ResDTO<>();
 
-        if(user == null){
-            throw new BadRequestException(String.format("Không tìm thấy người dùng với id: %s", account.getUserId()));
+        if (user == null) {
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, account.getUserId());
         }
 
         user.setActive(false);
 
-        response.setMessage("Đã vô hiệu hóa tài khoản");
+        response.setMessage(MessageCode.USER_DISABLED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(userRepository.save(user));
 
@@ -340,7 +341,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResDTO<?> saveUserRegistrationId(SaveUserResIdReq requestBody){
+    public ResDTO<?> saveUserRegistrationId(SaveUserResIdReq requestBody) {
         String userId = SecurityContextUtils.getUserId();
         User foundUser = findById(userId);
         Map<String, String> data = new HashMap<>();
@@ -348,23 +349,23 @@ public class UserServiceImpl implements UserService {
 
         ResDTO<Map<String, String>> response = new ResDTO<>();
 
-        if(foundUser != null && foundUser.isActive()){
+        if (foundUser != null && foundUser.isActive()) {
             firebaseService.saveUserDeviceGroup(foundUser, List.of(requestBody.getRegistrationId()));
             userRepository.save(foundUser);
             data.put("notificationKey", foundUser.getNotificationKey());
 
             response.setCode(200);
             response.setData(data);
-            response.setMessage("Saved user registration id");
+            response.setMessage(MessageCode.USER_SAVED_REGISTRATION_ID);
 
             return response;
         }
 
-        throw new BadRequestException("User not found with id: " + userId);
+        throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, userId);
     }
 
     @Override
-    public ResDTO<?> removeUserRegistrationId(SaveUserResIdReq requestBody){
+    public ResDTO<?> removeUserRegistrationId(SaveUserResIdReq requestBody) {
         String userId = SecurityContextUtils.getUserId();
         User foundUser = findById(userId);
         Map<String, String> data = new HashMap<>();
@@ -372,18 +373,18 @@ public class UserServiceImpl implements UserService {
 
         ResDTO<Map<String, String>> response = new ResDTO<>();
 
-        if(foundUser != null && foundUser.isActive()){
+        if (foundUser != null && foundUser.isActive()) {
             firebaseService.removeUserRegistrationId(foundUser, List.of(requestBody.getRegistrationId()));
             userRepository.save(foundUser);
             data.put("notificationKey", foundUser.getNotificationKey());
 
             response.setCode(200);
             response.setData(data);
-            response.setMessage("Removed user registration id");
+            response.setMessage(MessageCode.USER_DELETED_REGISTRATION_ID);
 
             return response;
         }
 
-        throw new BadRequestException("User not found with id: " + userId);
+        throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, userId);
     }
 }

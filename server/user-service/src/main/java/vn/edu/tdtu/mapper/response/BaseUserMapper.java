@@ -38,9 +38,9 @@ public class BaseUserMapper {
                 .ifPresent(request -> {
                     switch (request.getStatus()) {
                         case PENDING -> {
-                            if(request.getToUser().getId().equals(user.getId())){
+                            if (request.getToUser().getId().equals(user.getId())) {
                                 userResponse.setFriendStatus(EFriendStatus.SENT_BY_YOU);
-                            }else {
+                            } else {
                                 userResponse.setFriendStatus(EFriendStatus.SENT_TO_YOU);
                             }
                         }
@@ -85,7 +85,7 @@ public class BaseUserMapper {
     public List<User> getListFriends(User user) {
         List<User> friends = new ArrayList<>();
 
-        if(user != null) {
+        if (user != null) {
             List<FriendRequest> friendRequests = friendRequestRepository.findByFromUserAndStatusOrToUserAndStatus(user, EFriendReqStatus.ACCEPTED, user, EFriendReqStatus.ACCEPTED);
             friends = friendRequests.stream().map(request -> {
                 if (request.getFromUser().getId().equals(user.getId())) {

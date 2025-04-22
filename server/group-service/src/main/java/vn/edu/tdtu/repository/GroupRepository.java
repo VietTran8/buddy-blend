@@ -19,5 +19,6 @@ public interface GroupRepository extends JpaRepository<Group, String> {
     boolean getIsJoinedToGroup(@Param("groupId") String groupId, @Param("userId") String userId);
 
     Optional<Group> findByIdAndIsDeleted(String id, boolean isDeleted);
+
     List<Group> findAllByIdInAndIsDeleted(List<String> id, boolean isDeleted);
 }

@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface SavePostService {
     public ResDTO<SavePostResponse> handleSavePost(String postId);
+
     public ResDTO<List<PostResponse>> getUserSavedPost(String token);
 }

@@ -15,9 +15,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class ApplicationConfig {
     @Bean
     @LoadBalanced
-    public RestTemplate restTemplate(){
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+
     @Value("${kafka.topic.sync-user.name}")
     private String synUserTopicName;
     @Value("${kafka.topic.friend-request.name}")
@@ -31,17 +32,17 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public NewTopic friendRequestTopic(){
+    public NewTopic friendRequestTopic() {
         return new NewTopic(friendRequestTopicName, 2, (short) 1);
     }
 
     @Bean
-    public NewTopic syncUser(){
+    public NewTopic syncUser() {
         return new NewTopic(synUserTopicName, 2, (short) 1);
     }
 
     @Bean
-    public RedisTemplate<String, ?> redisTemplate(RedisConnectionFactory connectionFactory){
+    public RedisTemplate<String, ?> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, ?> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
 
@@ -49,7 +50,7 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public JsonMessageConverter jsonMessageConverter(){
+    public JsonMessageConverter jsonMessageConverter() {
         return new JsonMessageConverter();
     }
 

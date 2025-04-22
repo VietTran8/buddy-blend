@@ -9,5 +9,6 @@ import java.util.Optional;
 @Repository
 public interface BannedWordRepository extends MongoRepository<BannedWord, String> {
     boolean existsByWord(String word);
+
     Optional<BannedWord> findByWord(String word);
 }

@@ -17,8 +17,9 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Component
-public class CustomPostRepositoryImpl implements CustomPostRepository{
+public class CustomPostRepositoryImpl implements CustomPostRepository {
     private final MongoTemplate mongoTemplate;
+
     @Override
     public Page<Post> findNewsFeed(String userId, List<String> friendIds, List<String> groupIds, LocalDateTime startTime, int page, int size) {
         Criteria detachCriteria = new Criteria().orOperator(

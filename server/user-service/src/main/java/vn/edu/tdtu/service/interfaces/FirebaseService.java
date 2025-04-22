@@ -7,7 +7,10 @@ import java.util.List;
 
 public interface FirebaseService {
     public String getAccessToken();
+
     public void removeUserRegistrationId(User user, List<String> registrationIds);
+
     public void saveUserDeviceGroup(User user, List<String> registrationIds);
+
     public FcmResponse getNotificationKey(String notificationKeyName);
 }

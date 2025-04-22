@@ -36,10 +36,10 @@ public class PostResponseMapper {
     private final PostRepository postRepository;
     private final MediaRepository mediaRepository;
 
-    public PostResponse mapToDto(String token, String postId, Post post, Map<String, Post> sharedPostsMap, boolean bulkFetch){
+    public PostResponse mapToDto(String token, String postId, Post post, Map<String, Post> sharedPostsMap, boolean bulkFetch) {
         PostResponse postResponse = mapToDto(token, postId, post, bulkFetch);
 
-        if(post.getType().equals(EPostType.SHARE)) {
+        if (post.getType().equals(EPostType.SHARE)) {
             Post foundSharedPost = !bulkFetch ?
                     postRepository.findById(post.getSharedPostId()).orElse(null) :
                     sharedPostsMap.get(post.getSharedPostId());
@@ -50,7 +50,7 @@ public class PostResponseMapper {
         return postResponse;
     }
 
-    public PostResponse mapToDto(String token, String postId, Post post, boolean bulkFetch){
+    public PostResponse mapToDto(String token, String postId, Post post, boolean bulkFetch) {
 
         PostResponse postResponse = mapToBasePostDto(token, post, bulkFetch);
 
@@ -70,20 +70,20 @@ public class PostResponseMapper {
         postResponse.setNoComments(commentsCount);
 
         String userId;
-        if(token != null && !token.isEmpty()){
+        if (token != null && !token.isEmpty()) {
             userId = SecurityContextUtils.getUserId();
 
             postResponse.setMine(userId.equals(post.getUserId()));
-        }else{
+        } else {
             userId = "";
         }
 
-        if(reactionsMap != null && !userId.isEmpty()){
+        if (reactionsMap != null && !userId.isEmpty()) {
             Reacts react = findUserReaction(reactionsMap, userId);
             postResponse.setReacted(react != null ? react.getType() : null);
         }
 
-        if(!bulkFetch && post.getType().equals(EPostType.SHARE)) {
+        if (!bulkFetch && post.getType().equals(EPostType.SHARE)) {
             Post foundSharedPost = postRepository.findById(post.getSharedPostId()).orElse(null);
 
             postResponse.setSharedPost(mapToBasePostDto(token, foundSharedPost, bulkFetch));
@@ -95,17 +95,17 @@ public class PostResponseMapper {
     private PostResponse mapToBasePostDto(String token, Post post, boolean bulkFetch) {
         User postedUser = new User();
 
-        if(!bulkFetch)
-            postedUser =  userService.findById(token, post.getUserId());
+        if (!bulkFetch)
+            postedUser = userService.findById(token, post.getUserId());
 
         List<User> taggedUsers = new ArrayList<>();
 
-        if(post.getPostTags() != null)
+        if (post.getPostTags() != null)
             taggedUsers = post.getPostTags().stream().map(PostTag::getTaggedUser).toList();
 
         GroupInfo foundGroup = null;
 
-        if(post.getGroupId() != null && !post.getGroupId().isEmpty())
+        if (post.getGroupId() != null && !post.getGroupId().isEmpty())
             foundGroup = groupService.getGroupById(token, post.getGroupId());
 
         PostResponse postResponse = new PostResponse();
@@ -139,7 +139,7 @@ public class PostResponseMapper {
         return null;
     }
 
-    private List<TopReacts> findTopReact(Map<EReactionType, List<Reacts>> reactionsMap){
+    private List<TopReacts> findTopReact(Map<EReactionType, List<Reacts>> reactionsMap) {
         Map<EReactionType, List<Reacts>> sortedMap = reactionsMap.entrySet()
                 .stream()
                 .sorted((entry1, entry2) -> Integer.compare(entry2.getValue().size(), entry1.getValue().size()))

@@ -34,7 +34,7 @@ public class PostController {
             @RequestParam("page") int page,
             @RequestParam("size") int size,
             @RequestParam("startTime") String startTime
-    ){
+    ) {
         ResDTO<?> response = postService.getNewsFeed(token, page, size, startTime);
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -44,39 +44,39 @@ public class PostController {
     public ResponseEntity<?> post(
             @RequestHeader(name = "Authorization") String token,
             @RequestBody CreatePostRequest requestBody
-    ){
+    ) {
         ResDTO<?> response = postService.savePost(token, requestBody);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@RequestHeader("Authorization") String token,
-                                      @PathVariable("id") String id){
+                                      @PathVariable("id") String id) {
         ResDTO<?> response = postService.findPostRespById(token, id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/find-all")
     public ResponseEntity<?> findByIds(@RequestHeader("Authorization") String token,
-                                       @RequestBody FindByIdsReq req){
+                                       @RequestBody FindByIdsReq req) {
         ResDTO<?> response = postService.findPostRespByIds(token, req);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/save/{postId}")
-    public ResponseEntity<?> handleSavePost(@PathVariable("postId") String postId){
+    public ResponseEntity<?> handleSavePost(@PathVariable("postId") String postId) {
         ResDTO<?> response = savePostService.handleSavePost(postId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/save/posts")
-    public ResponseEntity<?> getUserSavedPosts(@RequestHeader("Authorization") String tokenHeader){
+    public ResponseEntity<?> getUserSavedPosts(@RequestHeader("Authorization") String tokenHeader) {
         ResDTO<?> response = savePostService.getUserSavedPost(tokenHeader);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<?> getUserIdByPost(@PathVariable("id") String id){
+    public ResponseEntity<?> getUserIdByPost(@PathVariable("id") String id) {
         ResDTO<?> response = postService.getUserIdByPostId(id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -84,7 +84,7 @@ public class PostController {
     @GetMapping("/search")
     public ResponseEntity<?> search(
             @RequestHeader(name = "Authorization", required = false, defaultValue = "") String token,
-            @RequestParam("key") String key){
+            @RequestParam("key") String key) {
         ResDTO<?> response = postService.findByContentContaining(token, key);
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -94,14 +94,14 @@ public class PostController {
     public ResponseEntity<?> update(
             @RequestHeader("Authorization") String token,
             @RequestBody UpdatePostContentRequest request
-            ){
-        ResDTO<?> response = postService.updatePostContent(token ,request);
+    ) {
+        ResDTO<?> response = postService.updatePostContent(token, request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/delete/{id}")
     @CacheEvict(cacheNames = "news-feed", allEntries = true)
-    public ResponseEntity<?> delete(@PathVariable("id") String id){
+    public ResponseEntity<?> delete(@PathVariable("id") String id) {
         ResDTO<?> response = postService.deletePost(id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -111,7 +111,7 @@ public class PostController {
     public ResponseEntity<?> sharePost(
             @RequestHeader("Authorization") String token,
             @RequestBody SharePostRequest request
-            ){
+    ) {
         ResDTO<?> response = postService.sharePost(token, request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -122,7 +122,7 @@ public class PostController {
             @PathVariable("groupId") String groupId,
             @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int limit
-    ){
+    ) {
         ResDTO<?> response = postService.getGroupPosts(token, groupId, page, limit);
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -138,7 +138,7 @@ public class PostController {
     public ResponseEntity<?> getMyPost(@RequestHeader("Authorization") String token,
                                        @RequestParam(name = "userId", required = false, defaultValue = "") String userId,
                                        @RequestParam(name = "page", required = false, defaultValue = "1") int page,
-                                       @RequestParam(name = "size", required = false, defaultValue = "10") int size){
+                                       @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
         ResDTO<?> response = postService.findUserPosts(token, userId, page, size);
         return ResponseEntity.status(response.getCode()).body(response);
     }

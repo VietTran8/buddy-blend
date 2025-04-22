@@ -18,27 +18,27 @@ public class ReactionController {
 
     @PostMapping()
     public ResponseEntity<?> doReact(@RequestHeader("Authorization") String token,
-                                     @RequestBody DoReactRequest request){
+                                     @RequestBody DoReactRequest request) {
         ResDTO<?> response = reactionService.doReaction(token, request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping()
     public ResponseEntity<?> findByPost(@RequestHeader(name = "Authorization") String token,
-                                        @RequestParam("postId") String postId){
+                                        @RequestParam("postId") String postId) {
         ResDTO<?> response = reactionService.getReactsByPostId(token, postId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/cmt")
-    public ResponseEntity<?> doCmtReact(@RequestBody DoCommentReactRequest request){
+    public ResponseEntity<?> doCmtReact(@RequestBody DoCommentReactRequest request) {
         ResDTO<?> response = commentReactionService.doReact(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/cmt")
     public ResponseEntity<?> findByCmt(@RequestHeader(name = "Authorization") String token,
-                                        @RequestParam("cmtId") String cmtId){
+                                       @RequestParam("cmtId") String cmtId) {
         ResDTO<?> response = commentReactionService.getReactsByCmtId(token, cmtId);
         return ResponseEntity.status(response.getCode()).body(response);
     }

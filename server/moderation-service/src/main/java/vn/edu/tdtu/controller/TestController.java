@@ -16,7 +16,7 @@ public class TestController {
     private final ModerationService moderationService;
 
     @PostMapping("/test")
-    public ModerateResponseDto test(@RequestBody ModerateMessage message){
+    public ModerateResponseDto test(@RequestBody ModerateMessage message) {
         return moderationService.moderate(message);
     }
 }

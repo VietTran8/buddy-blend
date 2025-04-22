@@ -10,6 +10,7 @@ import vn.edu.tdtu.service.interfaces.UserStatusService;
 @RequiredArgsConstructor
 public class UserStatusServiceImpl implements UserStatusService {
     private final RedisService<String> redisService;
+
     @Override
     public boolean isUserOnline(String userId) {
         return redisService.getSetSize(RedisKey.combineKey(RedisKey.USER_STATUS_KEY, userId)) > 0;

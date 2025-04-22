@@ -11,7 +11,7 @@ public class AppConfig {
     private String notificationName;
 
     @Bean
-    public NewTopic interactNoti(){
+    public NewTopic interactNoti() {
         return new NewTopic(notificationName, 2, (short) 1);
     }
 }

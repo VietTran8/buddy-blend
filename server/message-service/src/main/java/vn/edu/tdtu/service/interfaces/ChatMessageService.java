@@ -9,5 +9,6 @@ import java.util.Date;
 
 public interface ChatMessageService {
     public ChatMessage saveMessage(ChatMessage message);
+
     public ResDTO<PaginationResponse<MessageResponse>> getRoomMessages(String roomId, Date anchorDate, int page, int size);
 }

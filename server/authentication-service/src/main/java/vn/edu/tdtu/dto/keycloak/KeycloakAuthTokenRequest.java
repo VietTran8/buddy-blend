@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class KeycloakAuthTokenRequest{
+public class KeycloakAuthTokenRequest {
     private String grant_type;
     private String client_id;
     private String client_secret;

@@ -33,7 +33,7 @@ public class Group {
     @JsonIgnore
     private String createdBy;
     @JsonIgnore
-    @OneToMany(mappedBy = "group", orphanRemoval = true, cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "group", orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<GroupMember> groupMembers;
     @JsonIgnore
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)

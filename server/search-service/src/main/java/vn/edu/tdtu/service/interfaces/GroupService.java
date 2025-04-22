@@ -7,7 +7,10 @@ import java.util.List;
 
 public interface GroupService {
     void saveGroup(SyncGroup group);
+
     void updateGroup(SyncGroup group);
+
     void deleteGroup(String groupId);
+
     List<Group> findByNameContaining(String tokenHeader, String key, String fuzziness);
 }

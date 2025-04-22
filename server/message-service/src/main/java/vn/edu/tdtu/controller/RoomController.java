@@ -18,7 +18,7 @@ public class RoomController {
     private final ChatMessageService chatMessageService;
 
     @GetMapping()
-    public ResponseEntity<?> getRooms(){
+    public ResponseEntity<?> getRooms() {
         ResDTO<?> response = roomService.findRoomsByUser();
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -30,7 +30,7 @@ public class RoomController {
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
             @RequestParam(name = "anchorDate")
             @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date anchorDate
-    ){
+    ) {
         ResDTO<?> response = chatMessageService.getRoomMessages(id, anchorDate, page, size);
         return ResponseEntity.status(response.getCode()).body(response);
     }

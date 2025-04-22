@@ -15,7 +15,7 @@ public class PostServiceImpl implements PostService {
     private final PostClient postClient;
 
     @Override
-    public Post findById(String token, String postId){
+    public Post findById(String token, String postId) {
         ResDTO<Post> response = postClient.findById(token, postId);
 
         return response.getData();

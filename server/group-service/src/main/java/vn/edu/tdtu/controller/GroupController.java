@@ -22,21 +22,21 @@ public class GroupController {
     private final GroupAdminService groupAdminService;
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllGroupByIds(@RequestParam("ids") List<String> requestParam){
+    public ResponseEntity<?> getAllGroupByIds(@RequestParam("ids") List<String> requestParam) {
         ResDTO<?> response = groupService.getAllGroupByIds(requestParam);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/{groupId}")
-    public ResponseEntity<?> getGroupById(@RequestHeader("Authorization") String tokenHeader, @PathVariable("groupId") String groupId){
+    public ResponseEntity<?> getGroupById(@RequestHeader("Authorization") String tokenHeader, @PathVariable("groupId") String groupId) {
         ResDTO<?> response = groupService.getGroupById(tokenHeader, groupId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/min/{groupId}")
-    public ResponseEntity<?> getGroupByIdForPost(@PathVariable("groupId") String groupId){
+    public ResponseEntity<?> getGroupByIdForPost(@PathVariable("groupId") String groupId) {
         ResDTO<?> response = groupService.getGroupByIdForPost(groupId);
 
         return ResponseEntity.status(response.getCode()).body(response);
@@ -129,7 +129,7 @@ public class GroupController {
     }
 
     @PostMapping("/join/{groupId}")
-    public ResponseEntity<?> joinGroup(@PathVariable("groupId") String groupId){
+    public ResponseEntity<?> joinGroup(@PathVariable("groupId") String groupId) {
         ResDTO<?> response = groupService.joinGroup(groupId);
 
         return ResponseEntity.status(response.getCode()).body(response);
@@ -146,49 +146,49 @@ public class GroupController {
     }
 
     @PostMapping("/member/moderate")
-    public ResponseEntity<?> moderateMember(@RequestBody ModerateMemberRequest payload){
+    public ResponseEntity<?> moderateMember(@RequestBody ModerateMemberRequest payload) {
         ResDTO<?> response = groupService.moderateMember(payload);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/member/leave")
-    public ResponseEntity<?> leaveGroup(@RequestBody LeaveGroupRequest payload){
+    public ResponseEntity<?> leaveGroup(@RequestBody LeaveGroupRequest payload) {
         ResDTO<?> response = groupService.handleCancelPendingAndLeaveGroup(payload, EHandleLeaveType.LEAVE);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/member/promoteToAdmin")
-    public ResponseEntity<?> promoteToAdmin(@RequestBody PromoteToAdminRequest payload){
+    public ResponseEntity<?> promoteToAdmin(@RequestBody PromoteToAdminRequest payload) {
         ResDTO<?> response = groupAdminService.promoteToAdmin(payload);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/member/cancel-pending")
-    public ResponseEntity<?> cancelPendingGroup(@RequestBody LeaveGroupRequest payload){
+    public ResponseEntity<?> cancelPendingGroup(@RequestBody LeaveGroupRequest payload) {
         ResDTO<?> response = groupService.handleCancelPendingAndLeaveGroup(payload, EHandleLeaveType.CANCEL_PENDING);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @DeleteMapping("/{groupId}/member/{memberId}")
-    public ResponseEntity<?> deleteMember(@PathVariable("memberId") String memberId, @PathVariable("groupId") String groupId){
+    public ResponseEntity<?> deleteMember(@PathVariable("memberId") String memberId, @PathVariable("groupId") String groupId) {
         ResDTO<?> response = groupMemberService.removeMember(groupId, memberId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PutMapping("/{groupId}")
-    public ResponseEntity<?> updateGroup(@PathVariable("groupId") String groupId, @RequestBody UpdateGroupRequest payload){
+    public ResponseEntity<?> updateGroup(@PathVariable("groupId") String groupId, @RequestBody UpdateGroupRequest payload) {
         ResDTO<?> response = groupService.updateGroupInfo(groupId, payload);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @DeleteMapping("/{groupId}")
-    public ResponseEntity<?> delete(@PathVariable("groupId") String groupId){
+    public ResponseEntity<?> delete(@PathVariable("groupId") String groupId) {
         ResDTO<?> response = groupService.deleteGroup(groupId);
 
         return ResponseEntity.status(response.getCode()).body(response);

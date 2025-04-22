@@ -10,7 +10,7 @@ import vn.edu.tdtu.model.FriendRequest;
 public class FriendRequestResponseMapper {
     private final MinimizedUserMapper minimizedUserMapper;
 
-    public FriendRequestResponse mapToDTO(FriendRequest friendRequest){
+    public FriendRequestResponse mapToDTO(FriendRequest friendRequest) {
         FriendRequestResponse response = new FriendRequestResponse();
 
         response.setId(friendRequest.getId());

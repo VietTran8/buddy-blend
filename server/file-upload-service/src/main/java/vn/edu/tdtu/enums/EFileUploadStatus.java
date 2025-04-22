@@ -6,11 +6,12 @@ public enum EFileUploadStatus {
     STATUS_WRONG_EXT(2);
 
     private final int status;
-    EFileUploadStatus(int status){
+
+    EFileUploadStatus(int status) {
         this.status = status;
     }
 
-    public int getStatus(){
+    public int getStatus() {
         return this.status;
     }
 }

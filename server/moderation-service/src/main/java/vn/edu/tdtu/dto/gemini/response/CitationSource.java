@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CitationSource{
+public class CitationSource {
     public int startIndex;
     public int endIndex;
     public String uri;

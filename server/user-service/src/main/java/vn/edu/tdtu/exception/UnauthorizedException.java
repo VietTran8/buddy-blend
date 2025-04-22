@@ -1,14 +1,23 @@
 package vn.edu.tdtu.exception;
 
 
-import lombok.AllArgsConstructor;
+import vn.edu.tdtu.util.MessageUtils;
 
-@AllArgsConstructor
-public class UnauthorizedException extends RuntimeException{
-    private String message;
+public class UnauthorizedException extends RuntimeException {
+    private final String errorCode;
+    private Object[] vars;
+
+    public UnauthorizedException(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public UnauthorizedException(String errorCode, Object... vars) {
+        this.errorCode = errorCode;
+        this.vars = vars;
+    }
 
     @Override
     public String getMessage() {
-        return message;
+        return MessageUtils.getMessage(errorCode, vars);
     }
 }

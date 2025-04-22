@@ -20,12 +20,12 @@ public class ApplicationConfig {
     private String sendOtpMailTopicName;
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider(){
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder());
         provider.setUserDetailsService(userDetailsService);
@@ -34,7 +34,7 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public RedisTemplate<String, ?> redisTemplate(RedisConnectionFactory connectionFactory){
+    public RedisTemplate<String, ?> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, ?> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
 

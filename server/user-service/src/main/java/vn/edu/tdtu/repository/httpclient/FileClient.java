@@ -13,6 +13,6 @@ import java.util.Map;
 @FeignClient(name = "${service.file-service.name}", configuration = FeignConfig.class, path = "/api/v1/file")
 public interface FileClient {
 
-    @PostMapping( value = "/upload/{fileType}", consumes = "multipart/form-data")
+    @PostMapping(value = "/upload/{fileType}", consumes = "multipart/form-data")
     public ResDTO<Map<String, String>> uploadFile(@PathVariable("fileType") String fileType, @RequestPart("file") MultipartFile file);
 }

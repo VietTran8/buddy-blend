@@ -10,10 +10,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 @EnableCaching
 @EnableFeignClients
-public class PostServiceApp
-{
-    public static void main( String[] args )
-    {
+public class PostServiceApp {
+    public static void main(String[] args) {
         SpringApplication.run(PostServiceApp.class, args);
     }
 }

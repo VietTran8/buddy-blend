@@ -19,7 +19,7 @@ public class AlbumController {
             @PathVariable("ownerId") String ownerId,
             @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size
-    ){
+    ) {
         PaginationResponse<Media> response = mediaService.getAlbum(ownerId, page, size);
 
         return ResponseEntity.status(HttpServletResponse.SC_OK).body(response);

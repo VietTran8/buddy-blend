@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.tdtu.constant.KeycloakUserAttribute;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.constant.RedisKey;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.keycloak.KeycloakTokenResponse;
@@ -49,7 +50,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtils jwtUtils;
 
     @Override
-    public ResDTO<LoginResponse> loginUser(LoginRequest loginRequest){
+    public ResDTO<LoginResponse> loginUser(LoginRequest loginRequest) {
         String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
 
@@ -61,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
 
         ResDTO<LoginResponse> responseDto = new ResDTO<>();
         responseDto.setCode(HttpServletResponse.SC_OK);
-        responseDto.setMessage("User login successfully");
+        responseDto.setMessage(MessageCode.AUTH_LOGIN_SUCCESS);
         responseDto.setData(
                 LoginResponse.builder()
                         .id(foundUser.getId())
@@ -78,14 +79,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResDTO<LoginResponse> refreshToken(String refreshToken) {
-        if(refreshToken == null)
-            throw new UnauthorizedException("No refresh token");
+        if (refreshToken == null)
+            throw new UnauthorizedException(MessageCode.AUTH_REFRESH_TOKEN_NOT_FOUND);
 
         KeycloakTokenResponse keycloakTokenResponse = keycloakService.refreshToken(refreshToken);
 
         ResDTO<LoginResponse> responseDto = new ResDTO<>();
         responseDto.setCode(HttpServletResponse.SC_OK);
-        responseDto.setMessage("Token refreshed successfully");
+        responseDto.setMessage(MessageCode.AUTH_TOKEN_REFRESHED);
         responseDto.setData(
                 LoginResponse.builder()
                         .token(AuthTokenResponse.from(keycloakTokenResponse))
@@ -97,9 +98,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public ResDTO<?> signUpUser(SignUpRequest request){
-        if(authInfoRepository.existsByEmail(request.getEmail())) {
-            throw new BadRequestException("Email này đã tồn tại!");
+    public ResDTO<?> signUpUser(SignUpRequest request) {
+        if (authInfoRepository.existsByEmail(request.getEmail())) {
+            throw new BadRequestException(MessageCode.AUTH_EMAIL_EXISTS);
         }
 
         String userId = UUID.randomUUID().toString();
@@ -119,7 +120,7 @@ public class AuthServiceImpl implements AuthService {
 
         ResDTO<SignUpResponse> response = new ResDTO<>();
         response.setData(data);
-        response.setMessage("Đăng ký tài khoản thành công");
+        response.setMessage(MessageCode.AUTH_REGISTERED);
         response.setCode(HttpServletResponse.SC_CREATED);
 
         return response;
@@ -152,8 +153,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResDTO<?> createChangePasswordOTP(CreateChangePasswordRequest request) {
-        if(!keycloakService.passwordChecking(request.getEmail(), request.getOldPassword())) {
-            throw new BadRequestException("Mật khẩu cũ không đúng");
+        if (!keycloakService.passwordChecking(request.getEmail(), request.getOldPassword())) {
+            throw new BadRequestException(MessageCode.AUTH_INCORRECT_OLD_PASSWORD);
         }
 
         String otp = OTPUtils.generateOTP(6);
@@ -167,7 +168,7 @@ public class AuthServiceImpl implements AuthService {
 
         return new ResDTO<>(
                 HttpServletResponse.SC_CREATED,
-                "Otp was created and sent to the user mail",
+                MessageCode.AUTH_OTP_SENT,
                 null
         );
     }
@@ -176,11 +177,11 @@ public class AuthServiceImpl implements AuthService {
     public ResDTO<?> changePassword(ChangePasswordRequest request) {
         String otp = redisService.get(RedisKey.combineKey(RedisKey.OTP_KEY, request.getEmail()));
 
-        if(otp == null || !otp.equals(request.getOtp()))
-            throw new BadRequestException("Mã OTP không hợp lệ");
+        if (otp == null || !otp.equals(request.getOtp()))
+            throw new BadRequestException(MessageCode.AUTH_OTP_INCORRECT);
 
         UserRepresentation foundUser = keycloakService.findUserByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND));
 
         keycloakService.resetPassword(foundUser.getId(), request.getNewPassword());
 
@@ -188,15 +189,15 @@ public class AuthServiceImpl implements AuthService {
 
         return new ResDTO<>(
                 HttpServletResponse.SC_OK,
-                "User password changed successfully",
+                MessageCode.AUTH_PASSWORD_CHANGED,
                 null
         );
     }
 
     @Override
     public ResDTO<?> createForgotPasswordOTP(CreateForgotPasswordRequest request) {
-        if(!authInfoRepository.existsByEmail(request.getEmail()))
-            throw new BadRequestException("Người dùng không tồn tại");
+        if (!authInfoRepository.existsByEmail(request.getEmail()))
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND);
 
         String otp = OTPUtils.generateOTP(6);
 
@@ -209,26 +210,26 @@ public class AuthServiceImpl implements AuthService {
 
         return new ResDTO<>(
                 HttpServletResponse.SC_CREATED,
-                "Otp was created and sent to the user mail",
+                MessageCode.AUTH_OTP_SENT,
                 null
         );
     }
 
     @Override
     public ResDTO<?> validateOTP(ValidateOTPRequest request) {
-        if(!authInfoRepository.existsByEmail(request.getEmail()))
-                throw new BadRequestException("Không tìm thấy người dùng");
+        if (!authInfoRepository.existsByEmail(request.getEmail()))
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND);
 
         String otp = redisService.get(RedisKey.combineKey(RedisKey.OTP_KEY, request.getEmail()));
 
-        if(otp == null || !otp.equals(request.getOtp()))
-            throw new BadRequestException("Mã OTP không hợp lệ");
+        if (otp == null || !otp.equals(request.getOtp()))
+            throw new BadRequestException(MessageCode.AUTH_OTP_INCORRECT);
 
         redisService.extendsTtl(RedisKey.combineKey(RedisKey.OTP_KEY, request.getEmail()), 3600);
 
         return new ResDTO<>(
                 HttpServletResponse.SC_OK,
-                "Otp is correct",
+                MessageCode.AUTH_OTP_CORRECT,
                 null
         );
     }
@@ -236,25 +237,25 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResDTO<?> passwordChecking(PasswordCheckingRequest request) {
         authInfoRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("User not found with email: " + request.getEmail()));
+                .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND_EMAIL, request.getEmail()));
 
         boolean result = keycloakService.passwordChecking(request.getEmail(), request.getPassword());
 
         String token = null;
 
-        if(result) {
+        if (result) {
             token = OTPUtils.generateOTP(20);
 
             redisService.set(
-                RedisKey.combineKey(RedisKey.PASSWORD_CHECKING_TOKEN_KEY, request.getEmail()),
-                token,
-                600
+                    RedisKey.combineKey(RedisKey.PASSWORD_CHECKING_TOKEN_KEY, request.getEmail()),
+                    token,
+                    600
             );
         }
 
         return new ResDTO<>(
                 result ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST,
-                result ? "Matched" : "Not matched",
+                result ? MessageCode.AUTH_MATCH : MessageCode.AUTH_NONE_MATCH,
                 result ? new PasswordCheckingResponse(token) : null
         );
     }
@@ -270,7 +271,7 @@ public class AuthServiceImpl implements AuthService {
 
         return new ResDTO<>(
                 result ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST,
-                result ? "Matched" : "Not matched",
+                result ? MessageCode.AUTH_MATCH : MessageCode.AUTH_NONE_MATCH,
                 null
         );
     }

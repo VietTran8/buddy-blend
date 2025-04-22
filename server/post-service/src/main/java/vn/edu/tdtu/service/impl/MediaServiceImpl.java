@@ -19,7 +19,7 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public PaginationResponse<Media> getAlbum(String ownerId, int page, int size) {
-        if(Objects.isNull(ownerId))
+        if (Objects.isNull(ownerId))
             ownerId = SecurityContextUtils.getUserId();
 
         Page<Media> medias = mediaRepository.findByOwnerIdAndDetachedNot(ownerId, true, PageRequest.of(page - 1, size));

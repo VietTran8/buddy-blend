@@ -4,20 +4,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.web.server.Cookie;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.constant.CommonConstant;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.LoginResponse;
 import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.service.interfaces.AuthService;
 import vn.edu.tdtu.util.CookieUtils;
-
-import java.time.Duration;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -27,7 +23,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest, HttpServletResponse response){
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         ResDTO<LoginResponse> responseBody = authService.loginUser(loginRequest);
 
         String refreshToken = responseBody.getData().getToken().refreshToken();
@@ -45,13 +41,13 @@ public class AuthController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<?> signUpUser(@RequestBody SignUpRequest signUpRequest){
+    public ResponseEntity<?> signUpUser(@RequestBody SignUpRequest signUpRequest) {
         ResDTO<?> response = authService.signUpUser(signUpRequest);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logoutUser(HttpServletResponse response){
+    public ResponseEntity<?> logoutUser(HttpServletResponse response) {
         CookieUtils.setCookie(
                 response,
                 CommonConstant.REFRESH_TOKEN_COOKIE_NAME,
@@ -67,13 +63,13 @@ public class AuthController {
     public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         jakarta.servlet.http.Cookie[] cookies = request.getCookies();
 
-        if(cookies == null)
-            throw new UnauthorizedException("No refresh token found");
+        if (cookies == null)
+            throw new UnauthorizedException(MessageCode.AUTH_REFRESH_TOKEN_NOT_FOUND);
 
         String refreshToken = null;
 
-        for(jakarta.servlet.http.Cookie cookie : cookies) {
-            if(CommonConstant.REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
+        for (jakarta.servlet.http.Cookie cookie : cookies) {
+            if (CommonConstant.REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
                 refreshToken = cookie.getValue();
                 break;
             }
@@ -93,13 +89,13 @@ public class AuthController {
     }
 
     @PostMapping("/create-change-pass")
-    public ResponseEntity<?> createChangePasswordOtp(@RequestBody CreateChangePasswordRequest changePasswordRequest){
+    public ResponseEntity<?> createChangePasswordOtp(@RequestBody CreateChangePasswordRequest changePasswordRequest) {
         ResDTO<?> response = authService.createChangePasswordOTP(changePasswordRequest);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/create-forgot-pass")
-    public ResponseEntity<?> createForgotPasswordOtp(@RequestBody CreateForgotPasswordRequest changePasswordRequest){
+    public ResponseEntity<?> createForgotPasswordOtp(@RequestBody CreateForgotPasswordRequest changePasswordRequest) {
         ResDTO<?> response = authService.createForgotPasswordOTP(changePasswordRequest);
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -110,13 +106,13 @@ public class AuthController {
     }
 
     @PostMapping("/change-pass")
-    public ResponseEntity<?> changePasswordOtp(@RequestBody ChangePasswordRequest changePasswordRequest){
+    public ResponseEntity<?> changePasswordOtp(@RequestBody ChangePasswordRequest changePasswordRequest) {
         ResDTO<?> response = authService.changePassword(changePasswordRequest);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/validate-otp")
-    public ResponseEntity<?> validateOtp(@RequestBody ValidateOTPRequest validateOTPRequest){
+    public ResponseEntity<?> validateOtp(@RequestBody ValidateOTPRequest validateOTPRequest) {
         ResDTO<?> response = authService.validateOTP(validateOTPRequest);
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -128,7 +124,7 @@ public class AuthController {
     }
 
     @PostMapping("/confirm-token-checking")
-    public ResponseEntity<?> confirmTokenChecking(@RequestBody ConfirmTokenCheckingRequest request){
+    public ResponseEntity<?> confirmTokenChecking(@RequestBody ConfirmTokenCheckingRequest request) {
         ResDTO<?> response = authService.confirmTokenChecking(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }

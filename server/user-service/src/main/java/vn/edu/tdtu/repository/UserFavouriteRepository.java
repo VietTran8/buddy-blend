@@ -11,7 +11,10 @@ import java.util.Optional;
 @Repository
 public interface UserFavouriteRepository extends JpaRepository<UserFavourite, String> {
     Boolean existsByName(String name);
+
     Optional<UserFavourite> findByNameAndUser(String name, User user);
+
     List<UserFavourite> findByUser(User user);
+
     Optional<UserFavourite> findByIdAndUser(String id, User user);
 }

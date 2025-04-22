@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Candidate{
+public class Candidate {
     public Content content;
     public String finishReason;
     public CitationMetadata citationMetadata;

@@ -13,8 +13,11 @@ import java.util.Optional;
 @Repository
 public interface FriendRequestRepository extends JpaRepository<FriendRequest, String> {
     List<FriendRequest> findByToUserAndActiveAndStatus(User toUser, boolean active, EFriendReqStatus status);
+
     List<FriendRequest> findByFromUserAndStatusOrToUserAndStatus(User fromUser, EFriendReqStatus status1, User toUser, EFriendReqStatus status2);
+
     List<FriendRequest> findByToUserAndFromUserOrFromUserAndToUser(User toUser, User fromUser, User fromUser2, User toUser2);
+
     @Query("SELECT f FROM FriendRequest f WHERE f.fromUser.id = ?1 AND f.toUser.id = ?2")
     Optional<FriendRequest> findByFromUserIdAndToUserId(String fromUserId, String toUserId);
 }

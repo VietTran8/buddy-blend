@@ -17,7 +17,7 @@ public class UpdatePostContentRequest {
     private EPrivacy privacy;
     private String background;
     private List<String> taggingUsers;
-//    private List<String> videoUrls;
+    //    private List<String> videoUrls;
 //    private List<String> imageUrls;
     private List<Media> medias;
 }

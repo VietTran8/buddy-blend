@@ -3,6 +3,7 @@ package vn.edu.tdtu.service.impl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.FindByIdsReq;
 import vn.edu.tdtu.dto.response.PostResponse;
@@ -33,7 +34,7 @@ public class SavePostServiceImpl implements SavePostService {
         ResDTO<SavePostResponse> response = new ResDTO<>();
 
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("Đã lưu bài viết");
+        response.setMessage(MessageCode.POST_SAVE_POST);
         response.setData(responseData);
 
         Optional<SavePost> optionalSavePost = savePostRepository.findByUserId(userId);
@@ -46,12 +47,11 @@ public class SavePostServiceImpl implements SavePostService {
             return newSavePost;
         });
 
-        if(savePost.getPostIds().contains(postId)) {
+        if (savePost.getPostIds().contains(postId)) {
             savePost.getPostIds().remove(postId);
-            response.setMessage("Đã bỏ lưu bài viết");
+            response.setMessage(MessageCode.POST_UNSAVE_POST);
             responseData.setSavedId(null);
-        }
-        else
+        } else
             savePost.getPostIds().add(postId);
 
         savePostRepository.save(savePost);
@@ -60,16 +60,16 @@ public class SavePostServiceImpl implements SavePostService {
     }
 
     @Override
-    public ResDTO<List<PostResponse>> getUserSavedPost(String token){
+    public ResDTO<List<PostResponse>> getUserSavedPost(String token) {
         ResDTO<List<PostResponse>> response = new ResDTO<>();
-        response.setMessage("Posts fetched successfully");
+        response.setMessage(MessageCode.POST_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(new ArrayList<>());
 
         String userId = SecurityContextUtils.getUserId();
         SavePost foundSavePost = savePostRepository.findByUserId(userId).orElse(null);
 
-        if(foundSavePost == null) {
+        if (foundSavePost == null) {
             return response;
         }
 

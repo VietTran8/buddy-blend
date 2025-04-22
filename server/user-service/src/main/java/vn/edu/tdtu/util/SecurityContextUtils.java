@@ -8,7 +8,7 @@ public class SecurityContextUtils {
     public static String getUserId() throws UnauthorizedException {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if(principal instanceof Jwt jwt) {
+        if (principal instanceof Jwt jwt) {
             Object userIdClaim = jwt.getClaims().get("user_id");
             return userIdClaim != null ? userIdClaim.toString() : "";
         }

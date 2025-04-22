@@ -16,7 +16,7 @@ import java.util.List;
 public class PostPostRequestMapper {
     private final MediaRepository mediaRepository;
 
-    public Post mapToObject(CreatePostRequest request){
+    public Post mapToObject(CreatePostRequest request) {
         Post post = new Post();
 
         post.setContent(request.getContent());

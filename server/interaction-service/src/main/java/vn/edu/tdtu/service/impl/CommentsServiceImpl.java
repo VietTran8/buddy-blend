@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.requests.AddCommentRequest;
 import vn.edu.tdtu.dto.requests.UpdateCommentRequest;
@@ -43,11 +44,11 @@ public class CommentsServiceImpl implements CommentService {
 
         User foundUser = userService.findById(token, userIdFromJwtToken);
 
-        if(foundUser == null)
+        if (foundUser == null)
             throw new RuntimeException("User not found with id: " + userIdFromJwtToken);
 
         Post foundPost = postService.findById(token, request.getPostId());
-        if(foundPost == null)
+        if (foundPost == null)
             throw new RuntimeException("Post not found with id: " + request.getPostId());
 
         Comments comment = new Comments();
@@ -58,9 +59,9 @@ public class CommentsServiceImpl implements CommentService {
         comment.setImageUrls(request.getImageUrls());
         comment.setPostId(postId);
 
-        if(parentCommentId != null && commentsRepository.existsById(parentCommentId)){
+        if (parentCommentId != null && commentsRepository.existsById(parentCommentId)) {
             comment.setParentId(request.getParentId());
-        }else if(parentCommentId != null && !commentsRepository.existsById(parentCommentId)){
+        } else if (parentCommentId != null && !commentsRepository.existsById(parentCommentId)) {
             throw new RuntimeException("Parent comment not found with id: " + request.getParentId());
         }
 
@@ -74,7 +75,7 @@ public class CommentsServiceImpl implements CommentService {
         log.info("posted user id: " + foundPost.getUser().getId());
         log.info("result: " + !foundUser.getId().equals(foundPost.getUser().getId()));
 
-        if(parentCommentId == null && !foundUser.getId().equals(foundPost.getUser().getId())){
+        if (parentCommentId == null && !foundUser.getId().equals(foundPost.getUser().getId())) {
             InteractNotification interactNotification = new InteractNotification();
             interactNotification.setAvatarUrl(foundUser.getProfilePicture());
             interactNotification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
@@ -89,13 +90,13 @@ public class CommentsServiceImpl implements CommentService {
             kafkaMsgService.publishInteractNoti(interactNotification);
         }
 
-        return new ResDTO<>("Comment added successfully", commentResponse, 200);
+        return new ResDTO<>(MessageCode.COMMENT_CREATED, commentResponse, 200);
     }
 
     @Override
     public ResDTO<?> countCommentByPostId(String postId) {
         return new ResDTO<>(
-                "Comment counted successfully",
+                MessageCode.COMMENT_FETCHED,
                 commentsRepository.countByPostId(postId),
                 HttpServletResponse.SC_OK
         );
@@ -107,7 +108,7 @@ public class CommentsServiceImpl implements CommentService {
 
         CommentResponse updatedComment = commentsRepository.findById(id)
                 .map(existingComment -> {
-                    if(existingComment.getUserId().equals(userId)){
+                    if (existingComment.getUserId().equals(userId)) {
                         existingComment.setContent(comment.getContent());
                         existingComment.setImageUrls(comment.getImageUrls());
                         existingComment.setUpdatedAt(LocalDateTime.now());
@@ -116,13 +117,13 @@ public class CommentsServiceImpl implements CommentService {
                         commentResponse.setMine(true);
 
                         return commentResponse;
-                    }else{
+                    } else {
                         throw new RuntimeException("You cannot update other people's comments");
                     }
 
                 }).orElseThrow(() -> new RuntimeException("Comment not found with id " + id));
 
-        return new ResDTO<>("Comment updated successfully", updatedComment, 200);
+        return new ResDTO<>(MessageCode.COMMENT_UPDATED, updatedComment, 200);
     }
 
     @Override
@@ -131,19 +132,19 @@ public class CommentsServiceImpl implements CommentService {
         ResDTO<?> response = new ResDTO<>();
         commentsRepository.findById(id).ifPresentOrElse(
                 cmt -> {
-                    if(userId.equals(cmt.getUserId())){
-                        response.setMessage("Comment deleted successfully");
+                    if (userId.equals(cmt.getUserId())) {
+                        response.setMessage(MessageCode.COMMENT_DELETED);
                         response.setCode(200);
                         response.setData(null);
 
                         commentsRepository.deleteById(id);
-                    }else{
-                        response.setMessage("Comments made by others cannot be deleted");
+                    } else {
+                        response.setMessage(MessageCode.COMMENT_CAN_NOT_DELETE_OTHERS);
                         response.setCode(400);
                         response.setData(null);
                     }
                 }, () -> {
-                    response.setMessage("Comment not fount with id: " + id);
+                    response.setMessage(MessageCode.COMMENT_NOT_FOUND_ID, id);
                     response.setCode(400);
                     response.setData(null);
                 }
@@ -163,7 +164,7 @@ public class CommentsServiceImpl implements CommentService {
         comment.getChildren().forEach(cmt -> {
             cmt.setMine(cmt.getUser().getId().equals(userId));
         });
-        return new ResDTO<>("Comment found successfully", comment, 200);
+        return new ResDTO<>(MessageCode.COMMENT_FETCHED, comment, 200);
     }
 
     @Override
@@ -183,7 +184,7 @@ public class CommentsServiceImpl implements CommentService {
         ).sorted(
                 (cmt1, cmt2) -> cmt2.getCreatedAt().compareTo(cmt1.getCreatedAt())
         ).toList();
-        return new ResDTO<>("Comments retrieved successfully", commentResponses, 200);
+        return new ResDTO<>(MessageCode.COMMENT_FETCHED, commentResponses, 200);
     }
 
     @Override
@@ -199,6 +200,6 @@ public class CommentsServiceImpl implements CommentService {
                     return response;
                 }
         ).toList();
-        return new ResDTO<>("Comments retrieved successfully", commentResponses, 200);
+        return new ResDTO<>(MessageCode.COMMENT_FETCHED, commentResponses, 200);
     }
 }

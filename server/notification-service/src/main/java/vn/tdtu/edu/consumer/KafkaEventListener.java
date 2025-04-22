@@ -34,7 +34,7 @@ public class KafkaEventListener {
     private final ViolationService violationService;
 
     @KafkaListener(groupId = "InteractNotification", topics = {"${kafka.topic.interact-noti.name}", "${kafka.topic.invite-users-noti.name}"})
-    public void consumeInteractTopic(CommonNotificationMessage notification){
+    public void consumeInteractTopic(CommonNotificationMessage notification) {
         log.info("Interaction message: " + notification.toString());
         boolean sendResult = notificationSender.sendCommonNotification(notification);
 
@@ -58,17 +58,17 @@ public class KafkaEventListener {
     }
 
     @KafkaListener(groupId = "ChattingNotification", topics = "${kafka.topic.chatting.name}")
-    public void consumeChattingTopic(Message message){
+    public void consumeChattingTopic(Message message) {
         log.info("Chatting message: " + message.toString());
-        if(notificationSender.sendChatNotification(message)){
+        if (notificationSender.sendChatNotification(message)) {
             log.info("Message sent to target user");
-        }else{
+        } else {
             log.info("Can not send message to the target user");
         }
     }
 
     @KafkaListener(groupId = "FriendRequestNotification", topics = "${kafka.topic.friend-request.name}")
-    public void consumeFriendRequest(FriendRequestMessage message){
+    public void consumeFriendRequest(FriendRequestMessage message) {
         log.info("friend request message: " + message.toString());
 
         CommonNotification commonNotification = new CommonNotification();
@@ -85,7 +85,7 @@ public class KafkaEventListener {
     }
 
     @KafkaListener(groupId = "ModerateNotiGroup", topics = "${kafka.topic.moderation-result-noti.name}")
-    public void consumeModerationResult(ModerateResultsMessage message){
+    public void consumeModerationResult(ModerateResultsMessage message) {
         log.info("Moderate result message: " + message.toString());
 
         Violation violation = new Violation();

@@ -16,14 +16,15 @@ public class FileValidation {
             "wmv", "amv", "mp4", "m4p",
             "mpg", "mp2", "m4v"
     );
-    public EFileUploadStatus validate(MultipartFile[] files){
-        if((files.length == 1 && Objects.requireNonNull(files[0].getOriginalFilename()).isEmpty())){
+
+    public EFileUploadStatus validate(MultipartFile[] files) {
+        if ((files.length == 1 && Objects.requireNonNull(files[0].getOriginalFilename()).isEmpty())) {
             return EFileUploadStatus.STATUS_EMPTY_FILE;
         }
         for (MultipartFile file : files) {
             String name = file.getOriginalFilename();
-            if(name != null && !name.isEmpty()) {
-                if(!isCorrectFormat(file)) {
+            if (name != null && !name.isEmpty()) {
+                if (!isCorrectFormat(file)) {
                     return EFileUploadStatus.STATUS_WRONG_EXT;
                 }
             }
@@ -31,9 +32,9 @@ public class FileValidation {
         return EFileUploadStatus.STATUS_OK;
     }
 
-    public boolean isCorrectFormat(MultipartFile file){
+    public boolean isCorrectFormat(MultipartFile file) {
         String name = file.getOriginalFilename();
-        if(name != null && !name.isEmpty()) {
+        if (name != null && !name.isEmpty()) {
             String[] splited = name.split("\\.");
             String ext = splited[splited.length - 1];
 

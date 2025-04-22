@@ -9,7 +9,8 @@ public enum EUploadFolder {
     FOLDER_OTHERS("buddy-blend/others", "raw");
     private final String folderName;
     private final String resourceType;
-    EUploadFolder(String folderName, String resourceType){
+
+    EUploadFolder(String folderName, String resourceType) {
         this.folderName = folderName;
         this.resourceType = resourceType;
     }

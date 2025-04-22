@@ -8,6 +8,7 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.request.FindByIdsReq;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.model.data.Post;
@@ -39,7 +40,7 @@ public class PostServiceImpl implements PostService {
                     foundPost.setContent(post.getContent());
                     postRepository.save(post);
                 }, () -> {
-                    throw new BadRequestException("Post not found with id: " + post.getId());
+                    throw new BadRequestException(MessageCode.POST_NOT_FOUND_ID, post.getId());
                 }
         );
     }
@@ -53,10 +54,10 @@ public class PostServiceImpl implements PostService {
     public List<Post> findByContentContaining(String token, String key, String fuzziness) {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q.match(mq -> mq
-                        .field("content")
-                        .query(key)
-                        .fuzziness(fuzziness)
-                    )
+                                .field("content")
+                                .query(key)
+                                .fuzziness(fuzziness)
+                        )
                 )
                 .withSort(SortOptions.of(so -> so
                         .score(score -> score

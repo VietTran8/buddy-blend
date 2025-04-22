@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.GroupInfo;
@@ -55,18 +56,18 @@ public class PostServiceImpl implements PostService {
     private final KafkaEventPublisher kafkaEventPublisher;
 
     @Override
-    public Post findPostById(String postId){
+    public Post findPostById(String postId) {
         return postRepository.findById(postId).orElse(null);
     }
 
     @Override
-    public ResDTO<?> findPostRespById(String token, String postId){
+    public ResDTO<?> findPostRespById(String token, String postId) {
         ResDTO<PostResponse> response = new ResDTO<>();
 
         Post post = postRepository.findById(postId)
-                        .orElseThrow(() -> new BadRequestException("Post not found with id: " + postId));
+                .orElseThrow(() -> new BadRequestException(MessageCode.POST_NOT_FOUND_ID, postId));
 
-        response.setMessage("success");
+        response.setMessage(MessageCode.POST_FETCHED);
         response.setData(postResponseMapper.mapToDto(token, post.getId(), post, false));
         response.setCode(HttpServletResponse.SC_OK);
 
@@ -74,7 +75,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<List<PostResponse>> findPostRespByIds(String token, FindByIdsReq req){
+    public ResDTO<List<PostResponse>> findPostRespByIds(String token, FindByIdsReq req) {
         String userId = SecurityContextUtils.getUserId();
 
         ResDTO<List<PostResponse>> response = new ResDTO<>();
@@ -106,7 +107,7 @@ public class PostServiceImpl implements PostService {
                     postResponse.setUser(postedUserMap.get(post.getUserId()));
                     postResponse.setMine(post.getUserId().equals(userId));
 
-                    if(post.getType().equals(EPostType.SHARE))
+                    if (post.getType().equals(EPostType.SHARE))
                         postResponse.getSharedPost()
                                 .setUser(postedUserMap.get(sharedPostMap.get(post.getSharedPostId()).getUserId()));
 
@@ -116,13 +117,13 @@ public class PostServiceImpl implements PostService {
 
         response.setCode(200);
         response.setData(posts);
-        response.setMessage("success");
+        response.setMessage(MessageCode.POST_FETCHED);
 
         return response;
     }
 
     @Override
-    public ResDTO<?> getUserIdByPostId(String postId){
+    public ResDTO<?> getUserIdByPostId(String postId) {
         ResDTO<Map<String, String>> response = new ResDTO<>();
         Map<String, String> data = new HashMap<>();
 
@@ -130,7 +131,7 @@ public class PostServiceImpl implements PostService {
 
         data.put("userId", post.getUserId());
 
-        response.setMessage("success");
+        response.setMessage(MessageCode.USER_FETCHED);
         response.setData(data);
         response.setCode(HttpServletResponse.SC_OK);
 
@@ -142,13 +143,13 @@ public class PostServiceImpl implements PostService {
         String authUserId = SecurityContextUtils.getUserId();
 
         Post foundPost = postRepository.findByIdAndDetachedAndUserId(postId, true, authUserId)
-                .orElseThrow(() -> new BadRequestException("Post not found!"));
+                .orElseThrow(() -> new BadRequestException(MessageCode.POST_NOT_FOUND));
 
         ResDTO<PostResponse> response = new ResDTO<>();
 
         PostResponse responseData = postResponseMapper.mapToDto(token, foundPost.getId(), foundPost, false);
 
-        response.setMessage("Post fetched successfully");
+        response.setMessage(MessageCode.POST_FETCHED);
         response.setData(responseData);
         response.setCode(HttpServletResponse.SC_OK);
 
@@ -156,17 +157,17 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse mapToPostResponse (String token, Post post) {
+    public PostResponse mapToPostResponse(String token, Post post) {
         return postResponseMapper.mapToDto(token, post.getId(), post, false);
     }
 
     @Override
     public ResDTO<?> getGroupPosts(String token, String groupId, int page, int limit) {
-        if(!groupService.allowFetchPost(token, groupId))
-            throw new BadRequestException("This group is private and you are not joined it");
+        if (!groupService.allowFetchPost(token, groupId))
+            throw new BadRequestException(MessageCode.GROUP_NOT_PERMITTED);
 
         ResDTO<PaginationResponse<PostResponse>> response = new ResDTO<>();
-        response.setMessage("Group posts fetched successfully");
+        response.setMessage(MessageCode.POST_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
 
         Page<Post> groupPosts = postRepository.findByGroupIdAndDetachedNotOrderByCreatedAtDesc(groupId, true, PageRequest.of(page - 1, limit));
@@ -185,14 +186,14 @@ public class PostServiceImpl implements PostService {
                 groupPosts.getTotalPages(),
                 groupPosts.stream()
                         .map(
-                        post -> {
-                            PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post, true);
-                            postResponse.setMine(post.getUserId().equals(userId));
-                            postResponse.setUser(postedUserMap.get(post.getUserId()));
+                                post -> {
+                                    PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post, true);
+                                    postResponse.setMine(post.getUserId().equals(userId));
+                                    postResponse.setUser(postedUserMap.get(post.getUserId()));
 
-                            return postResponse;
-                        }
-                ).toList()
+                                    return postResponse;
+                                }
+                        ).toList()
         ));
 
         return response;
@@ -248,20 +249,20 @@ public class PostServiceImpl implements PostService {
                     postResponse.setUser(postedUserMap.get(post.getUserId()));
                     postResponse.setMine(post.getUserId().equals(authUserId));
 
-                    if(post.getType().equals(EPostType.SHARE))
+                    if (post.getType().equals(EPostType.SHARE))
                         postResponse.getSharedPost()
                                 .setUser(postedUserMap.get(sharedPostMap.get(post.getSharedPostId()).getUserId()));
 
                     return postResponse;
                 }
         ).filter(post -> {
-            if(!post.getType().equals(EPostType.GROUP))
+            if (!post.getType().equals(EPostType.GROUP))
                 return true;
 
-            if(post.getGroupInfo() == null)
+            if (post.getGroupInfo() == null)
                 return false;
 
-            if(post.getGroupInfo().isPrivate())
+            if (post.getGroupInfo().isPrivate())
                 return groupIds.contains(post.getGroupInfo().getId());
 
             return true;
@@ -276,7 +277,7 @@ public class PostServiceImpl implements PostService {
 
         response.setData(paginationResponse);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("success");
+        response.setMessage(MessageCode.POST_FETCHED);
 
         return response;
     }
@@ -286,32 +287,32 @@ public class PostServiceImpl implements PostService {
 
         PostResponse postShare = postResponse.getSharedPost();
 
-        if(postShare == null)
+        if (postShare == null)
             return;
 
-        if(
+        if (
                 (postShare.getPrivacy().equals(EPrivacy.PRIVATE) && !postShare.getUser().getId().equals(authUserId)) ||
                         (postShare.getPrivacy().equals(EPrivacy.ONLY_FRIENDS) && (!friendIds.contains(postShare.getUser().getId()) && !postShare.getUser().getId().equals(authUserId))) ||
                         (postShare.getType().equals(EPostType.GROUP) && !groupService.allowFetchPost(token, postShare.getGroupInfo().getId()))
-        ){
+        ) {
             hideIllegalPostResponse(postResponse);
         }
     }
 
     @Override
-    public ResDTO<?> findByContentContaining(String token, String key){
+    public ResDTO<?> findByContentContaining(String token, String key) {
         ResDTO<List<PostResponse>> response = new ResDTO<>();
         response.setData(postRepository.findByContent(key).stream().map(
                 p -> postResponseMapper.mapToDto(token, p.getId(), p, false)
         ).toList());
-        response.setMessage("success");
+        response.setMessage(MessageCode.POST_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
 
         return response;
     }
 
     @Override
-    public ResDTO<?> savePost(String token, CreatePostRequest postRequest){
+    public ResDTO<?> savePost(String token, CreatePostRequest postRequest) {
         Post post = postPostRequestMapper.mapToObject(postRequest);
 
         List<User> taggedUser = userService
@@ -340,7 +341,7 @@ public class PostServiceImpl implements PostService {
         postResponse.setMine(post.getUserId().equals(SecurityContextUtils.getUserId()));
 
         ResDTO<PostResponse> response = new ResDTO<>();
-        response.setMessage("Đã đăng bài viết");
+        response.setMessage(MessageCode.POST_SAVED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(postResponse);
 
@@ -365,15 +366,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<?> updatePostContent(String token, UpdatePostContentRequest request){
+    public ResDTO<?> updatePostContent(String token, UpdatePostContentRequest request) {
         String userId = SecurityContextUtils.getUserId();
 
         Post foundPost = findPostById(request.getId());
         ResDTO<PostResponse> response = new ResDTO<>();
 
-        if(foundPost != null){
-            if(!foundPost.getUserId().equals(userId))
-                throw new BadRequestException("Không thể cập nhật bài viết của người khác");
+        if (foundPost != null) {
+            if (!foundPost.getUserId().equals(userId))
+                throw new BadRequestException(MessageCode.POST_CAN_NOT_UPDATE_OTHERS);
 
             updatePostRequestMapper.bindToObject(request, foundPost);
 
@@ -393,7 +394,7 @@ public class PostServiceImpl implements PostService {
 
             postRepository.save(foundPost);
 
-            response.setMessage("Đã cập nhật bài viết");
+            response.setMessage(MessageCode.POST_DELETED);
             response.setCode(HttpServletResponse.SC_OK);
             response.setData(postResponseMapper.mapToDto(token, foundPost.getId(), foundPost, false));
 
@@ -406,7 +407,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<?> deletePost(String postId){
+    public ResDTO<?> deletePost(String postId) {
         String userId = SecurityContextUtils.getUserId();
 
         Post foundPost = findPostById(postId);
@@ -414,14 +415,14 @@ public class PostServiceImpl implements PostService {
         ResDTO<Map<String, String>> response = new ResDTO<>();
         Map<String, String> data = new HashMap<>();
 
-        if(foundPost != null){
-            if(foundPost.getUserId().equals(userId)){
+        if (foundPost != null) {
+            if (foundPost.getUserId().equals(userId)) {
                 mediaRepository.deleteByIdIn(foundPost.getMediaIds());
                 postRepository.delete(foundPost);
 
                 data.put("deletedId", foundPost.getId());
 
-                response.setMessage("Đã xoá bài viết");
+                response.setMessage(MessageCode.POST_UPDATED);
                 response.setCode(HttpServletResponse.SC_OK);
                 response.setData(data);
 
@@ -431,7 +432,7 @@ public class PostServiceImpl implements PostService {
 
             }
 
-            response.setMessage("Không thể xóa bài viết của người khác");
+            response.setMessage(MessageCode.POST_CAN_NOT_DELETE_OTHERS);
             response.setCode(HttpServletResponse.SC_BAD_REQUEST);
             response.setData(null);
 
@@ -442,35 +443,35 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<?> sharePost(String token, SharePostRequest request){
+    public ResDTO<?> sharePost(String token, SharePostRequest request) {
         ResDTO<PostResponse> response = new ResDTO<>();
 
         Post post = postRepository.findById(request.getPostId())
-                .orElseThrow(() -> new BadRequestException("Không tìm thấy bài viết"));
+                .orElseThrow(() -> new BadRequestException(MessageCode.POST_NOT_FOUND_ID, request.getPostId()));
 
-        if(post.getType().equals(EPostType.GROUP)) {
+        if (post.getType().equals(EPostType.GROUP)) {
             GroupInfo foundGroupInfo = groupService.getGroupById(token, post.getGroupId());
 
-            if(foundGroupInfo.isPrivate())
-                throw new BadRequestException("Không thể chia sẻ bài viết trong nhóm riêng tư");
+            if (foundGroupInfo.isPrivate())
+                throw new BadRequestException(MessageCode.GROUP_NOT_PERMITTED);
         }
 
         String userId = SecurityContextUtils.getUserId();
         User foundUser = userService.findById(token, userId);
 
-        if(foundUser == null) {
-            throw new BadRequestException("Không tìm thấy người dùng");
+        if (foundUser == null) {
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND);
         }
 
         Post postShare = getPostShare(request, post, foundUser);
         postRepository.save(postShare);
 
-        if(!post.getUserId().equals(userId)){
+        if (!post.getUserId().equals(userId)) {
             InteractNotification notification = getInteractNotification(request, post, foundUser, userId);
             kafkaEventPublisher.pubSharePostMessage(notification);
         }
 
-        response.setMessage("Đã chia sẻ bài viết");
+        response.setMessage(MessageCode.POST_SHARED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(postResponseMapper.mapToDto(token, post.getId(), post, false));
 
@@ -522,18 +523,18 @@ public class PostServiceImpl implements PostService {
         return notification;
     }
 
-    private void handleSendNewPostNotification(String tokenHeader, PostResponse postResponse){
+    private void handleSendNewPostNotification(String tokenHeader, PostResponse postResponse) {
         NewPostMessage newPostMessage = new NewPostMessage();
         newPostMessage.setPost(postResponse);
 
-        if((EPostType.NORMAL.equals(postResponse.getType()) || EPostType.SHARE.equals(postResponse.getType())) &&
+        if ((EPostType.NORMAL.equals(postResponse.getType()) || EPostType.SHARE.equals(postResponse.getType())) &&
                 !EPrivacy.PRIVATE.equals(postResponse.getPrivacy())
         ) {
             List<String> postedUserFriendIds = userService.findUserFriendIdsByUserId(tokenHeader, postResponse.getUser().getId());
             newPostMessage.setBroadcastIds(postedUserFriendIds);
 
             kafkaEventPublisher.pubNewPostMessage(newPostMessage);
-        } else if(EPostType.GROUP.equals(postResponse.getType())) {
+        } else if (EPostType.GROUP.equals(postResponse.getType())) {
             List<String> groupUserIds = groupService.getMemberIdList(tokenHeader, postResponse.getGroupInfo().getId());
             newPostMessage.setBroadcastIds(groupUserIds);
 
@@ -582,7 +583,7 @@ public class PostServiceImpl implements PostService {
             postResponse.setMine(post.getUserId().equals(authUserId));
             postResponse.setUser(postedUserMap.get(post.getUserId()));
 
-            if(post.getType().equals(EPostType.SHARE))
+            if (post.getType().equals(EPostType.SHARE))
                 postResponse.getSharedPost()
                         .setUser(postedUserMap.get(sharedPostMap.get(post.getSharedPostId()).getUserId()));
 
@@ -601,7 +602,7 @@ public class PostServiceImpl implements PostService {
 
         response.setData(paginationResponse);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("success");
+        response.setMessage(MessageCode.POST_FETCHED);
 
         return response;
     }

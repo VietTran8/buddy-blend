@@ -16,7 +16,7 @@ public class ModerateResultsMessage extends ModerateResponseDto {
     private String timestamp;
     private EModerateType type;
 
-    public ModerateResultsMessage(ModerateResponseDto dto, ModerateMessage message){
+    public ModerateResultsMessage(ModerateResponseDto dto, ModerateMessage message) {
         this.refId = message.getRefId();
         this.setAccept(dto.isAccept());
         this.setType(message.getType());

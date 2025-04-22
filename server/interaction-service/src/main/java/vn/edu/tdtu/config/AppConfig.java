@@ -15,17 +15,17 @@ public class AppConfig {
 
     @Bean
     @LoadBalanced
-    public RestTemplate restTemplate(){
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 
     @Bean
-    public ObjectMapper objectMapper(){
+    public ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
 
     @Bean
-    public NewTopic interactNoti(){
+    public NewTopic interactNoti() {
         return new NewTopic(notificationName, 2, (short) 1);
     }
 }

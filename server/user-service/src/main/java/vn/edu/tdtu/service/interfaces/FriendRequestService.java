@@ -10,13 +10,22 @@ import java.util.List;
 
 public interface FriendRequestService {
     public ResDTO<?> handleFriendRequest(FriendReqDTO request);
+
     public List<User> getListFriends(String userId);
+
     public ResDTO<?> getListFriendsResp(String token, String id);
+
     public ResDTO<?> getFriendIds(String userId);
+
     public List<FriendRequest> getListFriendRequest(String userId);
+
     public ResDTO<?> getListFriendRequestResp(String token);
+
     public ResDTO<?> getFriendRequestIdByFromUserId(String fromUserId);
+
     public List<User> getFromUsersViaRequests(List<FriendRequest> friendRequests);
+
     public ResDTO<?> friendRequestAcceptation(FQAcceptationDTO request);
+
     public ResDTO<?> getFriendSuggestions();
 }

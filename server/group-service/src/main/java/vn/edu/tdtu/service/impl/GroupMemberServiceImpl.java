@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.edu.tdtu.constant.Message;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.repository.GroupMemberRepository;
 import vn.edu.tdtu.repository.GroupRepository;
@@ -32,7 +32,7 @@ public class GroupMemberServiceImpl implements GroupMemberService {
         removeGroupMemberById(memberId);
 
         return new ResDTO<>(
-                Message.GROUP_MEMBER_DELETED_MSG,
+                MessageCode.GROUP_MEMBER_DELETED,
                 null,
                 HttpServletResponse.SC_OK
         );

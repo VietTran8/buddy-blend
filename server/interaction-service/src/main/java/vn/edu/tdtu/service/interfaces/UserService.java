@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface UserService {
     public User findById(String accessToken, String userId);
+
     public List<User> findByIds(String accessToken, List<String> ids);
 }

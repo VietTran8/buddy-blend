@@ -11,6 +11,6 @@ import vn.edu.tdtu.dto.request.FileReq;
 @FeignClient(name = "${service.file-service.name}", configuration = FeignConfig.class, path = "/api/v1/file")
 public interface FileClient {
 
-    @PostMapping( "/delete/{fileType}")
+    @PostMapping("/delete/{fileType}")
     public ResDTO<?> deleteFile(@PathVariable("fileType") String fileType, @RequestBody FileReq requestBody);
 }

@@ -27,15 +27,15 @@ public interface StoryRepository extends JpaRepository<Story, String> {
     @Query("SELECT s FROM Story s WHERE " +
             "s.userId = :userId " +
             "AND (" +
-                "s.privacy = 'PUBLIC' " +
-                "OR (" +
-                    "s.privacy = 'ONLY_FRIENDS' " +
-                    "AND (s.userId in :friendIds OR s.userId = :authUserId)" +
-                ") " +
-                "OR (" +
-                    "s.privacy = 'PRIVATE' " +
-                    "AND s.userId = :authUserId" +
-                ")" +
+            "s.privacy = 'PUBLIC' " +
+            "OR (" +
+            "s.privacy = 'ONLY_FRIENDS' " +
+            "AND (s.userId in :friendIds OR s.userId = :authUserId)" +
+            ") " +
+            "OR (" +
+            "s.privacy = 'PRIVATE' " +
+            "AND s.userId = :authUserId" +
+            ")" +
             ") " +
             "AND s.expiredAt > :expiredAt " +
             "ORDER BY s.createdAt ASC")

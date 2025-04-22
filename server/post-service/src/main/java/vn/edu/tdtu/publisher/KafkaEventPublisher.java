@@ -17,9 +17,9 @@ import vn.edu.tdtu.model.Post;
 public class KafkaEventPublisher {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     @Value("${kafka.topic.interact-noti.name}")
-    private  String interactTopicName;
+    private String interactTopicName;
     @Value("${kafka.topic.sync-post.name}")
-    private  String syncPostTopicName;
+    private String syncPostTopicName;
     @Value("${kafka.topic.moderation-result-noti.name}")
     private String moderateNotificationTopicName;
     @Value("${kafka.topic.moderate.name}")
@@ -27,23 +27,23 @@ public class KafkaEventPublisher {
     @Value("${kafka.topic.new-post.name}")
     private String newPostTopicName;
 
-    public void pubSharePostMessage(InteractNotification notification){
+    public void pubSharePostMessage(InteractNotification notification) {
         kafkaTemplate.send(interactTopicName, notification);
     }
 
-    public void pubSyncPostMessage(Post post, ESyncType syncType){
+    public void pubSyncPostMessage(Post post, ESyncType syncType) {
         kafkaTemplate.send(syncPostTopicName, SyncPostMsg.fromModel(post, syncType));
     }
 
-    public void pubModerateResultNotificationMessage(ModerationNotificationMsg msg){
+    public void pubModerateResultNotificationMessage(ModerationNotificationMsg msg) {
         kafkaTemplate.send(moderateNotificationTopicName, msg);
     }
 
-    public void pubModerateMessage(ModerateMessage msg){
+    public void pubModerateMessage(ModerateMessage msg) {
         kafkaTemplate.send(moderateTopicName, msg);
     }
 
-    public void pubNewPostMessage(NewPostMessage msg){
+    public void pubNewPostMessage(NewPostMessage msg) {
         kafkaTemplate.send(newPostTopicName, msg);
     }
 }

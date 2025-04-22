@@ -13,7 +13,7 @@ public class KafkaEventPublisher {
     @Value("${kafka.topic.chatting.name}")
     private String chattingTopicName;
 
-    public void publishMessageNoti(MessageNoti message){
+    public void publishMessageNoti(MessageNoti message) {
         kafkaTemplate.send(chattingTopicName, message);
     }
 }

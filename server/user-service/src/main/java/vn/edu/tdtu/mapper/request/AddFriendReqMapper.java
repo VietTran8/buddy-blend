@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AddFriendReqMapper {
     private final UserRepository userRepository;
-    public FriendRequest mapToObject(String fromUserId, FriendReqDTO dto){
+
+    public FriendRequest mapToObject(String fromUserId, FriendReqDTO dto) {
         FriendRequest friendRequest = new FriendRequest();
         friendRequest.setActive(true);
         friendRequest.setCreatedAt(LocalDateTime.now());

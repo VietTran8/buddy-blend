@@ -41,6 +41,6 @@ public class Story {
     @Enumerated(EnumType.STRING)
     private EPrivacy privacy;
     @JsonIgnore
-    @OneToMany(mappedBy = "story", cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
+    @OneToMany(mappedBy = "story", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private List<Viewer> viewers;
 }

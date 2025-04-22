@@ -13,7 +13,7 @@ public class KafkaEventPublisher {
     @Value("${kafka.topic.send-otp-mail.name}")
     private String sendOtpMailTopicName;
 
-    public void publishSendOtpMailMsg(SendOTPMailMessage message){
+    public void publishSendOtpMailMsg(SendOTPMailMessage message) {
         kafkaTemplate.send(sendOtpMailTopicName, message);
     }
 }

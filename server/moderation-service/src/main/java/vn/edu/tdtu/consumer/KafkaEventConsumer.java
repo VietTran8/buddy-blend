@@ -16,10 +16,10 @@ public class KafkaEventConsumer {
     private final KafkaEventPublisher publisher;
 
     @KafkaListener(groupId = "ModerateGroup", topics = "${kafka.topic.moderate.name}")
-    public void consumeModerateTopic(ModerateMessage message){
+    public void consumeModerateTopic(ModerateMessage message) {
         ModerateResponseDto result = moderationService.moderate(message);
 
-        if(!result.isAccept())
+        if (!result.isAccept())
             publisher.publishModerationResult(new ModerateResultsMessage(result, message));
     }
 }

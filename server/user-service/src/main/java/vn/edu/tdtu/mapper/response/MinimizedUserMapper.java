@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.response.MinimizedUserResponse;
-import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.model.User;
 import vn.edu.tdtu.repository.UserRepository;
 import vn.edu.tdtu.util.SecurityContextUtils;
@@ -18,16 +17,16 @@ public class MinimizedUserMapper {
     private final UserRepository userRepository;
     private final BaseUserMapper baseUserMapper;
 
-    public MinimizedUserResponse mapToDTO(User user){
-        if(user == null) {
-           return null;
+    public MinimizedUserResponse mapToDTO(User user) {
+        if (user == null) {
+            return null;
         }
 
         MinimizedUserResponse minimizedUser = new MinimizedUserResponse(baseUserMapper.baseMapToDto(user));
 
         String authUserId = SecurityContextUtils.getUserId();
 
-        if(authUserId == null)
+        if (authUserId == null)
             return minimizedUser;
 
         User authUser = userRepository.findByIdAndActive(authUserId, true).orElse(null);

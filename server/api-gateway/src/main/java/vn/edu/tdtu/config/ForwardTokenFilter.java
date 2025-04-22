@@ -24,10 +24,10 @@ public class ForwardTokenFilter implements GatewayFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
 
-        if(routerValidation.isSecured.test(request)) {
+        if (routerValidation.isSecured.test(request)) {
             final String tokenHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
-            if(tokenHeader == null || !tokenHeader.startsWith("Bearer "))
+            if (tokenHeader == null || !tokenHeader.startsWith("Bearer "))
                 return onError(exchange);
 
             request.mutate()

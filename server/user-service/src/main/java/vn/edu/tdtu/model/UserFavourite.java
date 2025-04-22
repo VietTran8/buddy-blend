@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 public class UserFavourite {
     @Id
-    @GeneratedValue(strategy =  GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     @ManyToOne()
     @JoinColumn(name = "userId")

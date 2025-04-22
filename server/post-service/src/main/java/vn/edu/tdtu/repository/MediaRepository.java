@@ -11,5 +11,6 @@ import java.util.Collection;
 @Repository
 public interface MediaRepository extends MongoRepository<Media, String> {
     void deleteByIdIn(Collection<String> id);
+
     Page<Media> findByOwnerIdAndDetachedNot(String ownerId, boolean detached, Pageable pageable);
 }

@@ -6,10 +6,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
-public class MessageServiceApp
-{
-    public static void main( String[] args )
-    {
+public class MessageServiceApp {
+    public static void main(String[] args) {
         SpringApplication.run(MessageServiceApp.class, args);
     }
 }

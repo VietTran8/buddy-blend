@@ -11,5 +11,6 @@ import java.util.Optional;
 @Repository
 public interface ViewerRepository extends JpaRepository<Viewer, String> {
     Optional<Viewer> findTopByStoryAndUserId(Story story, String userId);
+
     long countByUserIdAndStoryIn(String userId, Collection<Story> story);
 }

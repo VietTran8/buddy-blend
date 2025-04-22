@@ -73,15 +73,15 @@ public class NotificationSender {
         return sendCommonNotification(commonNotificationMessage);
     }
 
-    public boolean sendCommonNotification(CommonNotificationMessage commonNotification){
+    public boolean sendCommonNotification(CommonNotificationMessage commonNotification) {
         socketModule.emitNotification(commonNotification);
 
-        String SEND_NOTI_URL = "https://fcm.googleapis.com/v1/projects/"+ projectId +"/messages:send";
+        String SEND_NOTI_URL = "https://fcm.googleapis.com/v1/projects/" + projectId + "/messages:send";
 
         User foundUser = userService.findById(commonNotification.getToUserIds().get(0));
         if (foundUser != null) {
             String notificationKey = foundUser.getNotificationKey();
-            if(notificationKey == null || notificationKey.isEmpty()){
+            if (notificationKey == null || notificationKey.isEmpty()) {
                 return false;
             }
 
@@ -131,8 +131,8 @@ public class NotificationSender {
         return false;
     }
 
-    public boolean sendChatNotification(Message message){
-        String SEND_NOTI_URL = "https://fcm.googleapis.com/v1/projects/"+ projectId +"/messages:send";
+    public boolean sendChatNotification(Message message) {
+        String SEND_NOTI_URL = "https://fcm.googleapis.com/v1/projects/" + projectId + "/messages:send";
 
         String toUserId = message.getToUserId();
         String fromUserId = message.getFromUserId();
@@ -145,7 +145,7 @@ public class NotificationSender {
         User toUser = users.stream().filter(user -> user.getId().equals(toUserId)).findFirst().orElse(null);
         User fromUser = users.stream().filter(user -> user.getId().equals(fromUserId)).findFirst().orElse(null);
 
-        if(toUser == null){
+        if (toUser == null) {
             log.error("Failed to send to a null user");
             return false;
         }
@@ -154,7 +154,7 @@ public class NotificationSender {
         socketModule.emitChatNotification(messageNoti);
 
         String notificationKey = toUser.getNotificationKey();
-        if(notificationKey == null || notificationKey.isEmpty()){
+        if (notificationKey == null || notificationKey.isEmpty()) {
             return false;
         }
 
@@ -206,11 +206,11 @@ public class NotificationSender {
         socketModule.emitNewPostNotification(message);
     }
 
-    private String getUserFullName(User foundUser){
+    private String getUserFullName(User foundUser) {
         return foundUser != null ? String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()) : "Unknown";
     }
 
-    private String getUserAvatar(User foundUser){
+    private String getUserAvatar(User foundUser) {
         return foundUser != null ? foundUser.getProfilePicture() : "Unknown";
     }
 }

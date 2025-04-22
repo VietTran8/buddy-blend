@@ -24,8 +24,8 @@ public class JwtUtils {
         return getTokenSubject(bearerToken);
     }
 
-    public String getTokenSubject(String bearerToken){
-        if(bearerToken == null || !bearerToken.startsWith("Bearer "))
+    public String getTokenSubject(String bearerToken) {
+        if (bearerToken == null || !bearerToken.startsWith("Bearer "))
             throw new IllegalArgumentException("Invalid JWT token format");
 
         String token = bearerToken.substring(7);
@@ -33,16 +33,16 @@ public class JwtUtils {
         if (!validateJwtToken(token))
             throw new JwtException("JWT token is invalid");
 
-        try{
+        try {
             return Jwts.parserBuilder().setSigningKey(key()).build()
                     .parseClaimsJws(token).getBody().getSubject();
-        }catch (ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
             return e.getClaims().getSubject();
         }
     }
 
     public boolean validateJwtToken(String authToken) {
-        if(authToken != null){
+        if (authToken != null) {
             try {
                 Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
                 return true;

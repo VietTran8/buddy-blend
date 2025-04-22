@@ -14,6 +14,7 @@ import vn.edu.tdtu.service.impl.UserServiceImpl;
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserServiceImpl userService;
     private final AuthInfoRepository authInfoRepository;
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         AuthInfo foundAuthInfo = authInfoRepository.findByEmail(email)

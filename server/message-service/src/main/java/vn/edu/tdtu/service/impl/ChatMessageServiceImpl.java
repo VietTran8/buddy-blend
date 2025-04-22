@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.MessageResponse;
 import vn.edu.tdtu.dto.PaginationResponse;
 import vn.edu.tdtu.dto.ResDTO;
@@ -41,7 +42,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                 messagePage.getTotalElements()
         ));
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage("Messages fetched successfully!");
+        response.setMessage(MessageCode.MESSAGE_FETCHED);
 
         return response;
     }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import vn.tdtu.edu.constant.MessageCode;
 import vn.tdtu.edu.dto.NotificationResponse;
 import vn.tdtu.edu.dto.PaginationResponse;
 import vn.tdtu.edu.dto.ResDTO;
@@ -28,7 +29,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserService userService;
 
     @Override
-    public void save(CommonNotification obj){
+    public void save(CommonNotification obj) {
         repository.save(obj);
     }
 
@@ -56,7 +57,7 @@ public class NotificationServiceImpl implements NotificationService {
                 notificationPage.get().map(noti -> notificationMapper.mapToDto(noti, fromUserMap)).toList(),
                 notificationPage.getTotalElements()
         ));
-        response.setMessage("success");
+        response.setMessage(MessageCode.NOTIFICATION_FETCHED);
 
         return response;
     }
@@ -64,32 +65,32 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public ResDTO<?> detachNotification(String tokenHeader, String notificationId) {
         CommonNotification notification = repository.findById(notificationId)
-                .orElseThrow(() -> new BadRequestException("Notification not found!"));
+                .orElseThrow(() -> new BadRequestException(MessageCode.NOTIFICATION_NOT_FOUND));
 
-        if(notification.getToUsers().stream().noneMatch(
+        if (notification.getToUsers().stream().noneMatch(
                 user -> SecurityContextUtils.getUserId().equals(user.getUserId())
         ))
-            throw new BadRequestException("You are not the notification owner");
+            throw new BadRequestException(MessageCode.NOTIFICATION_NOT_PERMITTED);
 
         repository.deleteById(notificationId);
 
-        return new ResDTO<>("success", null, 200);
+        return new ResDTO<>(MessageCode.NOTIFICATION_DETACHED, null, 200);
     }
 
     @Override
     public ResDTO<?> readNotification(String tokenHeader, String notificationId) {
         CommonNotification notification = repository.findById(notificationId)
-                .orElseThrow(() -> new BadRequestException("Notification not found!"));
+                .orElseThrow(() -> new BadRequestException(MessageCode.NOTIFICATION_NOT_FOUND));
 
-        if(notification.getToUsers().stream().noneMatch(
+        if (notification.getToUsers().stream().noneMatch(
                 user -> SecurityContextUtils.getUserId().equals(user.getUserId())
         ))
-            throw new BadRequestException("You are not the notification owner");
+            throw new BadRequestException(MessageCode.NOTIFICATION_NOT_PERMITTED);
 
         notification.setToUsers(
                 notification.getToUsers().stream().peek(
                         user -> {
-                            if(SecurityContextUtils.getUserId().equals(user.getUserId()))
+                            if (SecurityContextUtils.getUserId().equals(user.getUserId()))
                                 user.setHasRead(true);
                         }
                 ).toList()
@@ -97,6 +98,6 @@ public class NotificationServiceImpl implements NotificationService {
 
         repository.save(notification);
 
-        return new ResDTO<>("success", null, 200);
+        return new ResDTO<>(MessageCode.NOTIFICATION_READ, null, 200);
     }
 }

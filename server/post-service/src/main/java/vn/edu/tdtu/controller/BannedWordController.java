@@ -17,14 +17,14 @@ public class BannedWordController {
     private final BannedWordService bannedWordService;
 
     @PostMapping
-    public ResponseEntity<?> createBannedWord(@RequestBody CreateBannedWordReq requestBody){
+    public ResponseEntity<?> createBannedWord(@RequestBody CreateBannedWordReq requestBody) {
         ResDTO<?> response = bannedWordService.saveBannedWord(requestBody);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/remove")
-    public ResponseEntity<?> removeBannedWord(@RequestBody CreateBannedWordReq requestBody){
+    public ResponseEntity<?> removeBannedWord(@RequestBody CreateBannedWordReq requestBody) {
         ResDTO<?> response = bannedWordService.removeBannedWord(requestBody);
 
         return ResponseEntity.status(response.getCode()).body(response);

@@ -8,7 +8,7 @@ public class PromptUtil {
             return "";
         }
 
-        if(context == null) {
+        if (context == null) {
             return stringTemplate;
         }
 

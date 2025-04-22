@@ -7,7 +7,10 @@ import vn.tdtu.edu.model.CommonNotification;
 
 public interface NotificationService {
     public void save(CommonNotification obj);
+
     public ResDTO<PaginationResponse<NotificationResponse>> findAllUserNotifications(String tokenHeader, int page, int size);
+
     public ResDTO<?> detachNotification(String tokenHeader, String notificationId);
+
     public ResDTO<?> readNotification(String tokenHeader, String notificationId);
 }

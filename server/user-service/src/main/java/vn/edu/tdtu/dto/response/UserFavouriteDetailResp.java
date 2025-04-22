@@ -12,6 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class UserFavouriteDetailResp extends UserFavouriteResponse{
+public class UserFavouriteDetailResp extends UserFavouriteResponse {
     private List<PostResponse> posts;
 }

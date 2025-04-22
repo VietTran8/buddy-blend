@@ -7,6 +7,7 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.model.data.Group;
 import vn.edu.tdtu.model.es.SyncGroup;
@@ -36,7 +37,7 @@ public class GroupServiceImpl implements GroupService {
                     foundGroup.setName(group.getName());
                     groupRepository.save(foundGroup);
                 }, () -> {
-                    throw new BadRequestException("Post not found with id: " + group.getId());
+                    throw new BadRequestException(MessageCode.GROUP_NOT_FOUND_ID, group.getId());
                 }
         );
     }

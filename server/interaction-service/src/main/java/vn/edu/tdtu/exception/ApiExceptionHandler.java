@@ -15,7 +15,7 @@ import vn.edu.tdtu.dto.ResDTO;
 public class ApiExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<?> handleRuntimeException(RuntimeException ex){
+    public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
 
         ex.printStackTrace();
 
@@ -25,7 +25,7 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)
-    public ResponseEntity<?> missingHeaderRequestHandler(MissingRequestHeaderException ex){
+    public ResponseEntity<?> missingHeaderRequestHandler(MissingRequestHeaderException ex) {
         ResDTO<?> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_UNAUTHORIZED);
         response.setData(null);

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Root{
+public class Root {
     public ArrayList<Candidate> candidates;
     public UsageMetadata usageMetadata;
     public String modelVersion;

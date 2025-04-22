@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.Message;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.CreateStoryRequest;
 import vn.edu.tdtu.dto.response.LatestStoriesResponse;
@@ -60,7 +60,7 @@ public class StoryServiceImpl implements StoryService {
         storyRepository.save(story);
 
         return new ResDTO<>(
-                Message.STORY_CREATED_MSG,
+                MessageCode.STORY_CREATED,
                 new StoryIdResponse(story.getId()),
                 HttpServletResponse.SC_CREATED
         );
@@ -70,15 +70,15 @@ public class StoryServiceImpl implements StoryService {
     public ResDTO<StoryIdResponse> deleteStory(String storyId) {
         String userId = SecurityContextUtils.getUserId();
         Story foundStory = storyRepository.findById(storyId)
-                .orElseThrow(() -> new BadRequestException(Message.STORY_NOT_FOUND_MSG));
+                .orElseThrow(() -> new BadRequestException(MessageCode.STORY_NOT_FOUND));
 
-        if(!foundStory.getUserId().equals(userId))
-            throw new BadRequestException(Message.STORY_CAN_NOT_DELETE_OTHER_MSG);
+        if (!foundStory.getUserId().equals(userId))
+            throw new BadRequestException(MessageCode.STORY_CAN_NOT_DELETE_OTHER);
 
         storyRepository.deleteById(foundStory.getId());
 
         return new ResDTO<>(
-                Message.STORY_DELETED_MSG,
+                MessageCode.STORY_DELETED,
                 new StoryIdResponse(storyId),
                 HttpServletResponse.SC_CREATED
         );
@@ -87,13 +87,13 @@ public class StoryServiceImpl implements StoryService {
     @Override
     public ResDTO<StoryIdResponse> countView(String storyId) {
         Story foundStory = storyRepository.findById(storyId)
-                .orElseThrow(() -> new BadRequestException(Message.STORY_NOT_FOUND_MSG));
+                .orElseThrow(() -> new BadRequestException(MessageCode.STORY_NOT_FOUND));
 
         String userId = SecurityContextUtils.getUserId();
 
         List<Viewer> viewers = foundStory.getViewers();
 
-        if(viewers.stream().noneMatch(viewer -> viewer.getUserId().equals(userId)) && !foundStory.getUserId().equals(userId)){
+        if (viewers.stream().noneMatch(viewer -> viewer.getUserId().equals(userId)) && !foundStory.getUserId().equals(userId)) {
             Viewer newViewer = new Viewer();
             newViewer.setStory(foundStory);
             newViewer.setViewedAt(LocalDateTime.now());
@@ -105,7 +105,7 @@ public class StoryServiceImpl implements StoryService {
         }
 
         return new ResDTO<>(
-                Message.VIEWER_COUNTED_MSG,
+                MessageCode.VIEWER_COUNTED,
                 new StoryIdResponse(foundStory.getId()),
                 HttpServletResponse.SC_OK
         );
@@ -114,7 +114,7 @@ public class StoryServiceImpl implements StoryService {
     @Override
     public ResDTO<?> getViewers(String accessToken, String storyId) {
         Story foundStory = storyRepository.findById(storyId)
-                .orElseThrow(() -> new BadRequestException(Message.STORY_FETCHED_MSG));
+                .orElseThrow(() -> new BadRequestException(MessageCode.STORY_FETCHED));
 
         List<Viewer> viewers = foundStory.getViewers();
 
@@ -132,7 +132,7 @@ public class StoryServiceImpl implements StoryService {
         List<ViewerResponse> viewerResponses = viewerMapper.mapToDtos(viewers, userMap);
 
         return new ResDTO<>(
-                Message.VIEWER_NOT_FOUND_MSG,
+                MessageCode.VIEWER_NOT_FOUND,
                 viewerResponses,
                 HttpServletResponse.SC_OK
         );
@@ -144,8 +144,8 @@ public class StoryServiceImpl implements StoryService {
 
         List<User> friends = userService.getUserFriends(accessTokenHeader);
 
-        if(foundUser == null)
-            throw new BadRequestException(Message.USER_NOT_FOUND_MSG);
+        if (foundUser == null)
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND_MSG);
 
         List<StoryResponse> stories = storyRepository.findUserStory(
                         userId,
@@ -164,7 +164,7 @@ public class StoryServiceImpl implements StoryService {
         ResDTO<List<StoryResponse>> response = new ResDTO<>();
 
         response.setData(stories);
-        response.setMessage(Message.STORY_FETCHED_MSG);
+        response.setMessage(MessageCode.STORY_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
 
         return response;
@@ -211,7 +211,7 @@ public class StoryServiceImpl implements StoryService {
                 .toList();
 
         return new ResDTO<>(
-                Message.STORY_FETCHED_MSG,
+                MessageCode.STORY_FETCHED,
                 storyResponses,
                 HttpServletResponse.SC_OK
         );

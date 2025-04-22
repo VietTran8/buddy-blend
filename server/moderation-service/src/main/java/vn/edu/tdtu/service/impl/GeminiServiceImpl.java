@@ -34,7 +34,7 @@ public class GeminiServiceImpl implements GeminiService {
 
         ResponseEntity<Root> response = geminiClient.getResponse(geminiApiKey, request, "no-cache");
 
-        if(HttpStatusCode.valueOf(200).equals(response.getStatusCode())) {
+        if (HttpStatusCode.valueOf(200).equals(response.getStatusCode())) {
             return response.getBody().getContent();
         }
 

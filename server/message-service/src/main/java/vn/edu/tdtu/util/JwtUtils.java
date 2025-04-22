@@ -3,12 +3,10 @@ package vn.edu.tdtu.util;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.dto.ResDTO;
 
 import java.security.Key;
 
@@ -26,8 +24,8 @@ public class JwtUtils {
         return getTokenSubject(token);
     }
 
-    public String getTokenSubject(String bearerToken){
-        if(bearerToken == null || !bearerToken.startsWith("Bearer "))
+    public String getTokenSubject(String bearerToken) {
+        if (bearerToken == null || !bearerToken.startsWith("Bearer "))
             throw new IllegalArgumentException("Invalid JWT token format");
 
         String token = bearerToken.substring(7);
@@ -35,16 +33,16 @@ public class JwtUtils {
         if (!validateJwtToken(token))
             throw new JwtException("JWT token is invalid");
 
-        try{
+        try {
             return Jwts.parserBuilder().setSigningKey(key()).build()
                     .parseClaimsJws(token).getBody().getSubject();
-        }catch (ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
             return e.getClaims().getSubject();
         }
     }
 
     public boolean validateJwtToken(String authToken) {
-        if(authToken != null){
+        if (authToken != null) {
             try {
                 Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
                 return true;

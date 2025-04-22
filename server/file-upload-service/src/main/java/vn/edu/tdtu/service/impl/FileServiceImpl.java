@@ -21,10 +21,11 @@ import java.util.*;
 public class FileServiceImpl implements IFileService {
     private final FileValidation filesValidation;
     private final Cloudinary cloudinary;
+
     @Override
     public String uploadFile(MultipartFile multipartFile, EUploadFolder folder) throws IOException {
-        if(multipartFile.isEmpty() || Objects.requireNonNull(multipartFile.getOriginalFilename()).isEmpty()
-                || !filesValidation.isCorrectFormat(multipartFile)){
+        if (multipartFile.isEmpty() || Objects.requireNonNull(multipartFile.getOriginalFilename()).isEmpty()
+                || !filesValidation.isCorrectFormat(multipartFile)) {
             return null;
         }
 
@@ -57,9 +58,9 @@ public class FileServiceImpl implements IFileService {
     public boolean deleteFile(String url, EUploadFolder folder) throws IOException {
         String publicId = parsePublicId(url, folder);
         log.info(publicId);
-        if(publicId != null){
+        if (publicId != null) {
             return cloudinary.uploader()
-                    .destroy(publicId,  Map.of(
+                    .destroy(publicId, Map.of(
                             "resource_type", folder.getResourceType()
                     )).get("result").equals("ok");
         }
@@ -68,8 +69,8 @@ public class FileServiceImpl implements IFileService {
 
     @Override
     public String updateFile(String oldUrl, MultipartFile newFile, EUploadFolder folder) throws IOException {
-        if(newFile.isEmpty() || Objects.requireNonNull(newFile.getOriginalFilename()).isEmpty()
-                || !filesValidation.isCorrectFormat(newFile)){
+        if (newFile.isEmpty() || Objects.requireNonNull(newFile.getOriginalFilename()).isEmpty()
+                || !filesValidation.isCorrectFormat(newFile)) {
             return null;
         }
         String publicId = parsePublicId(oldUrl, folder);
@@ -83,8 +84,8 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
-    public String parsePublicId(String url, EUploadFolder folder){
-        if(url.contains("http://res.cloudinary.com/dt8itomae")){
+    public String parsePublicId(String url, EUploadFolder folder) {
+        if (url.contains("http://res.cloudinary.com/dt8itomae")) {
             String[] splitUrl = url.split("/");
             return Strings.concat(
                     folder.getFolderName() + "/",

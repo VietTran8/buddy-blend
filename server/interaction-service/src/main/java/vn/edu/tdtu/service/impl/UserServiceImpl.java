@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
                 new FindByIdsRequest(ids)
         );
 
-         log.info(response.toString());
+        log.info(response.toString());
 
         return response.getData();
     }

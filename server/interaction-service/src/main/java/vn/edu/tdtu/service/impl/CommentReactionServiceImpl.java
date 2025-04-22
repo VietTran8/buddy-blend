@@ -1,6 +1,7 @@
 package vn.edu.tdtu.service.impl;
 
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.requests.DoCommentReactRequest;
 import vn.edu.tdtu.dto.response.ReactResponse;
@@ -33,23 +34,22 @@ public record CommentReactionServiceImpl(
         ResDTO<List<TopReacts>> responseData = new ResDTO<>();
         responseData.setCode(200);
         responseData.setData(null);
-        responseData.setMessage("success");
 
         String userId = SecurityContextUtils.getUserId();
         commentReactionRepository.findByUserIdAndCmtId(userId, request.getCmtId()).ifPresentOrElse(
                 (reaction) -> {
-                    if(request.getType().equals(reaction.getType())) {
+                    if (request.getType().equals(reaction.getType())) {
                         commentReactionRepository.delete(reaction);
-                        responseData.setMessage("Đã hủy bày tỏ cảm xúc");
-                    }else{
+                        responseData.setMessage(MessageCode.REACTION_UNCREATED);
+                    } else {
                         reaction.setType(request.getType());
                         reaction.setCreatedAt(LocalDateTime.now());
-                        responseData.setMessage("Đã cập nhật cảm xúc");
+                        responseData.setMessage(MessageCode.REACTION_UPDATED);
                         commentReactionRepository.save(reaction);
                     }
                 }, () -> {
                     CommentReactions commentReactions = commentReactionMapper.mapToObject(userId, request);
-                    responseData.setMessage("Đã bày tỏ cảm xúc");
+                    responseData.setMessage(MessageCode.REACTION_CREATED);
                     commentReactionRepository.save(commentReactions);
                 }
         );
@@ -61,7 +61,7 @@ public record CommentReactionServiceImpl(
     }
 
     @Override
-    public ResDTO<Map<EReactionType, List<ReactResponse>>> getReactsByCmtId(String token, String cmtId){
+    public ResDTO<Map<EReactionType, List<ReactResponse>>> getReactsByCmtId(String token, String cmtId) {
         ResDTO<Map<EReactionType, List<ReactResponse>>> response = new ResDTO<>();
         String userId = SecurityContextUtils.getUserId();
 
@@ -76,7 +76,7 @@ public record CommentReactionServiceImpl(
 
         response.setCode(200);
         response.setData(reactResponses);
-        response.setMessage("success");
+        response.setMessage(MessageCode.REACTION_FETCHED);
 
         return response;
     }

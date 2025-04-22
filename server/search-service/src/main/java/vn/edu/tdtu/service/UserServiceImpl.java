@@ -8,6 +8,7 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
+import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.request.FindByUserIdsReq;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.model.data.User;
@@ -37,10 +38,10 @@ public class UserServiceImpl implements UserService {
                 foundUser -> {
                     foundUser.setEmail(user.getEmail());
                     foundUser.setFullName(user.getFullName());
-                    
+
                     userRepository.save(foundUser);
                 }, () -> {
-                    throw new BadRequestException("User not found with id: " + user.getId());
+                    throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, user.getId());
                 }
         );
     }

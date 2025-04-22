@@ -16,13 +16,13 @@ public class AppConfig {
     private String userDisconnectedTopicName;
 
     @Bean
-    public JsonMessageConverter jsonMessageConverter(){
+    public JsonMessageConverter jsonMessageConverter() {
         return new JsonMessageConverter();
     }
 
     @Bean
     @LoadBalanced
-    public RestTemplate restTemplate(){
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 

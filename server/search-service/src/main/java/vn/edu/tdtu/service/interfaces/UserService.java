@@ -7,7 +7,10 @@ import java.util.List;
 
 public interface UserService {
     void saveUser(SyncUser user);
+
     void updateUser(SyncUser user);
+
     void deleteUser(SyncUser user);
+
     List<User> searchUserFullName(String accessToken, String name, String fuzziness);
 }

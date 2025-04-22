@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewMessageNoti extends Message{
+public class NewMessageNoti extends Message {
     private String title;
     private String avatar;
 

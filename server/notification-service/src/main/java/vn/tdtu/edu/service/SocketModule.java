@@ -36,14 +36,14 @@ public class SocketModule {
             HandshakeData handshakeData = client.getHandshakeData();
             String bearerToken = handshakeData.getHttpHeaders().get("Authorization");
 
-            if(bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+            if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
                 client.disconnect();
                 throw new IllegalArgumentException("Invalid JWT token format");
             }
 
             String token = bearerToken.split(" ")[1];
 
-            if(!jwtUtils.validateJwtToken(token)) {
+            if (!jwtUtils.validateJwtToken(token)) {
                 client.disconnect();
                 throw new UnauthorizedException("You are not authenticated");
             }
@@ -65,13 +65,13 @@ public class SocketModule {
 
     public DisconnectListener onDisconnect() {
         return (client) -> {
-            if(client.get("userId") != null && client.get("sessionId") != null) {
+            if (client.get("userId") != null && client.get("sessionId") != null) {
                 log.info("User [{}] with session id [{}] has disconnected from the notification web socket server", client.get("userId").toString(), client.getSessionId());
 
                 String userId = client.get("userId");
                 String sessionId = client.get("sessionId");
 
-                if(userId != null && sessionId != null)
+                if (userId != null && sessionId != null)
                     publisher.publishUserDisconnected(new UserConnectMessage(
                             userId,
                             sessionId
@@ -82,15 +82,15 @@ public class SocketModule {
 
     public void emitNotification(CommonNotificationMessage notification) {
         server.getAllClients().forEach(c -> {
-                            if(notification.getToUserIds().get(0).equals(c.get("userId"))) {
-                                c.sendEvent("notification", notification);
-                            }
-                        });
+            if (notification.getToUserIds().get(0).equals(c.get("userId"))) {
+                c.sendEvent("notification", notification);
+            }
+        });
     }
 
     public void emitChatNotification(NewMessageNoti newMessageNoti) {
         server.getAllClients().forEach(c -> {
-            if(newMessageNoti.getToUserId().equals(c.get("userId"))) {
+            if (newMessageNoti.getToUserId().equals(c.get("userId"))) {
                 log.info("chat notification sent!");
                 c.sendEvent("new_message", newMessageNoti);
             }
@@ -100,7 +100,7 @@ public class SocketModule {
     public void emitNewPostNotification(NewPostMessage message) {
 
         server.getAllClients().forEach((client) -> {
-            if(message.getBroadcastIds().contains((String) client.get("userId"))) {
+            if (message.getBroadcastIds().contains((String) client.get("userId"))) {
                 client.sendEvent("new_post", message.getPost());
             }
         });

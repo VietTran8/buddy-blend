@@ -20,7 +20,8 @@ import java.util.stream.Stream;
 public class UpdatePostRequestMapper {
     private final FileService fileService;
     private final MediaRepository mediaRepository;
-    public void bindToObject(UpdatePostContentRequest dto, Post object){
+
+    public void bindToObject(UpdatePostContentRequest dto, Post object) {
         object.setContent(dto.getContent());
         object.setBackground(dto.getBackground());
         object.setNormalizedContent(StringUtils.toSlug(object.getContent()));
@@ -51,12 +52,12 @@ public class UpdatePostRequestMapper {
 //                fileService.delete(url, EFileType.TYPE_VIDEO);
 //            });
 
-        if(!needDelMedias.isEmpty())
+        if (!needDelMedias.isEmpty())
             needDelMedias.forEach(media -> {
-                if(EFileType.TYPE_VIDEO.equals(media.getType()))
+                if (EFileType.TYPE_VIDEO.equals(media.getType()))
                     fileService.delete(media.getUrl(), EFileType.TYPE_VIDEO);
 
-                else if(EFileType.TYPE_IMG.equals(media.getType()))
+                else if (EFileType.TYPE_IMG.equals(media.getType()))
                     fileService.delete(media.getUrl(), EFileType.TYPE_IMG);
             });
 
@@ -64,7 +65,7 @@ public class UpdatePostRequestMapper {
 
         List<Media> needAddMedias = dto.getMedias().stream()
                 .filter(media -> media.getId() == null || media.getId().isEmpty())
-                        .toList();
+                .toList();
 
         List<Media> addedMedias = mediaRepository.saveAll(needAddMedias);
 
@@ -75,7 +76,7 @@ public class UpdatePostRequestMapper {
                 addedMedias.stream().map(Media::getId)
         ).toList());
 
-        if(!object.getPrivacy().equals(dto.getPrivacy())){
+        if (!object.getPrivacy().equals(dto.getPrivacy())) {
             object.setPrivacy(dto.getPrivacy());
         }
 

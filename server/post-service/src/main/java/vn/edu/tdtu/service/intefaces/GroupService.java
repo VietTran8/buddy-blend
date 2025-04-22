@@ -6,7 +6,10 @@ import java.util.List;
 
 public interface GroupService {
     public GroupInfo getGroupById(String accessToken, String groupId);
+
     public List<GroupInfo> getMyGroups(String accessToken);
+
     public boolean allowFetchPost(String accessToken, String groupId);
+
     public List<String> getMemberIdList(String accessToken, String groupId);
 }
