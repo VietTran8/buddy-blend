@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import vn.tdtu.edu.enums.ENotificationType;
+import vn.tdtu.common.enums.notification.ENotificationType;
 
 import java.util.List;
 

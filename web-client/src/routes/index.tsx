@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouteObject } from "react-router-dom";
-import { FriendsLayout, GroupLayout, HeaderLayout, MainLayout, MainNoRightSideBarLayout, SearchLayout, UserProfileLayout } from "../layouts";
-import { About, Blocked, CreateGroup, CreateStory, Favourite, ForgotPassword, Friends, Group, GroupAbout, GroupDetails, GroupMembers, GroupPhotos, Groups, Home, Login, Main, ModerateMember, NotFound, People, Photos, Post, PostDetails, PostPhotos, ProfileAbout, Requests, Result, Saved, Settings, SignUp, Suggests, ViewStory } from "../pages";
+import { AdminLayout, FriendsLayout, GroupLayout, HeaderLayout, MainLayout, MainNoRightSideBarLayout, SearchLayout, UserProfileLayout } from "../layouts";
+import { About, AdminHome, AdminReport, AdminSettings, AdminUsers, Blocked, CreateGroup, CreateStory, Favourite, ForgotPassword, Friends, Group, GroupAbout, GroupDetails, GroupMembers, GroupPhotos, Groups, Home, Login, Main, ModerateMember, NotFound, People, Photos, Post, PostDetails, PostPhotos, ProfileAbout, Requests, Result, Saved, Settings, SignUp, Suggests, ViewStory } from "../pages";
 import { AuthProvider, ChatProvider, NotificationProvider, StoryWrapper } from "../components";
 import { Provider } from "../components";
 import FavouriteDetails from "../pages/favourite/FavouriteDetails";
@@ -45,6 +45,28 @@ const privateRoutes = [
                     },
                 ]
             },
+        ]
+    },
+    {
+        path: '/admin',
+        element: <AdminLayout />,
+        children: [
+            {
+                index: true,
+                element: <AdminHome />
+            },
+            {
+                path: 'users',
+                element: <AdminUsers />
+            },
+            {
+                path: 'reports',
+                element: <AdminReport />
+            },
+            {
+                path: 'settings',
+                element: <AdminSettings />
+            }
         ]
     },
     {

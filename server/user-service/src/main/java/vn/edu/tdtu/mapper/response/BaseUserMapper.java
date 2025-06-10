@@ -2,16 +2,15 @@ package vn.edu.tdtu.mapper.response;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.dto.response.BaseUserResponse;
-import vn.edu.tdtu.dto.response.MutualFriend;
 import vn.edu.tdtu.enums.EFriendReqStatus;
-import vn.edu.tdtu.enums.EFriendStatus;
 import vn.edu.tdtu.model.FriendRequest;
 import vn.edu.tdtu.model.User;
 import vn.edu.tdtu.repository.FriendRequestRepository;
 import vn.edu.tdtu.repository.UserRepository;
 import vn.edu.tdtu.service.interfaces.UserStatusService;
 import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.enums.user.EFriendStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +22,8 @@ public class BaseUserMapper {
     private final UserRepository userRepository;
     private final UserStatusService userStatusService;
 
-    public BaseUserResponse baseMapToDto(User user) {
-        BaseUserResponse userResponse = new BaseUserResponse();
+    public UserDTO baseMapToDto(User user) {
+        UserDTO userResponse = new UserDTO();
 
         String userId = SecurityContextUtils.getUserId();
 
@@ -67,11 +66,11 @@ public class BaseUserMapper {
         return userResponse;
     }
 
-    public List<MutualFriend> getMutualFriends(List<User> myFriends, List<User> userFriends) {
+    public List<UserDTO> getMutualFriends(List<User> myFriends, List<User> userFriends) {
         return myFriends.stream()
                 .filter(userFriends::contains)
                 .map(friend -> {
-                    MutualFriend mutualFriend = new MutualFriend();
+                    UserDTO mutualFriend = new UserDTO();
 
                     mutualFriend.setFullName(friend.getUserFullName());
                     mutualFriend.setId(friend.getId());

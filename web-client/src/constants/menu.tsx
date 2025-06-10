@@ -1,4 +1,4 @@
-import { faBookmark, faFilm, faGear, faHeart, faHouse, faList, faLock, faPaperclip, faPeopleGroup, faUser, faUserFriends, faUserGroup, faUserPlus } from "@fortawesome/free-solid-svg-icons";
+import { faBookmark, faFilm, faGear, faHeart, faHouse, faInfoCircle, faList, faLock, faPaperclip, faPeopleGroup, faUser, faUserFriends, faUserGroup, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { MenuItem } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -142,5 +142,28 @@ export const groupNavItems: MenuItem[] = [
         name: "Hình ảnh",
         linkTo: "photos",
         icon: undefined
+    }
+]
+
+export const adminMenuItems: MenuItem[] = [
+    {
+        name: "Trang chủ",
+        linkTo: "",
+        icon: <FontAwesomeIcon icon={faHouse} />
+    },
+    {
+        name: "Người dùng",
+        linkTo: "users",
+        icon: <FontAwesomeIcon icon={faUser} />
+    },
+    {
+        name: "Báo cáo bài viết",
+        linkTo: "reports",
+        icon: <FontAwesomeIcon icon={faInfoCircle} />
+    },
+    {
+        name: "Cài đặt",
+        linkTo: "settings",
+        icon: <FontAwesomeIcon icon={faGear} />
     }
 ]

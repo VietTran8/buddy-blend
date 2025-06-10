@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import vn.edu.tdtu.dto.response.PostResponse;
+import vn.tdtu.common.dto.PostDTO;
 
 import java.util.List;
 
@@ -14,5 +14,5 @@ import java.util.List;
 @Setter
 public class NewPostMessage {
     private List<String> broadcastIds;
-    private PostResponse post;
+    private PostDTO post;
 }

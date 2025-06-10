@@ -13,6 +13,7 @@ import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.*;
 import vn.edu.tdtu.enums.*;
+import vn.tdtu.common.enums.search.ESyncType;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.mapper.GroupMapper;
@@ -20,7 +21,6 @@ import vn.edu.tdtu.message.SyncGroupMsg;
 import vn.edu.tdtu.model.Group;
 import vn.edu.tdtu.model.GroupMember;
 import vn.edu.tdtu.model.Member;
-import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.repository.GroupMemberRepository;
 import vn.edu.tdtu.repository.GroupRepository;
@@ -30,6 +30,12 @@ import vn.edu.tdtu.service.interfaces.GroupAdminService;
 import vn.edu.tdtu.service.interfaces.GroupMemberService;
 import vn.edu.tdtu.service.interfaces.GroupService;
 import vn.edu.tdtu.utils.SecurityContextUtils;
+import vn.tdtu.common.dto.GroupDTO;
+import vn.tdtu.common.dto.GroupMemberDTO;
+import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.enums.group.EGroupPrivacy;
+import vn.tdtu.common.enums.group.EJoinGroupStatus;
+import vn.tdtu.common.enums.notification.ENotificationType;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -234,14 +240,14 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public ResDTO<?> getGroupById(String accessToken, String groupId) {
-        ResDTO<GroupResponse> response = new ResDTO<>();
+        ResDTO<GroupDTO> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_OK);
         response.setMessage(MessageCode.GROUP_FETCHED);
 
         Group group = groupRepository.findByIdAndIsDeleted(groupId, false)
                 .orElseThrow(() -> new BadRequestException(MessageCode.GROUP_NOT_FOUND));
 
-        GroupResponse groupResponse = groupMapper.mapToDto(accessToken, group, false);
+        GroupDTO groupResponse = groupMapper.mapToDto(accessToken, group, false);
 
         response.setData(groupResponse);
 
@@ -250,7 +256,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public ResDTO<?> getAllGroupByIds(List<String> groupIds) {
-        ResDTO<List<GroupResponse>> response = new ResDTO<>();
+        ResDTO<List<GroupDTO>> response = new ResDTO<>();
         response.setCode(HttpServletResponse.SC_OK);
         response.setMessage(MessageCode.GROUP_FETCHED);
 
@@ -311,7 +317,7 @@ public class GroupServiceImpl implements GroupService {
         Notification notification = new Notification();
         String userId = SecurityContextUtils.getUserId();
 
-        User foundUser = userClient.findById(accessToken, userId).getData();
+        UserDTO foundUser = userClient.findById(accessToken, userId).getData();
 
         if (foundUser == null)
             throw new UnauthorizedException("You are not authenticated");
@@ -334,7 +340,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public ResDTO<?> getPendingMembersList(String accessToken, String groupId) {
-        ResDTO<List<GroupMemberResponse>> response = new ResDTO<>();
+        ResDTO<List<GroupMemberDTO>> response = new ResDTO<>();
         response.setMessage(MessageCode.GROUP_MEMBER_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
 
@@ -345,13 +351,19 @@ public class GroupServiceImpl implements GroupService {
                 .map(member -> member.getMember().getUserId())
                 .toList();
 
-        List<User> users = userClient.findByIds(accessToken, new FindByIdsRequest(memberUserIds)).getData();
+        List<UserDTO> users = userClient.findByIds(accessToken, new FindByIdsRequest(memberUserIds)).getData();
 
-        Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getId, user -> user));
+        Map<String, UserDTO> userMap = users.stream().collect(Collectors.toMap(UserDTO::getId, user -> user));
 
         response.setData(
                 pendingMembers.stream()
-                        .map(member -> new GroupMemberResponse(member, userMap.get(member.getMember().getUserId())))
+                        .map(member -> new GroupMemberDTO(
+                                member.getId(),
+                                member.isAdmin(),
+                                member.isPending(),
+                                member.getJoinedAt(),
+                                userMap.get(member.getMember().getUserId()))
+                        )
                         .toList()
         );
 
@@ -360,7 +372,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public ResDTO<?> getGroupMembers(String accessToken, String groupId, int page, int size, EGetMemberOption option) {
-        ResDTO<PaginationResponse<GroupMemberResponse>> response = new ResDTO<>();
+        ResDTO<PaginationResponse<GroupMemberDTO>> response = new ResDTO<>();
         Page<GroupMember> memberPage;
 
         switch (option) {
@@ -374,9 +386,9 @@ public class GroupServiceImpl implements GroupService {
                 break;
             }
             case FRIEND_MEMBERS -> {
-                List<User> userFriends = userClient.findUserFriendIdsByUserToken(accessToken).getData();
+                List<UserDTO> userFriends = userClient.findUserFriendIdsByUserToken(accessToken).getData();
 
-                memberPage = groupMemberRepository.findFriendMembersByGroupId(groupId, userFriends.stream().map(User::getId).toList(), PageRequest.of(page - 1, size));
+                memberPage = groupMemberRepository.findFriendMembersByGroupId(groupId, userFriends.stream().map(UserDTO::getId).toList(), PageRequest.of(page - 1, size));
                 break;
             }
             default -> {
@@ -388,15 +400,21 @@ public class GroupServiceImpl implements GroupService {
         List<GroupMember> memberList = memberPage.get().toList();
 
         List<String> userIds = memberList.stream().map(member -> member.getMember().getUserId()).toList();
-        List<User> users = userClient.findByIds(accessToken, new FindByIdsRequest(userIds)).getData();
-        Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getId, user -> user));
+        List<UserDTO> users = userClient.findByIds(accessToken, new FindByIdsRequest(userIds)).getData();
+        Map<String, UserDTO> userMap = users.stream().collect(Collectors.toMap(UserDTO::getId, user -> user));
 
         response.setData(new PaginationResponse<>(
                 page,
                 size,
                 memberPage.getTotalPages(),
                 (int) memberPage.getTotalElements(),
-                memberPage.get().map(member -> new GroupMemberResponse(member, userMap.get(member.getMember().getUserId()))).toList()
+                memberPage.get().map(member -> new GroupMemberDTO(
+                        member.getId(),
+                        member.isAdmin(),
+                        member.isPending(),
+                        member.getJoinedAt(),
+                        userMap.get(member.getMember().getUserId()))
+                ).toList()
         ));
         response.setCode(HttpServletResponse.SC_OK);
         response.setMessage(MessageCode.GROUP_MEMBER_FETCHED);
@@ -425,8 +443,8 @@ public class GroupServiceImpl implements GroupService {
     public ResDTO<?> getAllFriendGroupMemberUserIds(String accessToken, String groupId) {
         ResDTO<List<String>> response = new ResDTO<>();
 
-        List<User> userFriends = userClient.findUserFriendIdsByUserToken(accessToken).getData();
-        List<GroupMember> memberList = groupMemberRepository.findFriendMembersByGroupId(groupId, userFriends.stream().map(User::getId).toList());
+        List<UserDTO> userFriends = userClient.findUserFriendIdsByUserToken(accessToken).getData();
+        List<GroupMember> memberList = groupMemberRepository.findFriendMembersByGroupId(groupId, userFriends.stream().map(UserDTO::getId).toList());
 
         List<String> userIds = memberList.stream().map(member -> member.getMember().getUserId()).toList();
 

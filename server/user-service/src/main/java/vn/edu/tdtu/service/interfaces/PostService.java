@@ -1,10 +1,10 @@
 package vn.edu.tdtu.service.interfaces;
 
 import vn.edu.tdtu.dto.request.FindByIdsReq;
-import vn.edu.tdtu.model.data.PostResponse;
+import vn.tdtu.common.dto.PostDTO;
 
 import java.util.List;
 
 public interface PostService {
-    public List<PostResponse> findByIds(String token, FindByIdsReq reqDTO);
+    public List<PostDTO> findByIds(String token, FindByIdsReq reqDTO);
 }

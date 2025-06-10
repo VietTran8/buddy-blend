@@ -9,8 +9,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.enums.EPrivacy;
 import vn.edu.tdtu.model.Post;
+import vn.tdtu.common.enums.post.EPrivacy;
 
 import java.time.LocalDateTime;
 import java.util.List;

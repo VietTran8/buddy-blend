@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.edu.tdtu.enums.EPostType;
-import vn.edu.tdtu.enums.EPrivacy;
 import vn.edu.tdtu.model.Media;
+import vn.tdtu.common.enums.post.EPostType;
+import vn.tdtu.common.enums.post.EPrivacy;
 
 import java.util.List;
 

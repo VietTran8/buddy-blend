@@ -20,11 +20,6 @@ public class AppConfig {
     }
 
     @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
-    }
-
-    @Bean
     public NewTopic interactNoti() {
         return new NewTopic(notificationName, 2, (short) 1);
     }

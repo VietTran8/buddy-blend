@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.response.MutualFriend;
-import vn.edu.tdtu.dto.response.UserDetailsResponse;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.model.User;
 import vn.edu.tdtu.repository.UserRepository;
 import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.enums.user.EUserMappingType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public class UserDetailsMapper {
     private final UserRepository userRepository;
     private final BaseUserMapper baseUserMapper;
 
-    public UserDetailsResponse mapToDTO(User user) {
+    public UserDTO mapToDTO(User user) {
         if (user == null) {
             return null;
         }
@@ -38,7 +38,7 @@ public class UserDetailsMapper {
         List<User> myFriends = baseUserMapper.getListFriends(authUser);
         List<User> userFriends = baseUserMapper.getListFriends(user);
 
-        UserDetailsResponse userDetails = new UserDetailsResponse(baseUserMapper.baseMapToDto(user));
+        UserDTO userDetails = new UserDTO(baseUserMapper.baseMapToDto(user), EUserMappingType.TYPE_DETAILED);
 
         userDetails.setFriend(myFriends.stream().anyMatch(f -> !authUserId.equals(user.getId())
                 && f.getId().equals(user.getId())));
@@ -50,7 +50,7 @@ public class UserDetailsMapper {
         userDetails.setPhone(user.getPhone() != null ? user.getPhone() : "Chưa cập nhật...");
         userDetails.setFromCity(user.getFromCity() != null ? user.getFromCity() : "Chưa cập nhật...");
 
-        List<MutualFriend> mutualFriends = baseUserMapper.getMutualFriends(myFriends, userFriends);
+        List<UserDTO> mutualFriends = baseUserMapper.getMutualFriends(myFriends, userFriends);
 
         userDetails.setMutualFriends(
                 userDetails.isMyAccount() ?
@@ -75,10 +75,10 @@ public class UserDetailsMapper {
                         otherUser.getBlockingList().stream().anyMatch(b -> b.getBlockedUser().getId().equals(authUser.getId())));
     }
 
-    private List<MutualFriend> getAllFriends(List<User> friends) {
+    private List<UserDTO> getAllFriends(List<User> friends) {
         return friends.stream()
                 .map(friend -> {
-                    MutualFriend mutualFriend = new MutualFriend();
+                    UserDTO mutualFriend = new UserDTO();
 
                     mutualFriend.setFullName(friend.getUserFullName());
                     mutualFriend.setId(friend.getId());

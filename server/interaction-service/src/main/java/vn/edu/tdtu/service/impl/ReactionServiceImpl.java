@@ -6,22 +6,21 @@ import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.requests.DoReactRequest;
 import vn.edu.tdtu.dto.response.InteractNotification;
-import vn.edu.tdtu.dto.response.ReactResponse;
-import vn.edu.tdtu.dto.response.TopReacts;
-import vn.edu.tdtu.enums.ENotificationType;
-import vn.edu.tdtu.enums.EReactionType;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.DoReactMapper;
 import vn.edu.tdtu.mapper.ReactResponseMapper;
 import vn.edu.tdtu.model.Reactions;
-import vn.edu.tdtu.model.data.Post;
-import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.repository.ReactionRepository;
 import vn.edu.tdtu.service.interfaces.PostService;
 import vn.edu.tdtu.service.interfaces.ReactionService;
 import vn.edu.tdtu.service.interfaces.UserService;
 import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.dto.PostDTO;
+import vn.tdtu.common.dto.ReactionDTO;
+import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.enums.interaction.EReactionType;
+import vn.tdtu.common.enums.notification.ENotificationType;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -40,11 +39,11 @@ public class ReactionServiceImpl implements ReactionService {
 
     @Override
     public ResDTO<?> doReaction(String token, DoReactRequest request) {
-        ResDTO<List<TopReacts>> response = new ResDTO<>();
+        ResDTO<List<ReactionDTO>> response = new ResDTO<>();
         String userId = SecurityContextUtils.getUserId();
         String postId = request.getPostId();
 
-        Post foundPost = postService.findById(token, request.getPostId());
+        PostDTO foundPost = postService.findById(token, request.getPostId());
 
         if (foundPost == null)
             throw new BadRequestException(MessageCode.POST_NOT_FOUND_ID, request.getPostId());
@@ -77,7 +76,7 @@ public class ReactionServiceImpl implements ReactionService {
                 );
 
         if (isCreateNew.get()) {
-            User foundUser = userService.findById(token, userId);
+            UserDTO foundUser = userService.findById(token, userId);
             if (foundUser != null && !foundUser.getId().equals(foundPost.getUser().getId())) {
                 InteractNotification notification = new InteractNotification();
                 notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
@@ -94,8 +93,8 @@ public class ReactionServiceImpl implements ReactionService {
             }
         }
 
-        Map<EReactionType, List<ReactResponse>> newPostReacts = getReactsByPostId(token, reaction.getPostId()).getData();
-        List<TopReacts> topReacts = findTopReact(newPostReacts != null ? newPostReacts : new HashMap<>());
+        Map<EReactionType, List<ReactionDTO>> newPostReacts = getReactsByPostId(token, reaction.getPostId()).getData();
+        List<ReactionDTO> topReacts = findTopReact(newPostReacts != null ? newPostReacts : new HashMap<>());
 
         response.setData(topReacts);
         response.setCode(200);
@@ -103,8 +102,8 @@ public class ReactionServiceImpl implements ReactionService {
         return response;
     }
 
-    private List<TopReacts> findTopReact(Map<EReactionType, List<ReactResponse>> reactionsMap) {
-        Map<EReactionType, List<ReactResponse>> sortedMap = reactionsMap.entrySet()
+    private List<ReactionDTO> findTopReact(Map<EReactionType, List<ReactionDTO>> reactionsMap) {
+        Map<EReactionType, List<ReactionDTO>> sortedMap = reactionsMap.entrySet()
                 .stream()
                 .sorted((entry1, entry2) -> Integer.compare(entry2.getValue().size(), entry1.getValue().size()))
                 .limit(3)
@@ -114,10 +113,10 @@ public class ReactionServiceImpl implements ReactionService {
                         (e1, e2) -> e1,
                         LinkedHashMap::new
                 ));
-        List<TopReacts> topReacts = new ArrayList<>();
+        List<ReactionDTO> topReacts = new ArrayList<>();
 
         sortedMap.forEach((k, v) -> {
-            TopReacts react = new TopReacts();
+            ReactionDTO react = new ReactionDTO();
             react.setCount(v.size());
             react.setType(k);
 
@@ -128,18 +127,18 @@ public class ReactionServiceImpl implements ReactionService {
     }
 
     @Override
-    public ResDTO<Map<EReactionType, List<ReactResponse>>> getReactsByPostId(String token, String postId) {
-        ResDTO<Map<EReactionType, List<ReactResponse>>> response = new ResDTO<>();
+    public ResDTO<Map<EReactionType, List<ReactionDTO>>> getReactsByPostId(String token, String postId) {
+        ResDTO<Map<EReactionType, List<ReactionDTO>>> response = new ResDTO<>();
         String userId = SecurityContextUtils.getUserId();
 
         List<Reactions> reactions = reactionRepository.findReactionsByPostIdOrderByCreatedAtDesc(postId);
         List<String> userIds = reactions.stream().map(Reactions::getUserId).toList();
-        List<User> users = userService.findByIds(token, userIds);
+        List<UserDTO> users = userService.findByIds(token, userIds);
 
-        Map<EReactionType, List<ReactResponse>> reactResponses = reactions
+        Map<EReactionType, List<ReactionDTO>> reactResponses = reactions
                 .stream()
                 .map(r -> reactResponseMapper.mapToDto(userId, r, users))
-                .collect(Collectors.groupingBy(ReactResponse::getType));
+                .collect(Collectors.groupingBy(ReactionDTO::getType));
 
         response.setCode(200);
         response.setData(reactResponses);

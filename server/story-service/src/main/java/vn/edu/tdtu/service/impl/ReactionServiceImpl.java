@@ -13,13 +13,13 @@ import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.model.Reaction;
 import vn.edu.tdtu.model.Story;
 import vn.edu.tdtu.model.Viewer;
-import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.repository.StoryRepository;
 import vn.edu.tdtu.repository.ViewerRepository;
 import vn.edu.tdtu.service.interfaces.ReactionService;
 import vn.edu.tdtu.service.interfaces.UserService;
 import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -60,7 +60,7 @@ public class ReactionServiceImpl implements ReactionService {
     }
 
     private void sendNotification(String accessToken, DoReactRequest payload, String userId, Story foundStory) {
-        User foundUser = userService.getUserById(accessToken, userId);
+        UserDTO foundUser = userService.getUserById(accessToken, userId);
 
         if (foundUser != null) {
             InteractNotification notification = new InteractNotification();

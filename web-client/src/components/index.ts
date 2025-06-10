@@ -10,6 +10,8 @@ export { default as SearchSideBar } from './shared/SearchSideBar';
 export { default as Button } from './shared/Button';
 export { default as NotFound } from './shared/NotFound';
 export { default as HtmlText } from './shared/HtmlText';
+export { default as AdminHeader } from './shared/AdminHeader';
+export { default as AdminSideBar } from './shared/AdminSideBar';
 
 // Popover contents
 export { default as MessagesPopoverContent } from './features/popovers/MessagesPopoverContent';

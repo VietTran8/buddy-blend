@@ -33,28 +33,47 @@ public class KeycloakServiceImpl implements KeycloakService {
     private final KeycloakPropsConfig keycloakPropsConfig;
 
     @Override
-    public void assignRealmRole(String userId, List<EUserRole> role) {
+    public void assignRealmRole(String keycloakUserId, List<EUserRole> role) {
         try {
-            realmResource.users().get(userId).roles()
+            realmResource.users().get(keycloakUserId).roles()
                     .realmLevel()
-                    .add(role.stream().map(item -> realmResource.roles().get(item.name()).toRepresentation()).toList());
+                    .add(role.stream().map(
+                                item -> realmResource.roles()
+                                        .get(item.name())
+                                        .toRepresentation()).toList()
+                    );
+
         } catch (Exception e) {
-            throw new BadRequestException("Failed to assign roles" + e.getMessage());
+            throw new BadRequestException(MessageCode.KEYCLOAK_ASSIGN_ROLES_FAILED, e.getMessage());
         }
     }
 
     @Override
-    public void resetPassword(String userId, String password) {
+    public void removeRealmRole(String keycloakUserId, List<EUserRole> role) {
+        try {
+            realmResource.users().get(keycloakUserId).roles()
+                    .realmLevel()
+                    .remove(role.stream().map(
+                            item -> realmResource.roles().get(item.name()).toRepresentation()).toList()
+                    );
+
+        } catch (Exception e) {
+            throw new BadRequestException(MessageCode.KEYCLOAK_REMOVE_ROLES_FAILED, e.getMessage());
+        }
+    }
+
+    @Override
+    public void resetPassword(String keycloakUserId, String password) {
         CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
         credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
         credentialRepresentation.setTemporary(false);
         credentialRepresentation.setValue(password);
 
         try {
-            realmResource.users().get(userId)
+            realmResource.users().get(keycloakUserId)
                     .resetPassword(credentialRepresentation);
         } catch (Exception e) {
-            throw new BadRequestException("Failed to reset password" + e.getMessage());
+            throw new BadRequestException(MessageCode.KEYCLOAK_RESET_PASSWORD_FAILED, e.getMessage());
         }
     }
 
@@ -67,7 +86,7 @@ public class KeycloakServiceImpl implements KeycloakService {
                     .users()
                     .create(userRepresentation);
         } catch (Exception e) {
-            throw new BadRequestException("Failed to create new user" + e.getMessage());
+            throw new BadRequestException(MessageCode.KEYCLOAK_CREATE_USER_FAILED, e.getMessage());
         }
 
         int createStatus = createUserResponse.getStatus();
@@ -75,17 +94,17 @@ public class KeycloakServiceImpl implements KeycloakService {
         if (createStatus == HttpStatus.SC_CREATED)
             return createUserResponse.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
 
-        throw new BadRequestException(String.format("[%s] Failed to create new user: {%s}", createStatus, createUserResponse.readEntity(String.class)));
+        throw new BadRequestException(MessageCode.KEYCLOAK_CREATE_USER_FAILED_W_STATUS, createStatus, createUserResponse.readEntity(String.class));
     }
 
     @Override
-    public void updateUser(String userId, UserRepresentation userRepresentation) {
+    public void updateUser(String keycloakUserId, UserRepresentation userRepresentation) {
         try {
             realmResource.users()
-                    .get(userId)
+                    .get(keycloakUserId)
                     .update(userRepresentation);
         } catch (Exception e) {
-            throw new BadRequestException("Failed to update user" + e.getMessage());
+            throw new BadRequestException(MessageCode.KEYCLOAK_UPDATE_USER_FAILED, e.getMessage());
         }
     }
 

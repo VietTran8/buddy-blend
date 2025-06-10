@@ -29,4 +29,11 @@ public class GroupMember {
     @ManyToOne()
     @JoinColumn(name = "memberId")
     private Member member;
+
+    public GroupMember(String id, Boolean isAdmin, Boolean isPending, LocalDateTime joinedAt) {
+        this.id = id;
+        this.isAdmin = isAdmin;
+        this.isPending = isPending;
+        this.joinedAt = joinedAt;
+    }
 }

@@ -3,7 +3,7 @@ package vn.edu.tdtu.dto.requests;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.edu.tdtu.enums.EReactionType;
+import vn.tdtu.common.enums.interaction.EReactionType;
 
 @Data
 @NoArgsConstructor

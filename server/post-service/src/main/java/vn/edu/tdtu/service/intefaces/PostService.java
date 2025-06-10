@@ -6,8 +6,8 @@ import vn.edu.tdtu.dto.request.FindByIdsReq;
 import vn.edu.tdtu.dto.request.SharePostRequest;
 import vn.edu.tdtu.dto.request.UpdatePostContentRequest;
 import vn.edu.tdtu.dto.response.PaginationResponse;
-import vn.edu.tdtu.dto.response.PostResponse;
 import vn.edu.tdtu.model.Post;
+import vn.tdtu.common.dto.PostDTO;
 
 import java.util.List;
 
@@ -16,11 +16,11 @@ public interface PostService {
 
     public ResDTO<?> findPostRespById(String token, String postId);
 
-    public ResDTO<List<PostResponse>> findPostRespByIds(String token, FindByIdsReq req);
+    public ResDTO<List<PostDTO>> findPostRespByIds(String token, FindByIdsReq req);
 
     public ResDTO<?> getUserIdByPostId(String postId);
 
-    public PostResponse mapToPostResponse(String token, Post post);
+    public PostDTO mapToPostDTO(String token, Post post);
 
     public ResDTO<?> getGroupPosts(String token, String groupId, int page, int limit);
 
@@ -36,7 +36,7 @@ public interface PostService {
 
     public ResDTO<?> sharePost(String token, SharePostRequest request);
 
-    public ResDTO<PostResponse> findDetachedPost(String token, String postId);
+    public ResDTO<PostDTO> findDetachedPost(String token, String postId);
 
-    public ResDTO<PaginationResponse<PostResponse>> findUserPosts(String token, String uId, int page, int size);
+    public ResDTO<PaginationResponse<PostDTO>> findUserPosts(String token, String uId, int page, int size);
 }

@@ -3,14 +3,14 @@ package vn.edu.tdtu.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.request.FindByIdsRequest;
-import vn.edu.tdtu.dto.response.GroupMemberResponse;
-import vn.edu.tdtu.dto.response.GroupResponse;
-import vn.edu.tdtu.enums.EJoinGroupStatus;
 import vn.edu.tdtu.model.Group;
 import vn.edu.tdtu.model.GroupMember;
-import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.repository.httpclient.UserClient;
 import vn.edu.tdtu.utils.SecurityContextUtils;
+import vn.tdtu.common.dto.GroupDTO;
+import vn.tdtu.common.dto.GroupMemberDTO;
+import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.enums.group.EJoinGroupStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class GroupMapper {
     private final UserClient userClient;
 
-    public GroupResponse mapToDto(String accessToken, Group group, boolean collectBaseInfo) {
+    public GroupDTO mapToDto(String accessToken, Group group, boolean collectBaseInfo) {
         String userId = SecurityContextUtils.getUserId();
 
         List<GroupMember> first10GroupMembers = new ArrayList<>();
@@ -38,19 +38,19 @@ public class GroupMapper {
                 .map(member -> member.getMember().getUserId())
                 .toList();
 
-        List<User> first10Members = new ArrayList<>();
+        List<UserDTO> first10Members = new ArrayList<>();
 
         if (!collectBaseInfo)
             first10Members = userClient.findByIds(accessToken, new FindByIdsRequest(first10MemberIds)).getData();
 
-        Map<String, User> userMap = first10Members.stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
+        Map<String, UserDTO> userMap = first10Members.stream()
+                .collect(Collectors.toMap(UserDTO::getId, user -> user));
 
-        List<GroupMemberResponse> response10MembersList = first10GroupMembers.stream()
+        List<GroupMemberDTO> response10MembersList = first10GroupMembers.stream()
                 .map(member -> {
-                    User user = userMap.remove(member.getMember().getUserId());
+                    UserDTO user = userMap.remove(member.getMember().getUserId());
 
-                    return new GroupMemberResponse(member, user);
+                    return new GroupMemberDTO(member.getId(), member.isAdmin(), member.isPending(), member.getJoinedAt(), user);
                 })
                 .toList();
 
@@ -61,7 +61,7 @@ public class GroupMapper {
                 .findFirst()
                 .orElse(null);
 
-        GroupResponse response = new GroupResponse();
+        GroupDTO response = new GroupDTO();
         response.setJoined(groupMembers
                 .stream()
                 .anyMatch(member -> member.getMember().getUserId().equals(userId) && !member.isPending()));

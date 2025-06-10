@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.edu.tdtu.enums.EFriendReqStatus;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.time.LocalDateTime;
 
@@ -18,5 +19,5 @@ public class FriendRequestResponse {
     private LocalDateTime createdAt;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime updatedAt;
-    private MinimizedUserResponse fromUser;
+    private UserDTO fromUser;
 }

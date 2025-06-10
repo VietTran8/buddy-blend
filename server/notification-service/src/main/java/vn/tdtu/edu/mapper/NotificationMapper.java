@@ -2,10 +2,10 @@ package vn.tdtu.edu.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import vn.tdtu.common.dto.UserDTO;
 import vn.tdtu.edu.dto.NotificationResponse;
 import vn.tdtu.edu.model.CommonNotification;
 import vn.tdtu.edu.model.UserInfo;
-import vn.tdtu.edu.model.data.User;
 import vn.tdtu.edu.service.interfaces.UserService;
 import vn.tdtu.edu.util.SecurityContextUtils;
 
@@ -37,8 +37,8 @@ public class NotificationMapper {
         return response;
     }
 
-    public NotificationResponse mapToDto(CommonNotification commonNotification, Map<String, User> fromUserMap) {
-        User foundFromUser = fromUserMap.get(commonNotification.getFromUserId());
+    public NotificationResponse mapToDto(CommonNotification commonNotification, Map<String, UserDTO> fromUserMap) {
+        UserDTO foundFromUser = fromUserMap.get(commonNotification.getFromUserId());
 
         NotificationResponse response = baseMap(commonNotification);
 

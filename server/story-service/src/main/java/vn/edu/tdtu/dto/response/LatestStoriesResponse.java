@@ -4,14 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import vn.edu.tdtu.model.data.User;
+import vn.tdtu.common.dto.UserDTO;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class LatestStoriesResponse {
-    private User user;
+    private UserDTO user;
     private StoryResponse latestStory;
     private boolean isSeenAll;
 }

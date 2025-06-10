@@ -55,5 +55,7 @@ public interface PostRepository extends MongoRepository<Post, String> {
 
     List<Post> findByIdInAndDetachedNot(Collection<String> id, boolean detached);
 
+    Optional<Post> findByIdAndDetached(String id, boolean detached);
+
     Optional<Post> findByIdAndDetachedAndUserId(String id, boolean detached, String userId);
 }

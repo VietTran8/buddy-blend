@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.ResDTO;
-import vn.edu.tdtu.enums.EReactionType;
-import vn.edu.tdtu.model.data.Comment;
-import vn.edu.tdtu.model.data.Reacts;
 import vn.edu.tdtu.repository.httpclient.InteractionClient;
 import vn.edu.tdtu.service.intefaces.InteractionService;
+import vn.tdtu.common.dto.CommentDTO;
+import vn.tdtu.common.dto.ReactionDTO;
+import vn.tdtu.common.enums.interaction.EReactionType;
 
 import java.util.List;
 import java.util.Map;
@@ -20,8 +20,8 @@ public class InteractionServiceImpl implements InteractionService {
     private final InteractionClient interactionClient;
 
     @Override
-    public List<Comment> findCommentsByPostId(String token, String postId) {
-        ResDTO<List<Comment>> response = interactionClient.findCommentsByPostId(token, postId);
+    public List<CommentDTO> findCommentsByPostId(String token, String postId) {
+        ResDTO<List<CommentDTO>> response = interactionClient.findCommentsByPostId(token, postId);
         log.info(response.toString());
 
         return response.getData();
@@ -36,8 +36,8 @@ public class InteractionServiceImpl implements InteractionService {
     }
 
     @Override
-    public Map<EReactionType, List<Reacts>> findReactionsByPostId(String token, String postId) {
-        ResDTO<Map<EReactionType, List<Reacts>>> response = interactionClient.findReactionsByPostId(token, postId);
+    public Map<EReactionType, List<ReactionDTO>> findReactionsByPostId(String token, String postId) {
+        ResDTO<Map<EReactionType, List<ReactionDTO>>> response = interactionClient.findReactionsByPostId(token, postId);
         log.info(response.toString());
 
         return response.getData();

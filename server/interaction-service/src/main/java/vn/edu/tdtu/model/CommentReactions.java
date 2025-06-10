@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import vn.edu.tdtu.enums.EReactionType;
+import vn.tdtu.common.enums.interaction.EReactionType;
 
 import java.time.LocalDateTime;
 

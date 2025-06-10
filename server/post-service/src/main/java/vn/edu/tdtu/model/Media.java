@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import vn.edu.tdtu.enums.EFileType;
+import vn.tdtu.common.enums.post.EFileType;
 
 import java.io.Serializable;
 

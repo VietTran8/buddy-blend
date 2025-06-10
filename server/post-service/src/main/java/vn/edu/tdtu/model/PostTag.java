@@ -3,7 +3,7 @@ package vn.edu.tdtu.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.edu.tdtu.model.data.User;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.time.LocalDateTime;
 
@@ -13,5 +13,5 @@ import java.time.LocalDateTime;
 public class PostTag {
     private String id;
     private LocalDateTime createdAt;
-    private User taggedUser;
+    private UserDTO taggedUser;
 }

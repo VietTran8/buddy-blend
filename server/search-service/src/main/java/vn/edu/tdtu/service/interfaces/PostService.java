@@ -1,7 +1,7 @@
 package vn.edu.tdtu.service.interfaces;
 
-import vn.edu.tdtu.model.data.Post;
 import vn.edu.tdtu.model.es.SyncPost;
+import vn.tdtu.common.dto.PostDTO;
 
 import java.util.List;
 
@@ -12,5 +12,5 @@ public interface PostService {
 
     void deletePost(SyncPost post);
 
-    List<Post> findByContentContaining(String token, String key, String fuzziness);
+    List<PostDTO> findByContentContaining(String token, String key, String fuzziness);
 }

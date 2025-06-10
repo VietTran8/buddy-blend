@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import vn.edu.tdtu.model.data.PostResponse;
+import vn.tdtu.common.dto.PostDTO;
 
 import java.util.List;
 
@@ -13,5 +13,5 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 public class UserFavouriteDetailResp extends UserFavouriteResponse {
-    private List<PostResponse> posts;
+    private List<PostDTO> posts;
 }

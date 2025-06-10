@@ -5,14 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.tdtu.model.Story;
-import vn.edu.tdtu.model.data.User;
+import vn.tdtu.common.dto.UserDTO;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class StoryResponse extends Story {
-    private User user;
+    private UserDTO user;
     private boolean isMine;
     private int storyCount;
     private boolean seen;

@@ -8,18 +8,18 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import vn.edu.tdtu.config.openfeign.FeignConfig;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.FindByIdsRequest;
-import vn.edu.tdtu.model.data.User;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.util.List;
 
 @FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class, path = "/api/v1/users")
 public interface UserClient {
     @GetMapping("/{userId}")
-    public ResDTO<User> findById(@RequestHeader("Authorization") String accessToken, @PathVariable("userId") String userId);
+    public ResDTO<UserDTO> findById(@RequestHeader("Authorization") String accessToken, @PathVariable("userId") String userId);
 
     @GetMapping("/by-ids")
-    public ResDTO<List<User>> findByIds(@RequestHeader("Authorization") String accessToken, @RequestBody FindByIdsRequest request);
+    public ResDTO<List<UserDTO>> findByIds(@RequestHeader("Authorization") String accessToken, @RequestBody FindByIdsRequest request);
 
     @GetMapping("/friends")
-    public ResDTO<List<User>> findUserFriendIdsByUserToken(@RequestHeader("Authorization") String accessToken);
+    public ResDTO<List<UserDTO>> findUserFriendIdsByUserToken(@RequestHeader("Authorization") String accessToken);
 }

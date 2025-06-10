@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.request.FindByIdsReq;
 import vn.edu.tdtu.exception.BadRequestException;
-import vn.edu.tdtu.model.data.Post;
 import vn.edu.tdtu.model.es.SyncPost;
 import vn.edu.tdtu.repository.EsPostRepository;
 import vn.edu.tdtu.repository.httpclient.PostClient;
 import vn.edu.tdtu.service.interfaces.PostService;
+import vn.tdtu.common.dto.PostDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,7 +51,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> findByContentContaining(String token, String key, String fuzziness) {
+    public List<PostDTO> findByContentContaining(String token, String key, String fuzziness) {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q.match(mq -> mq
                                 .field("content")

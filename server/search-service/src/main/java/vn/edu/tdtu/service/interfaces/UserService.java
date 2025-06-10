@@ -1,7 +1,7 @@
 package vn.edu.tdtu.service.interfaces;
 
-import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.model.es.SyncUser;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.util.List;
 
@@ -12,5 +12,5 @@ public interface UserService {
 
     void deleteUser(SyncUser user);
 
-    List<User> searchUserFullName(String accessToken, String name, String fuzziness);
+    List<UserDTO> searchUserFullName(String accessToken, String name, String fuzziness);
 }

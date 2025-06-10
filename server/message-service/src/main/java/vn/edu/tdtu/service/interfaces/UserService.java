@@ -1,7 +1,7 @@
 package vn.edu.tdtu.service.interfaces;
 
-import vn.edu.tdtu.model.data.User;
+import vn.tdtu.common.dto.UserDTO;
 
 public interface UserService {
-    public User findById(String userId);
+    public UserDTO findById(String userId);
 }

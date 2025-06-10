@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import vn.tdtu.common.dto.PostDTO;
 
 import java.util.List;
 
@@ -12,6 +13,6 @@ import java.util.List;
 @Getter
 @Setter
 public class NewPostMessage {
-    private PostMessage post;
+    private PostDTO post;
     private List<String> broadcastIds;
 }

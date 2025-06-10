@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import vn.edu.tdtu.enums.EGroupPrivacy;
 import vn.edu.tdtu.model.Group;
+import vn.tdtu.common.enums.group.EGroupPrivacy;
 
 @AllArgsConstructor
 @NoArgsConstructor

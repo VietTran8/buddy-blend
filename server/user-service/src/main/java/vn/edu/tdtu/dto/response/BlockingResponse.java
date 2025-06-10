@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.time.LocalDateTime;
 
@@ -16,5 +17,5 @@ public class BlockingResponse {
     private String id;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime blockedAt;
-    private MinimizedUserResponse blockedUser;
+    private UserDTO blockedUser;
 }

@@ -3,7 +3,7 @@ package vn.edu.tdtu.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.edu.tdtu.enums.ENotificationType;
+import vn.tdtu.common.enums.notification.ENotificationType;
 
 import java.util.Date;
 import java.util.List;

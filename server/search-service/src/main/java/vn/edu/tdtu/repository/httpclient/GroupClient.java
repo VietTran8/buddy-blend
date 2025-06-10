@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.tdtu.config.openfeign.FeignConfig;
 import vn.edu.tdtu.dto.ResDTO;
-import vn.edu.tdtu.model.data.Group;
+import vn.tdtu.common.dto.GroupDTO;
 
 import java.util.List;
 
@@ -14,5 +14,5 @@ import java.util.List;
 public interface GroupClient {
 
     @GetMapping("/all")
-    public ResDTO<List<Group>> getAllGroupByIds(@RequestHeader("Authorization") String tokenHeader, @RequestParam("ids") List<String> requestParam);
+    public ResDTO<List<GroupDTO>> getAllGroupByIds(@RequestHeader("Authorization") String tokenHeader, @RequestParam("ids") List<String> requestParam);
 }

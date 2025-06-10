@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.tdtu.constant.KeycloakUserAttribute;
@@ -32,10 +31,7 @@ import vn.edu.tdtu.service.keycloak.interfaces.KeycloakService;
 import vn.edu.tdtu.util.JwtUtils;
 import vn.edu.tdtu.util.OTPUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +40,6 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final RedisService<String> redisService;
     private final KafkaEventPublisher publisher;
-    private final PasswordEncoder passwordEncoder;
     private final AuthInfoRepository authInfoRepository;
     private final KeycloakService keycloakService;
     private final JwtUtils jwtUtils;
@@ -98,7 +93,61 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public ResDTO<?> signUpUser(SignUpRequest request) {
+    public ResDTO<SignUpResponse> createAdminUser(SignUpRequest request) {
+        AuthInfo foundAuthInfo = authInfoRepository.findByEmail(request.getEmail()).orElse(null);
+
+        if (foundAuthInfo == null)
+            return signUpUser(request, List.of(EUserRole.ROLE_ADMIN, EUserRole.ROLE_USER));
+
+        UserRepresentation keycloakUser = keycloakService.findUserByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException(MessageCode.KEYCLOAK_EXISTS_AUTH_INFO_BUT_NOT_KC_ACCOUNT));
+
+        keycloakService.assignRealmRole(keycloakUser.getId(), Collections.singletonList(EUserRole.ROLE_ADMIN));
+
+        foundAuthInfo.setRole(EUserRole.ROLE_ADMIN);
+        authInfoRepository.save(foundAuthInfo);
+
+        SignUpResponse responseData = new SignUpResponse();
+        responseData.setEmail(request.getEmail());
+        responseData.setId(foundAuthInfo.getId());
+
+        ResDTO<SignUpResponse> response = new ResDTO<>();
+        response.setData(responseData);
+        response.setCode(HttpServletResponse.SC_CREATED);
+        response.setMessage(MessageCode.AUTH_ADMIN_ROLE_ASSIGNED);
+
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public ResDTO<?> revokeAdminUser(String email) {
+        AuthInfo foundAuthInfo = authInfoRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND_EMAIL, email));
+
+        UserRepresentation keycloakUser = keycloakService.findUserByEmail(email)
+                .orElseThrow(() -> new BadRequestException(MessageCode.KEYCLOAK_EXISTS_AUTH_INFO_BUT_NOT_KC_ACCOUNT));
+
+        keycloakService.removeRealmRole(keycloakUser.getId(), Collections.singletonList(EUserRole.ROLE_ADMIN));
+
+        foundAuthInfo.setRole(EUserRole.ROLE_USER);
+        authInfoRepository.save(foundAuthInfo);
+
+        SignUpResponse responseData = new SignUpResponse();
+        responseData.setEmail(email);
+        responseData.setId(foundAuthInfo.getId());
+
+        ResDTO<SignUpResponse> response = new ResDTO<>();
+        response.setData(responseData);
+        response.setCode(HttpServletResponse.SC_OK);
+        response.setMessage(MessageCode.AUTH_ADMIN_ROLE_REVOKED);
+
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public ResDTO<SignUpResponse> signUpUser(SignUpRequest request, List<EUserRole> userRoles) {
         if (authInfoRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException(MessageCode.AUTH_EMAIL_EXISTS);
         }
@@ -106,13 +155,15 @@ public class AuthServiceImpl implements AuthService {
         String userId = UUID.randomUUID().toString();
         request.setId(userId);
 
-        createKeycloakUser(request);
+        createKeycloakUser(request, userRoles);
 
         SignUpResponse data = userService.saveUser(request);
 
         AuthInfo authInfo = new AuthInfo();
         authInfo.setActive(true);
-        authInfo.setRole(EUserRole.ROLE_USER);
+        authInfo.setRole(userRoles != null ?
+                userRoles.stream().findFirst().orElse(EUserRole.ROLE_USER) :
+                EUserRole.ROLE_USER);
         authInfo.setUserId(data.getId());
         authInfo.setEmail(request.getEmail());
 
@@ -126,23 +177,22 @@ public class AuthServiceImpl implements AuthService {
         return response;
     }
 
-    private void createKeycloakUser(SignUpRequest request) {
+    private void createKeycloakUser(SignUpRequest request, List<EUserRole> userRoles) {
         Map<String, List<String>> userAttributes = new HashMap<>();
-        userAttributes.put(KeycloakUserAttribute.USER_ID, List.of(request.getId()));
+        userAttributes.put(KeycloakUserAttribute.USER_ID, Collections.singletonList(request.getId()));
 
         UserRepresentation userRepresentation = getUserRepresentation(request, userAttributes);
 
         String createdKeycloakUserId = keycloakService.createUser(userRepresentation);
 
         keycloakService.resetPassword(createdKeycloakUserId, request.getPassword());
-        keycloakService.assignRealmRole(createdKeycloakUserId, List.of(EUserRole.ROLE_USER));
+        keycloakService.assignRealmRole(createdKeycloakUserId, userRoles != null ? userRoles : Collections.singletonList(EUserRole.ROLE_USER));
     }
 
     private static UserRepresentation getUserRepresentation(SignUpRequest request, Map<String, List<String>> userAttributes) {
         UserRepresentation userRepresentation = new UserRepresentation();
         userRepresentation.setEmail(request.getEmail());
         userRepresentation.setUsername(request.getEmail());
-        userRepresentation.setRealmRoles(List.of(EUserRole.ROLE_USER.name()));
         userRepresentation.setFirstName(request.getFirstName());
         userRepresentation.setLastName(request.getLastName());
         userRepresentation.setEnabled(true);

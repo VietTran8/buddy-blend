@@ -10,7 +10,6 @@ import vn.edu.tdtu.dto.request.FQAcceptationDTO;
 import vn.edu.tdtu.dto.request.FriendReqDTO;
 import vn.edu.tdtu.dto.response.FriendRequestResponse;
 import vn.edu.tdtu.dto.response.HandleFriendRequestResponse;
-import vn.edu.tdtu.dto.response.MinimizedUserResponse;
 import vn.edu.tdtu.enums.EFriendReqStatus;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.exception.UnauthorizedException;
@@ -25,6 +24,7 @@ import vn.edu.tdtu.repository.FriendRequestRepository;
 import vn.edu.tdtu.repository.UserRepository;
 import vn.edu.tdtu.service.interfaces.FriendRequestService;
 import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -122,10 +122,10 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
     @Override
     public ResDTO<?> getListFriendsResp(String token, String id) {
-        ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
+        ResDTO<List<UserDTO>> response = new ResDTO<>();
         String userId = id == null ? SecurityContextUtils.getUserId() : id;
 
-        List<MinimizedUserResponse> minimizedUsers = getListFriends(userId).stream().map(
+        List<UserDTO> minimizedUsers = getListFriends(userId).stream().map(
                 minimizedUserMapper::mapToDTO
         ).filter(friend -> !friend.isHiddenBanned()).toList();
 
@@ -259,12 +259,12 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                     .forEach(suggestions::add);
         });
 
-        List<MinimizedUserResponse> responseData = suggestions.stream()
+        List<UserDTO> responseData = suggestions.stream()
                 .map(minimizedUserMapper::mapToDTO)
-                .sorted(Comparator.comparing(MinimizedUserResponse::getUserFullName))
+                .sorted(Comparator.comparing(UserDTO::getUserFullName))
                 .toList();
 
-        ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
+        ResDTO<List<UserDTO>> response = new ResDTO<>();
         response.setData(responseData);
         response.setCode(HttpServletResponse.SC_OK);
         response.setMessage(MessageCode.FRIEND_REQUEST_SUGGESTION_FETCHED);

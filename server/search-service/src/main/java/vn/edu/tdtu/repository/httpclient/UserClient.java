@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import vn.edu.tdtu.config.openfeign.FeignConfig;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.FindByUserIdsReq;
-import vn.edu.tdtu.model.data.User;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.util.List;
 
@@ -15,5 +15,5 @@ import java.util.List;
 public interface UserClient {
 
     @PostMapping("/by-ids")
-    public ResDTO<List<User>> findByIds(@RequestHeader("Authorization") String accessToken, @RequestBody FindByUserIdsReq request);
+    public ResDTO<List<UserDTO>> findByIds(@RequestHeader("Authorization") String accessToken, @RequestBody FindByUserIdsReq request);
 }

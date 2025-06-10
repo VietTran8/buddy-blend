@@ -2,7 +2,7 @@ package vn.edu.tdtu.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import vn.edu.tdtu.model.data.SearchHistory;
+import vn.edu.tdtu.dto.response.SearchHistory;
 
 import java.util.List;
 

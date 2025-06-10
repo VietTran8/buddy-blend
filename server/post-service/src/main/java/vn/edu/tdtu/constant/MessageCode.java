@@ -12,9 +12,12 @@ public class MessageCode {
     public static final String POST_UNSAVE_POST = "post.unsave-post";
     public static final String POST_NOT_FOUND = "post.not-found";
     public static final String POST_CAN_NOT_UPDATE_OTHERS = "post.can-not-update-others";
+    public static final String POST_ACCEPTED = "post.accepted";
+    public static final String POST_DETACHED = "post.detached";
 
     public static final String REPORT_SUBMITTED = "report.submitted";
     public static final String REPORT_FETCHED = "report.fetched";
+    public static final String REPORT_NOT_FOUND = "report.not-found";
 
     public static final String USER_FETCHED = "user.fetched";
     public static final String USER_NOT_FOUND = "user.not-found";

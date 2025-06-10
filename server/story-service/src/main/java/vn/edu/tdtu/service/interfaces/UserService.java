@@ -1,13 +1,13 @@
 package vn.edu.tdtu.service.interfaces;
 
-import vn.edu.tdtu.model.data.User;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.util.List;
 
 public interface UserService {
-    public List<User> getUsersByIds(String accessToken, List<String> userIds);
+    public List<UserDTO> getUsersByIds(String accessToken, List<String> userIds);
 
-    public User getUserById(String accessToken, String userId);
+    public UserDTO getUserById(String accessToken, String userId);
 
-    public List<User> getUserFriends(String accessToken);
+    public List<UserDTO> getUserFriends(String accessToken);
 }

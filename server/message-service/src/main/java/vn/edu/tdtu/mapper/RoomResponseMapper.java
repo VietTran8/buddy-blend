@@ -7,8 +7,8 @@ import vn.edu.tdtu.dto.MessageResponse;
 import vn.edu.tdtu.dto.RoomResponse;
 import vn.edu.tdtu.model.ChatMessage;
 import vn.edu.tdtu.model.Room;
-import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.service.interfaces.UserService;
+import vn.tdtu.common.dto.UserDTO;
 
 @Component
 @RequiredArgsConstructor
@@ -25,7 +25,7 @@ public class RoomResponseMapper {
                 response.getLatestMessage() != null
                         && response.getLatestMessage().getFromUserId().equals(currentUserId)
         );
-        User opponentUser = new User();
+        UserDTO opponentUser = new UserDTO();
         String opponentUserId = "";
 
         if (object.getUserId1().equals(currentUserId)) {

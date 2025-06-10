@@ -8,13 +8,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface KeycloakService {
-    void assignRealmRole(String userId, List<EUserRole> role);
+    void assignRealmRole(String keycloakUserId, List<EUserRole> role);
 
-    void resetPassword(String userId, String password);
+    void removeRealmRole(String keycloakUserId, List<EUserRole> role);
+
+    void resetPassword(String keycloakUserId, String password);
 
     String createUser(UserRepresentation userRepresentation);
 
-    void updateUser(String userId, UserRepresentation userRepresentation);
+    void updateUser(String keycloakUserId, UserRepresentation userRepresentation);
 
     Optional<UserRepresentation> findUserByEmail(String email);
 

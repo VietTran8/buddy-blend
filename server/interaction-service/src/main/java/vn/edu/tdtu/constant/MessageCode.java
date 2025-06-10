@@ -14,4 +14,6 @@ public class MessageCode {
     public static final String COMMENT_FETCHED = "comment.fetched";
 
     public static final String POST_NOT_FOUND_ID = "post.not-found-id";
+
+    public static final String USER_NOT_FOUND_ID = "user.not-found-id";
 }

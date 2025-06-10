@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.request.FindByUserIdsReq;
 import vn.edu.tdtu.exception.BadRequestException;
-import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.model.es.SyncUser;
 import vn.edu.tdtu.repository.EsUserRepository;
 import vn.edu.tdtu.repository.httpclient.UserClient;
 import vn.edu.tdtu.service.interfaces.UserService;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.util.List;
 
@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> searchUserFullName(String accessToken, String name, String fuzziness) {
+    public List<UserDTO> searchUserFullName(String accessToken, String name, String fuzziness) {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q
                         .match(mq -> mq

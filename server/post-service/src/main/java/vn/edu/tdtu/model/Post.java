@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import vn.edu.tdtu.enums.EPostType;
-import vn.edu.tdtu.enums.EPrivacy;
+import vn.tdtu.common.enums.post.EPostType;
+import vn.tdtu.common.enums.post.EPrivacy;
 
 import java.time.LocalDateTime;
 import java.util.List;

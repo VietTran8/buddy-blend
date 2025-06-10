@@ -6,13 +6,13 @@ import org.springframework.stereotype.Service;
 import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.FindByIdsReq;
-import vn.edu.tdtu.dto.response.PostResponse;
 import vn.edu.tdtu.dto.response.SavePostResponse;
 import vn.edu.tdtu.model.SavePost;
 import vn.edu.tdtu.repository.SavePostRepository;
 import vn.edu.tdtu.service.intefaces.PostService;
 import vn.edu.tdtu.service.intefaces.SavePostService;
 import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.dto.PostDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +60,8 @@ public class SavePostServiceImpl implements SavePostService {
     }
 
     @Override
-    public ResDTO<List<PostResponse>> getUserSavedPost(String token) {
-        ResDTO<List<PostResponse>> response = new ResDTO<>();
+    public ResDTO<List<PostDTO>> getUserSavedPost(String token) {
+        ResDTO<List<PostDTO>> response = new ResDTO<>();
         response.setMessage(MessageCode.POST_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(new ArrayList<>());
@@ -73,7 +73,7 @@ public class SavePostServiceImpl implements SavePostService {
             return response;
         }
 
-        List<PostResponse> responseData = postService.findPostRespByIds(token, new FindByIdsReq(foundSavePost.getPostIds())).getData();
+        List<PostDTO> responseData = postService.findPostRespByIds(token, new FindByIdsReq(foundSavePost.getPostIds())).getData();
 
         response.setData(responseData);
 

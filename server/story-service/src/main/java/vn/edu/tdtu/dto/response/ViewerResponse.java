@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.tdtu.model.Reaction;
-import vn.edu.tdtu.model.data.User;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +19,6 @@ public class ViewerResponse {
     private String id;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime viewedAt;
-    private User user;
+    private UserDTO user;
     private List<Reaction> reactions;
 }

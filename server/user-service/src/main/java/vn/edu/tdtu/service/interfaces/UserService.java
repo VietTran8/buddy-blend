@@ -3,8 +3,8 @@ package vn.edu.tdtu.service.interfaces;
 import org.springframework.web.multipart.MultipartFile;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
-import vn.edu.tdtu.dto.response.MinimizedUserResponse;
 import vn.edu.tdtu.model.User;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public interface UserService {
 
     ResDTO<?> findProfile(String userId);
 
-    ResDTO<List<MinimizedUserResponse>> getUserSuggestionForGroup(String tokenHeader, String groupId);
+    ResDTO<List<UserDTO>> getUserSuggestionForGroup(String tokenHeader, String groupId);
 
     ResDTO<?> findByEmailResp(String email);
 
@@ -21,9 +21,9 @@ public interface UserService {
 
     ResDTO<?> findResById(String id);
 
-    ResDTO<List<MinimizedUserResponse>> findResByIds(String token, FindByIdsReqDTO request);
+    ResDTO<List<UserDTO>> findResByIds(String token, FindByIdsReqDTO request);
 
-    ResDTO<List<MinimizedUserResponse>> findFriendsByNotInIds(String token, FindByIdsReqDTO request);
+    ResDTO<List<UserDTO>> findFriendsByNotInIds(String token, FindByIdsReqDTO request);
 
     User findById(String id);
 

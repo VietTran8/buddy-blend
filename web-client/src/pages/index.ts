@@ -36,6 +36,12 @@ export { default as Login } from './auth/Login';
 export { default as SignUp } from './auth/SignUp';
 export { default as ForgotPassword } from './auth/ForgotPassword';
 
+// Admin
+export { default as AdminHome } from './admin/AdminHome';
+export { default as AdminUsers } from './admin/AdminUsers';
+export { default as AdminReport } from './admin/AdminReport';
+export { default as AdminSettings } from './admin/AdminSettings';
+
 //Friends
 export { default as Requests } from './friends/Requests';
 export { default as Blocked } from './friends/Blocked';

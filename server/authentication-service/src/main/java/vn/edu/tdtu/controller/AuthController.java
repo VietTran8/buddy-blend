@@ -42,7 +42,22 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUpUser(@RequestBody SignUpRequest signUpRequest) {
-        ResDTO<?> response = authService.signUpUser(signUpRequest);
+        ResDTO<?> response = authService.signUpUser(signUpRequest, null);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    /**
+     * Create a new admin user if not exists, else, update from normal user to admin user
+     */
+    @PostMapping("/create-admin")
+    public ResponseEntity<?> createAdmin(@RequestBody SignUpRequest signUpRequest) {
+        ResDTO<?> response = authService.createAdminUser(signUpRequest);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @PostMapping("/revoke-admin/{email}")
+    public ResponseEntity<?> revokeAdmin(@PathVariable("email") String email) {
+        ResDTO<?> response = authService.revokeAdminUser(email);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -98,11 +113,6 @@ public class AuthController {
     public ResponseEntity<?> createForgotPasswordOtp(@RequestBody CreateForgotPasswordRequest changePasswordRequest) {
         ResDTO<?> response = authService.createForgotPasswordOTP(changePasswordRequest);
         return ResponseEntity.status(response.getCode()).body(response);
-    }
-
-    @GetMapping("/authenticated")
-    public String authenticatedEndPoint() {
-        return "authenticated";
     }
 
     @PostMapping("/change-pass")

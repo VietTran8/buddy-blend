@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.edu.tdtu.dto.ModerateResponseDto;
-import vn.edu.tdtu.enums.EModerateType;
+import vn.tdtu.common.enums.moderation.EModerateType;
 
 @Getter
 @Setter

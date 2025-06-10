@@ -16,18 +16,19 @@ import vn.edu.tdtu.mapper.StoryMapper;
 import vn.edu.tdtu.mapper.ViewerMapper;
 import vn.edu.tdtu.model.Story;
 import vn.edu.tdtu.model.Viewer;
-import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.repository.StoryRepository;
 import vn.edu.tdtu.repository.ViewerRepository;
 import vn.edu.tdtu.service.interfaces.StoryService;
 import vn.edu.tdtu.service.interfaces.UserService;
 import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -118,15 +119,15 @@ public class StoryServiceImpl implements StoryService {
 
         List<Viewer> viewers = foundStory.getViewers();
 
-        Map<String, User> userMap = userService.getUsersByIds(
+        Map<String, UserDTO> userMap = userService.getUsersByIds(
                         accessToken,
                         viewers.stream().map(Viewer::getUserId).toList()
                 )
                 .stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(
-                        User::getId,
-                        user -> user
+                        UserDTO::getId,
+                        Function.identity()
                 ));
 
         List<ViewerResponse> viewerResponses = viewerMapper.mapToDtos(viewers, userMap);
@@ -140,9 +141,9 @@ public class StoryServiceImpl implements StoryService {
 
     @Override
     public ResDTO<?> getUserStory(String accessTokenHeader, String userId) {
-        User foundUser = userService.getUserById(accessTokenHeader, userId);
+        UserDTO foundUser = userService.getUserById(accessTokenHeader, userId);
 
-        List<User> friends = userService.getUserFriends(accessTokenHeader);
+        List<UserDTO> friends = userService.getUserFriends(accessTokenHeader);
 
         if (foundUser == null)
             throw new BadRequestException(MessageCode.USER_NOT_FOUND_MSG);
@@ -150,7 +151,7 @@ public class StoryServiceImpl implements StoryService {
         List<StoryResponse> stories = storyRepository.findUserStory(
                         userId,
                         SecurityContextUtils.getUserId(),
-                        friends.stream().map(User::getId).toList(),
+                        friends.stream().map(UserDTO::getId).toList(),
                         LocalDateTime.now()
                 )
                 .stream().map(story -> {
@@ -173,15 +174,15 @@ public class StoryServiceImpl implements StoryService {
     @Override
     public ResDTO<?> getStories(String accessToken) {
         String userId = SecurityContextUtils.getUserId();
-        List<User> friends = userService.getUserFriends(accessToken);
+        List<UserDTO> friends = userService.getUserFriends(accessToken);
 
         List<Story> stories = storyRepository.findStories(
                 LocalDateTime.now(),
                 userId,
-                friends.stream().map(User::getId).toList()
+                friends.stream().map(UserDTO::getId).toList()
         );
 
-        Map<String, User> userMap = stories
+        Map<String, UserDTO> userMap = stories
                 .stream()
                 .map(Story::getUserId)
                 .distinct()

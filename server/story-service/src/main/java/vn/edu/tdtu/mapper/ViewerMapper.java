@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.response.ViewerResponse;
 import vn.edu.tdtu.model.Reaction;
 import vn.edu.tdtu.model.Viewer;
-import vn.edu.tdtu.model.data.User;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.util.Comparator;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class ViewerMapper {
-    public List<ViewerResponse> mapToDtos(List<Viewer> viewers, Map<String, User> userMap) {
+    public List<ViewerResponse> mapToDtos(List<Viewer> viewers, Map<String, UserDTO> userMap) {
         return viewers.stream().map(viewer -> {
             ViewerResponse viewerResponse = new ViewerResponse();
 

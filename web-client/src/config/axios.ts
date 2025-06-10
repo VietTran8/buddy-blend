@@ -17,7 +17,7 @@ export const getSocketAccessToken = () => {
     const userTokenString = localStorage.getItem(USER_TOKEN_PREFIX);
     const userToken: UserTokenType = JSON.parse(userTokenString ? userTokenString : "{}");
 
-    return userToken ? userToken.sAcs : undefined;
+    return userToken ? `Bearer ${userToken.sAcs}`  : undefined;
 };
 
 export const http = axios.create({

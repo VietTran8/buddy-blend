@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import vn.edu.tdtu.enums.ESyncType;
+import vn.tdtu.common.enums.search.ESyncType;
 
 @AllArgsConstructor
 @NoArgsConstructor

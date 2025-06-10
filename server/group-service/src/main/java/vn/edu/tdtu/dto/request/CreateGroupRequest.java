@@ -3,7 +3,7 @@ package vn.edu.tdtu.dto.request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.edu.tdtu.enums.EGroupPrivacy;
+import vn.tdtu.common.enums.group.EGroupPrivacy;
 
 @Data
 @NoArgsConstructor

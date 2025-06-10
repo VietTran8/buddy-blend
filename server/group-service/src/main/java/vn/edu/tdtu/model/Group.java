@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import vn.edu.tdtu.enums.EGroupPrivacy;
+import vn.tdtu.common.enums.group.EGroupPrivacy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +28,7 @@ public class Group {
     private String cover;
     @JsonIgnore
     private boolean isDeleted;
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime createdAt;
     @JsonIgnore
     private String createdBy;

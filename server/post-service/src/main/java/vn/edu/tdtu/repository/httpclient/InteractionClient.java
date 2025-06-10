@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.tdtu.config.openfeign.FeignConfig;
 import vn.edu.tdtu.dto.ResDTO;
-import vn.edu.tdtu.enums.EReactionType;
-import vn.edu.tdtu.model.data.Comment;
-import vn.edu.tdtu.model.data.Reacts;
+import vn.tdtu.common.dto.CommentDTO;
+import vn.tdtu.common.dto.ReactionDTO;
+import vn.tdtu.common.enums.interaction.EReactionType;
 
 import java.util.List;
 import java.util.Map;
@@ -18,13 +18,13 @@ import java.util.Map;
 public interface InteractionClient {
 
     @GetMapping("/api/v1/comments")
-    public ResDTO<List<Comment>> findCommentsByPostId(
+    public ResDTO<List<CommentDTO>> findCommentsByPostId(
             @RequestHeader("Authorization") String accessToken,
             @RequestParam("postId") String postId
     );
 
     @GetMapping("/api/v1/reacts")
-    public ResDTO<Map<EReactionType, List<Reacts>>> findReactionsByPostId(
+    public ResDTO<Map<EReactionType, List<ReactionDTO>>> findReactionsByPostId(
             @RequestHeader("Authorization") String accessToken,
             @RequestParam("postId") String postId
     );

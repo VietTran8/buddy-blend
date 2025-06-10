@@ -12,6 +12,7 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import vn.tdtu.common.dto.UserDTO;
 import vn.tdtu.edu.dto.Message;
 import vn.tdtu.edu.dto.NewMessageNoti;
 import vn.tdtu.edu.dto.fcm.NotificationContent;
@@ -21,7 +22,6 @@ import vn.tdtu.edu.message.CommonNotificationMessage;
 import vn.tdtu.edu.message.newpost.NewPostMessage;
 import vn.tdtu.edu.model.CommonNotification;
 import vn.tdtu.edu.model.UserInfo;
-import vn.tdtu.edu.model.data.User;
 import vn.tdtu.edu.service.interfaces.UserService;
 
 import java.io.IOException;
@@ -54,7 +54,7 @@ public class NotificationSender {
     }
 
     public boolean sendCommonNotification(CommonNotification commonNotification) {
-        User foundUser = userService.findById(commonNotification.getFromUserId());
+        UserDTO foundUser = userService.findById(commonNotification.getFromUserId());
 
         CommonNotificationMessage commonNotificationMessage = new CommonNotificationMessage();
         commonNotificationMessage.setToUserIds(commonNotification
@@ -78,7 +78,7 @@ public class NotificationSender {
 
         String SEND_NOTI_URL = "https://fcm.googleapis.com/v1/projects/" + projectId + "/messages:send";
 
-        User foundUser = userService.findById(commonNotification.getToUserIds().get(0));
+        UserDTO foundUser = userService.findById(commonNotification.getToUserIds().get(0));
         if (foundUser != null) {
             String notificationKey = foundUser.getNotificationKey();
             if (notificationKey == null || notificationKey.isEmpty()) {
@@ -137,13 +137,13 @@ public class NotificationSender {
         String toUserId = message.getToUserId();
         String fromUserId = message.getFromUserId();
 
-        List<User> users = userService.findByIds(List.of(message.getToUserId(), message.getFromUserId()));
+        List<UserDTO> users = userService.findByIds(List.of(message.getToUserId(), message.getFromUserId()));
         if (users == null || users.isEmpty()) {
             return false;
         }
 
-        User toUser = users.stream().filter(user -> user.getId().equals(toUserId)).findFirst().orElse(null);
-        User fromUser = users.stream().filter(user -> user.getId().equals(fromUserId)).findFirst().orElse(null);
+        UserDTO toUser = users.stream().filter(user -> user.getId().equals(toUserId)).findFirst().orElse(null);
+        UserDTO fromUser = users.stream().filter(user -> user.getId().equals(fromUserId)).findFirst().orElse(null);
 
         if (toUser == null) {
             log.error("Failed to send to a null user");
@@ -206,11 +206,11 @@ public class NotificationSender {
         socketModule.emitNewPostNotification(message);
     }
 
-    private String getUserFullName(User foundUser) {
+    private String getUserFullName(UserDTO foundUser) {
         return foundUser != null ? String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()) : "Unknown";
     }
 
-    private String getUserAvatar(User foundUser) {
+    private String getUserAvatar(UserDTO foundUser) {
         return foundUser != null ? foundUser.getProfilePicture() : "Unknown";
     }
 }

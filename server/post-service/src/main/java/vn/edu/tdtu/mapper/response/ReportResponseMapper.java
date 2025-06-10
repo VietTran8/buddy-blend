@@ -2,14 +2,14 @@ package vn.edu.tdtu.mapper.response;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.dto.response.PostResponse;
 import vn.edu.tdtu.dto.response.ReportResponse;
 import vn.edu.tdtu.dto.response.ReportUserResponse;
 import vn.edu.tdtu.model.Post;
 import vn.edu.tdtu.model.Report;
-import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.service.impl.UserServiceImpl;
 import vn.edu.tdtu.service.intefaces.PostService;
+import vn.tdtu.common.dto.PostDTO;
+import vn.tdtu.common.dto.UserDTO;
 
 @Component
 @RequiredArgsConstructor
@@ -23,7 +23,7 @@ public class ReportResponseMapper {
         response.setReason(report.getReason());
         response.setCreateAt(report.getCreateAt());
 
-        User foundUser = userService.findById(token, report.getUserId());
+        UserDTO foundUser = userService.findById(token, report.getUserId());
         if (foundUser != null) {
             ReportUserResponse reportUserResponse = new ReportUserResponse();
             reportUserResponse.setId(foundUser.getId());
@@ -35,7 +35,7 @@ public class ReportResponseMapper {
 
         Post foundPost = postService.findPostById(report.getPostId());
         if (foundPost != null) {
-            PostResponse postResponse = postService.mapToPostResponse(token, foundPost);
+            PostDTO postResponse = postService.mapToPostDTO(token, foundPost);
             response.setPost(postResponse);
         }
 

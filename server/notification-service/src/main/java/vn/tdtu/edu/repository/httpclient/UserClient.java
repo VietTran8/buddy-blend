@@ -4,10 +4,10 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import vn.tdtu.common.dto.UserDTO;
 import vn.tdtu.edu.config.openfeign.FeignConfig;
 import vn.tdtu.edu.dto.FindByIdsRequest;
 import vn.tdtu.edu.dto.ResDTO;
-import vn.tdtu.edu.model.data.User;
 
 import java.util.List;
 
@@ -15,8 +15,8 @@ import java.util.List;
 public interface UserClient {
 
     @GetMapping("/{userId}")
-    ResDTO<User> findById(@PathVariable("userId") String userId);
+    ResDTO<UserDTO> findById(@PathVariable("userId") String userId);
 
     @GetMapping("/by-ids")
-    ResDTO<List<User>> findByIds(@RequestBody FindByIdsRequest request);
+    ResDTO<List<UserDTO>> findByIds(@RequestBody FindByIdsRequest request);
 }

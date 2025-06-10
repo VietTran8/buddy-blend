@@ -8,19 +8,20 @@ import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.requests.AddCommentRequest;
 import vn.edu.tdtu.dto.requests.UpdateCommentRequest;
-import vn.edu.tdtu.dto.response.CommentResponse;
 import vn.edu.tdtu.dto.response.InteractNotification;
-import vn.edu.tdtu.enums.ENotificationType;
+import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.CommentResponseMapper;
 import vn.edu.tdtu.model.Comments;
-import vn.edu.tdtu.model.data.Post;
-import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.repository.CommentsRepository;
 import vn.edu.tdtu.service.interfaces.CommentService;
 import vn.edu.tdtu.service.interfaces.PostService;
 import vn.edu.tdtu.service.interfaces.UserService;
 import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.dto.CommentDTO;
+import vn.tdtu.common.dto.PostDTO;
+import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.enums.notification.ENotificationType;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -42,14 +43,14 @@ public class CommentsServiceImpl implements CommentService {
         String parentCommentId = request.getParentId();
         String userIdFromJwtToken = SecurityContextUtils.getUserId();
 
-        User foundUser = userService.findById(token, userIdFromJwtToken);
+        UserDTO foundUser = userService.findById(token, userIdFromJwtToken);
 
         if (foundUser == null)
-            throw new RuntimeException("User not found with id: " + userIdFromJwtToken);
+            throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, userIdFromJwtToken);
 
-        Post foundPost = postService.findById(token, request.getPostId());
+        PostDTO foundPost = postService.findById(token, request.getPostId());
         if (foundPost == null)
-            throw new RuntimeException("Post not found with id: " + request.getPostId());
+            throw new BadRequestException(MessageCode.POST_NOT_FOUND_ID, request.getPostId());
 
         Comments comment = new Comments();
         comment.setCreatedAt(LocalDateTime.now());
@@ -62,11 +63,11 @@ public class CommentsServiceImpl implements CommentService {
         if (parentCommentId != null && commentsRepository.existsById(parentCommentId)) {
             comment.setParentId(request.getParentId());
         } else if (parentCommentId != null && !commentsRepository.existsById(parentCommentId)) {
-            throw new RuntimeException("Parent comment not found with id: " + request.getParentId());
+            throw new BadRequestException(MessageCode.COMMENT_NOT_FOUND_ID, request.getParentId());
         }
 
         Comments savedComment = commentsRepository.save(comment);
-        CommentResponse commentResponse = commentResponseMapper.mapToDto(token, savedComment);
+        CommentDTO commentResponse = commentResponseMapper.mapToDto(token, savedComment);
         commentResponse.setMine(true);
 
         //Send message if user comment on the post directly
@@ -106,14 +107,14 @@ public class CommentsServiceImpl implements CommentService {
     public ResDTO<?> updateComment(String token, String id, UpdateCommentRequest comment) {
         String userId = SecurityContextUtils.getUserId();
 
-        CommentResponse updatedComment = commentsRepository.findById(id)
+        CommentDTO updatedComment = commentsRepository.findById(id)
                 .map(existingComment -> {
                     if (existingComment.getUserId().equals(userId)) {
                         existingComment.setContent(comment.getContent());
                         existingComment.setImageUrls(comment.getImageUrls());
                         existingComment.setUpdatedAt(LocalDateTime.now());
 
-                        CommentResponse commentResponse = commentResponseMapper.mapToDto(token, commentsRepository.save(existingComment));
+                        CommentDTO commentResponse = commentResponseMapper.mapToDto(token, commentsRepository.save(existingComment));
                         commentResponse.setMine(true);
 
                         return commentResponse;
@@ -156,7 +157,7 @@ public class CommentsServiceImpl implements CommentService {
     public ResDTO<?> findCommentById(String token, String id) {
         String userId = SecurityContextUtils.getUserId();
 
-        CommentResponse comment = commentsRepository.findById(id)
+        CommentDTO comment = commentsRepository.findById(id)
                 .map(cmt -> commentResponseMapper.mapToDto(token, cmt))
                 .orElseThrow(() -> new RuntimeException("Comment not found with id " + id));
 
@@ -172,9 +173,9 @@ public class CommentsServiceImpl implements CommentService {
         String userId = SecurityContextUtils.getUserId();
 
         List<Comments> comments = commentsRepository.findByPostIdAndParentIdIsNull(postId);
-        List<CommentResponse> commentResponses = comments.stream().map(
+        List<CommentDTO> commentResponses = comments.stream().map(
                 comment -> {
-                    CommentResponse response = commentResponseMapper.mapToDto(token, comment);
+                    CommentDTO response = commentResponseMapper.mapToDto(token, comment);
                     response.setMine(response.getUser().getId().equals(userId));
                     response.getChildren().forEach(cmt -> {
                         cmt.setMine(cmt.getUser().getId().equals(userId));
@@ -190,9 +191,9 @@ public class CommentsServiceImpl implements CommentService {
     @Override
     public ResDTO<?> findAllComments(String token) {
         String userId = SecurityContextUtils.getUserId();
-        List<CommentResponse> commentResponses = commentsRepository.findAll().stream().map(
+        List<CommentDTO> commentResponses = commentsRepository.findAll().stream().map(
                 comment -> {
-                    CommentResponse response = commentResponseMapper.mapToDto(token, comment);
+                    CommentDTO response = commentResponseMapper.mapToDto(token, comment);
                     response.setMine(response.getUser().getId().equals(userId));
                     response.getChildren().forEach(cmt -> {
                         cmt.setMine(cmt.getUser().getId().equals(userId));

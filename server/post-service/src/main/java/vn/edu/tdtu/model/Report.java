@@ -17,4 +17,5 @@ public class Report {
     private String userId;
     private String postId;
     private Date createAt;
+    private Boolean active;
 }

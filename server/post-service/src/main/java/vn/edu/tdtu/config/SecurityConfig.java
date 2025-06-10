@@ -27,7 +27,10 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/posts/user/**",
                                 "/api/v1/banned-word/**",
-                                "/api/v1/posts/search"
+                                "/api/v1/posts/search",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

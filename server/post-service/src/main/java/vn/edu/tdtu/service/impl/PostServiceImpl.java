@@ -10,21 +10,19 @@ import org.springframework.stereotype.Service;
 import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
-import vn.edu.tdtu.dto.response.GroupInfo;
 import vn.edu.tdtu.dto.response.InteractNotification;
 import vn.edu.tdtu.dto.response.PaginationResponse;
-import vn.edu.tdtu.dto.response.PostResponse;
-import vn.edu.tdtu.enums.*;
+import vn.edu.tdtu.enums.EModerateType;
+import vn.tdtu.common.enums.search.ESyncType;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.request.PostPostRequestMapper;
 import vn.edu.tdtu.mapper.request.UpdatePostRequestMapper;
-import vn.edu.tdtu.mapper.response.PostResponseMapper;
+import vn.edu.tdtu.mapper.response.PostMapper;
 import vn.edu.tdtu.message.ModerateMessage;
 import vn.edu.tdtu.message.NewPostMessage;
 import vn.edu.tdtu.model.Media;
 import vn.edu.tdtu.model.Post;
 import vn.edu.tdtu.model.PostTag;
-import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.repository.CustomPostRepository;
 import vn.edu.tdtu.repository.MediaRepository;
@@ -35,9 +33,17 @@ import vn.edu.tdtu.service.intefaces.UserService;
 import vn.edu.tdtu.util.DateUtils;
 import vn.edu.tdtu.util.SecurityContextUtils;
 import vn.edu.tdtu.util.StringUtils;
+import vn.tdtu.common.dto.GroupDTO;
+import vn.tdtu.common.dto.PostDTO;
+import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.enums.notification.ENotificationType;
+import vn.tdtu.common.enums.post.EFileType;
+import vn.tdtu.common.enums.post.EPostType;
+import vn.tdtu.common.enums.post.EPrivacy;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,7 +52,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
-    private final PostResponseMapper postResponseMapper;
+    private final PostMapper postMapper;
     private final PostPostRequestMapper postPostRequestMapper;
     private final UpdatePostRequestMapper updatePostRequestMapper;
     private final CustomPostRepository customPostRepository;
@@ -62,23 +68,23 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public ResDTO<?> findPostRespById(String token, String postId) {
-        ResDTO<PostResponse> response = new ResDTO<>();
+        ResDTO<PostDTO> response = new ResDTO<>();
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new BadRequestException(MessageCode.POST_NOT_FOUND_ID, postId));
 
         response.setMessage(MessageCode.POST_FETCHED);
-        response.setData(postResponseMapper.mapToDto(token, post.getId(), post, false));
+        response.setData(postMapper.mapToDto(token, post.getId(), post, false));
         response.setCode(HttpServletResponse.SC_OK);
 
         return response;
     }
 
     @Override
-    public ResDTO<List<PostResponse>> findPostRespByIds(String token, FindByIdsReq req) {
+    public ResDTO<List<PostDTO>> findPostRespByIds(String token, FindByIdsReq req) {
         String userId = SecurityContextUtils.getUserId();
 
-        ResDTO<List<PostResponse>> response = new ResDTO<>();
+        ResDTO<List<PostDTO>> response = new ResDTO<>();
         List<String> ids = req.getIds();
 
         List<Post> foundPosts = postRepository.findByIdInAndDetachedNot(ids, true);
@@ -97,13 +103,13 @@ public class PostServiceImpl implements PostService {
                         .map(post -> sharedPostMap.get(post.getSharedPostId()).getUserId())
         ).distinct().toList();
 
-        Map<String, User> postedUserMap = userService.findByIds(token, postedUserIdsDistinct)
+        Map<String, UserDTO> postedUserMap = userService.findByIds(token, postedUserIdsDistinct)
                 .stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
+                .collect(Collectors.toMap(UserDTO::getId, user -> user));
 
-        List<PostResponse> posts = foundPosts.stream().map(
+        List<PostDTO> posts = foundPosts.stream().map(
                 post -> {
-                    PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post, true);
+                    PostDTO postResponse = postMapper.mapToDto(token, post.getId(), post, true);
                     postResponse.setUser(postedUserMap.get(post.getUserId()));
                     postResponse.setMine(post.getUserId().equals(userId));
 
@@ -139,15 +145,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<PostResponse> findDetachedPost(String token, String postId) {
+    public ResDTO<PostDTO> findDetachedPost(String token, String postId) {
         String authUserId = SecurityContextUtils.getUserId();
 
         Post foundPost = postRepository.findByIdAndDetachedAndUserId(postId, true, authUserId)
                 .orElseThrow(() -> new BadRequestException(MessageCode.POST_NOT_FOUND));
 
-        ResDTO<PostResponse> response = new ResDTO<>();
+        ResDTO<PostDTO> response = new ResDTO<>();
 
-        PostResponse responseData = postResponseMapper.mapToDto(token, foundPost.getId(), foundPost, false);
+        PostDTO responseData = postMapper.mapToDto(token, foundPost.getId(), foundPost, false);
 
         response.setMessage(MessageCode.POST_FETCHED);
         response.setData(responseData);
@@ -157,8 +163,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse mapToPostResponse(String token, Post post) {
-        return postResponseMapper.mapToDto(token, post.getId(), post, false);
+    public PostDTO mapToPostDTO(String token, Post post) {
+        return postMapper.mapToDto(token, post.getId(), post, false);
     }
 
     @Override
@@ -166,16 +172,16 @@ public class PostServiceImpl implements PostService {
         if (!groupService.allowFetchPost(token, groupId))
             throw new BadRequestException(MessageCode.GROUP_NOT_PERMITTED);
 
-        ResDTO<PaginationResponse<PostResponse>> response = new ResDTO<>();
+        ResDTO<PaginationResponse<PostDTO>> response = new ResDTO<>();
         response.setMessage(MessageCode.POST_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
 
         Page<Post> groupPosts = postRepository.findByGroupIdAndDetachedNotOrderByCreatedAtDesc(groupId, true, PageRequest.of(page - 1, limit));
         List<String> postedUserIds = groupPosts.map(Post::getUserId).stream().distinct().toList();
 
-        Map<String, User> postedUserMap = userService.findByIds(token, postedUserIds)
+        Map<String, UserDTO> postedUserMap = userService.findByIds(token, postedUserIds)
                 .stream().collect(Collectors.toMap(
-                        User::getId, user -> user
+                        UserDTO::getId, user -> user
                 ));
 
         String userId = SecurityContextUtils.getUserId();
@@ -187,7 +193,7 @@ public class PostServiceImpl implements PostService {
                 groupPosts.stream()
                         .map(
                                 post -> {
-                                    PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post, true);
+                                    PostDTO postResponse = postMapper.mapToDto(token, post.getId(), post, true);
                                     postResponse.setMine(post.getUserId().equals(userId));
                                     postResponse.setUser(postedUserMap.get(post.getUserId()));
 
@@ -207,21 +213,21 @@ public class PostServiceImpl implements PostService {
         req.setSize(size);
         req.setStartTime(DateUtils.stringToLocalDate(startTime));
 
-        ResDTO<PaginationResponse<PostResponse>> response = new ResDTO<>();
+        ResDTO<PaginationResponse<PostDTO>> response = new ResDTO<>();
 
         List<String> friendIds = userService.findUserFriendIdsByUserToken(token)
                 .stream()
-                .map(User::getId)
+                .map(UserDTO::getId)
                 .toList();
 
-        List<String> groupIds = groupService.getMyGroups(token)
+        List<String> userGroupIds = groupService.getMyGroups(token)
                 .stream()
-                .map(GroupInfo::getId)
+                .map(GroupDTO::getId)
                 .toList();
 
         String authUserId = SecurityContextUtils.getUserId();
 
-        Page<Post> fetchedPosts = customPostRepository.findNewsFeed(authUserId, friendIds, groupIds, req.getStartTime(), page, size);
+        Page<Post> fetchedPosts = customPostRepository.findNewsFeed(authUserId, friendIds, userGroupIds, req.getStartTime(), page, size);
 
         List<String> sharedPostIds = fetchedPosts.map(Post::getSharedPostId).stream().toList();
 
@@ -231,21 +237,19 @@ public class PostServiceImpl implements PostService {
                         post -> post
                 ));
 
-        //New codes
         List<String> postedUserIdsDistinct = Stream.concat(
                 fetchedPosts.stream().map(Post::getUserId),
                 fetchedPosts.stream().filter(post -> post.getType().equals(EPostType.SHARE))
                         .map(post -> sharedPostMap.get(post.getSharedPostId()).getUserId())
         ).distinct().toList();
 
-        Map<String, User> postedUserMap = userService.findByIds(token, postedUserIdsDistinct)
+        Map<String, UserDTO> postedUserMap = userService.findByIds(token, postedUserIdsDistinct)
                 .stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
-        //End new codes
+                .collect(Collectors.toMap(UserDTO::getId, Function.identity()));
 
-        List<PostResponse> posts = fetchedPosts.stream().map(
+        List<PostDTO> posts = fetchedPosts.stream().map(
                 post -> {
-                    PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post, sharedPostMap, true);
+                    PostDTO postResponse = postMapper.mapToDto(token, post.getId(), post, sharedPostMap, true);
                     postResponse.setUser(postedUserMap.get(post.getUserId()));
                     postResponse.setMine(post.getUserId().equals(authUserId));
 
@@ -263,12 +267,12 @@ public class PostServiceImpl implements PostService {
                 return false;
 
             if (post.getGroupInfo().isPrivate())
-                return groupIds.contains(post.getGroupInfo().getId());
+                return userGroupIds.contains(post.getGroupInfo().getId());
 
             return true;
         }).peek(post -> doPostCensoring(token, post, friendIds)).toList();
 
-        PaginationResponse<PostResponse> paginationResponse = new PaginationResponse<>();
+        PaginationResponse<PostDTO> paginationResponse = new PaginationResponse<>();
 
         paginationResponse.setData(posts);
         paginationResponse.setPage(page);
@@ -282,10 +286,10 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
-    private void doPostCensoring(String token, PostResponse postResponse, List<String> friendIds) {
+    private void doPostCensoring(String token, PostDTO postResponse, List<String> friendIds) {
         String authUserId = SecurityContextUtils.getUserId();
 
-        PostResponse postShare = postResponse.getSharedPost();
+        PostDTO postShare = postResponse.getSharedPost();
 
         if (postShare == null)
             return;
@@ -295,15 +299,15 @@ public class PostServiceImpl implements PostService {
                         (postShare.getPrivacy().equals(EPrivacy.ONLY_FRIENDS) && (!friendIds.contains(postShare.getUser().getId()) && !postShare.getUser().getId().equals(authUserId))) ||
                         (postShare.getType().equals(EPostType.GROUP) && !groupService.allowFetchPost(token, postShare.getGroupInfo().getId()))
         ) {
-            hideIllegalPostResponse(postResponse);
+            hideIllegalPostDTO(postResponse);
         }
     }
 
     @Override
     public ResDTO<?> findByContentContaining(String token, String key) {
-        ResDTO<List<PostResponse>> response = new ResDTO<>();
+        ResDTO<List<PostDTO>> response = new ResDTO<>();
         response.setData(postRepository.findByContent(key).stream().map(
-                p -> postResponseMapper.mapToDto(token, p.getId(), p, false)
+                p -> postMapper.mapToDto(token, p.getId(), p, false)
         ).toList());
         response.setMessage(MessageCode.POST_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
@@ -315,7 +319,7 @@ public class PostServiceImpl implements PostService {
     public ResDTO<?> savePost(String token, CreatePostRequest postRequest) {
         Post post = postPostRequestMapper.mapToObject(postRequest);
 
-        List<User> taggedUser = userService
+        List<UserDTO> taggedUser = userService
                 .findByIds(token, postRequest.getPostTags()
                         .stream()
                         .map(PostTagReqDTO::getTaggedUserId)
@@ -337,10 +341,10 @@ public class PostServiceImpl implements PostService {
         post.setUserId(SecurityContextUtils.getUserId());
         post = postRepository.save(post);
 
-        PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post, false);
+        PostDTO postResponse = postMapper.mapToDto(token, post.getId(), post, false);
         postResponse.setMine(post.getUserId().equals(SecurityContextUtils.getUserId()));
 
-        ResDTO<PostResponse> response = new ResDTO<>();
+        ResDTO<PostDTO> response = new ResDTO<>();
         response.setMessage(MessageCode.POST_SAVED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(postResponse);
@@ -370,7 +374,7 @@ public class PostServiceImpl implements PostService {
         String userId = SecurityContextUtils.getUserId();
 
         Post foundPost = findPostById(request.getId());
-        ResDTO<PostResponse> response = new ResDTO<>();
+        ResDTO<PostDTO> response = new ResDTO<>();
 
         if (foundPost != null) {
             if (!foundPost.getUserId().equals(userId))
@@ -378,7 +382,7 @@ public class PostServiceImpl implements PostService {
 
             updatePostRequestMapper.bindToObject(request, foundPost);
 
-            List<User> taggedUser = userService.findByIds(token, request.getTaggingUsers());
+            List<UserDTO> taggedUser = userService.findByIds(token, request.getTaggingUsers());
 
             foundPost.setPostTags(
                     taggedUser.stream().map(
@@ -396,7 +400,7 @@ public class PostServiceImpl implements PostService {
 
             response.setMessage(MessageCode.POST_DELETED);
             response.setCode(HttpServletResponse.SC_OK);
-            response.setData(postResponseMapper.mapToDto(token, foundPost.getId(), foundPost, false));
+            response.setData(postMapper.mapToDto(token, foundPost.getId(), foundPost, false));
 
             kafkaEventPublisher.pubSyncPostMessage(foundPost, ESyncType.TYPE_UPDATE);
 
@@ -444,20 +448,20 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public ResDTO<?> sharePost(String token, SharePostRequest request) {
-        ResDTO<PostResponse> response = new ResDTO<>();
+        ResDTO<PostDTO> response = new ResDTO<>();
 
         Post post = postRepository.findById(request.getPostId())
                 .orElseThrow(() -> new BadRequestException(MessageCode.POST_NOT_FOUND_ID, request.getPostId()));
 
         if (post.getType().equals(EPostType.GROUP)) {
-            GroupInfo foundGroupInfo = groupService.getGroupById(token, post.getGroupId());
+            GroupDTO foundGroupInfo = groupService.getGroupById(token, post.getGroupId());
 
             if (foundGroupInfo.isPrivate())
                 throw new BadRequestException(MessageCode.GROUP_NOT_PERMITTED);
         }
 
         String userId = SecurityContextUtils.getUserId();
-        User foundUser = userService.findById(token, userId);
+        UserDTO foundUser = userService.findById(token, userId);
 
         if (foundUser == null) {
             throw new BadRequestException(MessageCode.USER_NOT_FOUND);
@@ -473,13 +477,13 @@ public class PostServiceImpl implements PostService {
 
         response.setMessage(MessageCode.POST_SHARED);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setData(postResponseMapper.mapToDto(token, post.getId(), post, false));
+        response.setData(postMapper.mapToDto(token, post.getId(), post, false));
 
         return response;
     }
 
     @Override
-    public ResDTO<PaginationResponse<PostResponse>> findUserPosts(String token, String uId, int page, int size) {
+    public ResDTO<PaginationResponse<PostDTO>> findUserPosts(String token, String uId, int page, int size) {
         String userId = SecurityContextUtils.getUserId();
 
         if (uId.isEmpty())
@@ -488,11 +492,11 @@ public class PostServiceImpl implements PostService {
         return findPostsByUserId(token, uId, page, size);
     }
 
-    private void hideIllegalPostResponse(PostResponse postResponse) {
+    private void hideIllegalPostDTO(PostDTO postResponse) {
         postResponse.setSharedPost(null);
     }
 
-    private static Post getPostShare(SharePostRequest request, Post post, User foundUser) {
+    private static Post getPostShare(SharePostRequest request, Post post, UserDTO foundUser) {
         Post postShare = new Post();
 
         postShare.setPrivacy(request.getPrivacy());
@@ -507,7 +511,7 @@ public class PostServiceImpl implements PostService {
         return postShare;
     }
 
-    private static InteractNotification getInteractNotification(SharePostRequest request, Post post, User foundUser, String userId) {
+    private static InteractNotification getInteractNotification(SharePostRequest request, Post post, UserDTO foundUser, String userId) {
         InteractNotification notification = new InteractNotification();
 
         notification.setAvatarUrl(foundUser.getProfilePicture());
@@ -523,7 +527,7 @@ public class PostServiceImpl implements PostService {
         return notification;
     }
 
-    private void handleSendNewPostNotification(String tokenHeader, PostResponse postResponse) {
+    private void handleSendNewPostNotification(String tokenHeader, PostDTO postResponse) {
         NewPostMessage newPostMessage = new NewPostMessage();
         newPostMessage.setPost(postResponse);
 
@@ -542,12 +546,12 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    private ResDTO<PaginationResponse<PostResponse>> findPostsByUserId(String token, String userId, int page, int size) {
+    private ResDTO<PaginationResponse<PostDTO>> findPostsByUserId(String token, String userId, int page, int size) {
         String authUserId = SecurityContextUtils.getUserId();
 
         List<String> friendIds = userService.findUserFriendIdsByUserToken(token)
                 .stream()
-                .map(User::getId)
+                .map(UserDTO::getId)
                 .toList();
 
         Page<Post> fetchedPosts = postRepository.findByUserIdOrPostTagsTaggedUserIdWithPrivacy(
@@ -566,20 +570,18 @@ public class PostServiceImpl implements PostService {
                         post -> post
                 ));
 
-        //New codes
         List<String> postedUserIdsDistinct = Stream.concat(
                 fetchedPosts.stream().map(Post::getUserId),
                 fetchedPosts.stream().filter(post -> post.getType().equals(EPostType.SHARE))
                         .map(post -> sharedPostMap.get(post.getSharedPostId()).getUserId())
         ).distinct().toList();
 
-        Map<String, User> postedUserMap = userService.findByIds(token, postedUserIdsDistinct)
+        Map<String, UserDTO> postedUserMap = userService.findByIds(token, postedUserIdsDistinct)
                 .stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
-        //End new codes
+                .collect(Collectors.toMap(UserDTO::getId, Function.identity()));
 
-        List<PostResponse> myPosts = fetchedPosts.stream().map(post -> {
-            PostResponse postResponse = postResponseMapper.mapToDto(token, post.getId(), post, sharedPostMap, true);
+        List<PostDTO> myPosts = fetchedPosts.stream().map(post -> {
+            PostDTO postResponse = postMapper.mapToDto(token, post.getId(), post, sharedPostMap, true);
             postResponse.setMine(post.getUserId().equals(authUserId));
             postResponse.setUser(postedUserMap.get(post.getUserId()));
 
@@ -591,9 +593,9 @@ public class PostServiceImpl implements PostService {
 
         }).peek(post -> doPostCensoring(token, post, friendIds)).toList();
 
-        ResDTO<PaginationResponse<PostResponse>> response = new ResDTO<>();
+        ResDTO<PaginationResponse<PostDTO>> response = new ResDTO<>();
 
-        PaginationResponse<PostResponse> paginationResponse = new PaginationResponse<>();
+        PaginationResponse<PostDTO> paginationResponse = new PaginationResponse<>();
 
         paginationResponse.setData(myPosts);
         paginationResponse.setPage(page);

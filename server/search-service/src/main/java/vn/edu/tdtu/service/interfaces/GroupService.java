@@ -1,7 +1,7 @@
 package vn.edu.tdtu.service.interfaces;
 
-import vn.edu.tdtu.model.data.Group;
 import vn.edu.tdtu.model.es.SyncGroup;
+import vn.tdtu.common.dto.GroupDTO;
 
 import java.util.List;
 
@@ -12,5 +12,5 @@ public interface GroupService {
 
     void deleteGroup(String groupId);
 
-    List<Group> findByNameContaining(String tokenHeader, String key, String fuzziness);
+    List<GroupDTO> findByNameContaining(String tokenHeader, String key, String fuzziness);
 }

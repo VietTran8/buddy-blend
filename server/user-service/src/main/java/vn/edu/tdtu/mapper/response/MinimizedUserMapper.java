@@ -3,10 +3,11 @@ package vn.edu.tdtu.mapper.response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.dto.response.MinimizedUserResponse;
 import vn.edu.tdtu.model.User;
 import vn.edu.tdtu.repository.UserRepository;
 import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.enums.user.EUserMappingType;
 
 import java.util.List;
 
@@ -17,12 +18,12 @@ public class MinimizedUserMapper {
     private final UserRepository userRepository;
     private final BaseUserMapper baseUserMapper;
 
-    public MinimizedUserResponse mapToDTO(User user) {
+    public UserDTO mapToDTO(User user) {
         if (user == null) {
             return null;
         }
 
-        MinimizedUserResponse minimizedUser = new MinimizedUserResponse(baseUserMapper.baseMapToDto(user));
+        UserDTO minimizedUser = new UserDTO(baseUserMapper.baseMapToDto(user), EUserMappingType.TYPE_MINIMIZED);
 
         String authUserId = SecurityContextUtils.getUserId();
 

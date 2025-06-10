@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.request.FileReq;
-import vn.edu.tdtu.enums.EFileType;
 import vn.edu.tdtu.repository.httpclient.FileClient;
 import vn.edu.tdtu.service.intefaces.FileService;
+import vn.tdtu.common.enums.post.EFileType;
 
 @Service
 @RequiredArgsConstructor

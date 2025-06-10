@@ -6,9 +6,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.user.FindByIdsRequest;
-import vn.edu.tdtu.model.data.User;
 import vn.edu.tdtu.repository.httpclient.UserClient;
 import vn.edu.tdtu.service.intefaces.UserService;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.util.List;
 
@@ -20,24 +20,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Cacheable(key = "T(java.util.Objects).hash(#a0, #a1)", value = "single-user", unless = "#result == null")
-    public User findById(String accessToken, String userId) {
-        ResDTO<User> response = userClient.findById(accessToken, userId);
+    public UserDTO findById(String accessToken, String userId) {
+        ResDTO<UserDTO> response = userClient.findById(accessToken, userId);
         log.info("findById: " + response.toString());
 
         return response.getData();
     }
 
     @Override
-    public List<User> findByIds(String accessToken, List<String> ids) {
-        ResDTO<List<User>> response = userClient.findByIds(accessToken, new FindByIdsRequest(ids));
+    public List<UserDTO> findByIds(String accessToken, List<String> ids) {
+        ResDTO<List<UserDTO>> response = userClient.findByIds(accessToken, new FindByIdsRequest(ids));
         log.info("findByIds: " + response.toString());
 
         return response.getData();
     }
 
     @Override
-    public List<User> findUserFriendIdsByUserToken(String token) {
-        ResDTO<List<User>> response = userClient.findUserFriendIdsByUserToken(token);
+    public List<UserDTO> findUserFriendIdsByUserToken(String token) {
+        ResDTO<List<UserDTO>> response = userClient.findUserFriendIdsByUserToken(token);
         log.info("findFriends: " + response.toString());
 
         return response.getData();

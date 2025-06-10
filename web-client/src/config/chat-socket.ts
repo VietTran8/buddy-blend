@@ -11,6 +11,8 @@ export const connectChatSocket = () => {
     chatSocket.io.opts.extraHeaders = {
         "Authorization": getSocketAccessToken() || ""
     }
+
+    console.log("Connecting to chat socket with token:", getSocketAccessToken());
     chatSocket.connect();
 }
 

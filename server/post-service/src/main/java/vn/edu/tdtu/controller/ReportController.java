@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.dto.ResDTO;
+import vn.edu.tdtu.dto.request.ApprovePostRequest;
 import vn.edu.tdtu.dto.request.ReportRequest;
 import vn.edu.tdtu.service.intefaces.ReportService;
 
@@ -16,6 +17,12 @@ public class ReportController {
     @PostMapping()
     public ResponseEntity<?> report(@RequestBody ReportRequest requestBody) {
         ResDTO<?> response = reportService.reportPost(requestBody);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @PostMapping("/approve")
+    public ResponseEntity<?> approvePost(@RequestBody ApprovePostRequest requestBody) {
+        ResDTO<?> response = reportService.approvePost(requestBody);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 

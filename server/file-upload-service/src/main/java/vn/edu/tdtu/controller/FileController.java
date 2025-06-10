@@ -68,9 +68,9 @@ public class FileController {
 
         EUploadFolder folder;
 
-        if (type.equals("img")) {
+        if ("img".equals(type)) {
             folder = EUploadFolder.FOLDER_IMG;
-        } else if (type.equals("vid")) {
+        } else if ("vid".equals(type)) {
             folder = EUploadFolder.FOLDER_VIDEO;
         } else {
             folder = EUploadFolder.FOLDER_OTHERS;
@@ -112,9 +112,10 @@ public class FileController {
         response.setData(null);
 
         EUploadFolder folder = EUploadFolder.FOLDER_VIDEO;
-        if (type.equals("img")) {
+        if ("img".equals(type)) {
             folder = EUploadFolder.FOLDER_IMG;
         }
+
         try {
             boolean isOk = fileService.deleteFile(request.getUrl(), folder);
 
@@ -138,7 +139,7 @@ public class FileController {
         response.setData(data);
 
         EUploadFolder folder = EUploadFolder.FOLDER_VIDEO;
-        if (type.equals("img")) {
+        if ("img".equals(type)) {
             folder = EUploadFolder.FOLDER_IMG;
         }
         try {

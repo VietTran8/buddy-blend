@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import vn.tdtu.common.dto.UserDTO;
 import vn.tdtu.edu.constant.MessageCode;
 import vn.tdtu.edu.dto.NotificationResponse;
 import vn.tdtu.edu.dto.PaginationResponse;
@@ -11,7 +12,6 @@ import vn.tdtu.edu.dto.ResDTO;
 import vn.tdtu.edu.exception.BadRequestException;
 import vn.tdtu.edu.mapper.NotificationMapper;
 import vn.tdtu.edu.model.CommonNotification;
-import vn.tdtu.edu.model.data.User;
 import vn.tdtu.edu.repository.NotificationRepository;
 import vn.tdtu.edu.service.interfaces.NotificationService;
 import vn.tdtu.edu.service.interfaces.UserService;
@@ -44,9 +44,9 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(CommonNotification::getFromUserId)
                 .collect(Collectors.toSet());
 
-        Map<String, User> fromUserMap = userService.findByIds(fromUserIdSet.stream().toList())
+        Map<String, UserDTO> fromUserMap = userService.findByIds(fromUserIdSet.stream().toList())
                 .stream().collect(Collectors.toMap(
-                        User::getId, user -> user
+                        UserDTO::getId, user -> user
                 ));
 
         response.setCode(200);

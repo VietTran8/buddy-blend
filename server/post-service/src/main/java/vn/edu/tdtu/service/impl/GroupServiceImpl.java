@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.ResDTO;
-import vn.edu.tdtu.dto.response.GroupInfo;
 import vn.edu.tdtu.repository.httpclient.GroupClient;
 import vn.edu.tdtu.service.intefaces.GroupService;
+import vn.tdtu.common.dto.GroupDTO;
 
 import java.util.List;
 
@@ -19,16 +19,16 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     @Cacheable(key = "T(java.util.Objects).hash(#a0, #a1)", value = "single-group", unless = "#result == null")
-    public GroupInfo getGroupById(String accessToken, String groupId) {
-        ResDTO<GroupInfo> response = groupClient.getGroupInfoById(accessToken, groupId);
+    public GroupDTO getGroupById(String accessToken, String groupId) {
+        ResDTO<GroupDTO> response = groupClient.getGroupInfoById(accessToken, groupId);
         log.info("getGroupById: " + response.toString());
 
         return response.getData();
     }
 
     @Override
-    public List<GroupInfo> getMyGroups(String accessToken) {
-        ResDTO<List<GroupInfo>> response = groupClient.getMyGroups(accessToken);
+    public List<GroupDTO> getMyGroups(String accessToken) {
+        ResDTO<List<GroupDTO>> response = groupClient.getMyGroups(accessToken);
         log.info("getMyGroups: " + response.toString());
 
         return response.getData();

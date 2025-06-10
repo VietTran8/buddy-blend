@@ -9,11 +9,9 @@ import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.AuthUserResponse;
-import vn.edu.tdtu.dto.response.MinimizedUserResponse;
 import vn.edu.tdtu.dto.response.SaveUserResponse;
-import vn.edu.tdtu.dto.response.UserDetailsResponse;
 import vn.edu.tdtu.enums.EFileType;
-import vn.edu.tdtu.enums.ESyncType;
+import vn.tdtu.common.enums.search.ESyncType;
 import vn.edu.tdtu.enums.EUserRole;
 import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.request.SaveUserReqMapper;
@@ -24,6 +22,7 @@ import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.repository.UserRepository;
 import vn.edu.tdtu.service.interfaces.*;
 import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.dto.UserDTO;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +57,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResDTO<?> findProfile(String id) {
         String userId = SecurityContextUtils.getUserId();
-        ResDTO<UserDetailsResponse> response = new ResDTO<>();
+        ResDTO<UserDTO> response = new ResDTO<>();
 
         User foundUser = userRepository.findByIdAndActive(id.isEmpty() ? userId : id, true)
                 .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND));
@@ -71,7 +70,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResDTO<List<MinimizedUserResponse>> getUserSuggestionForGroup(String tokenHeader, String groupId) {
+    public ResDTO<List<UserDTO>> getUserSuggestionForGroup(String tokenHeader, String groupId) {
         List<String> friendUserIdsInGroup = groupService.getFriendUserIdsInGroup(tokenHeader, groupId);
 
         return findFriendsByNotInIds(tokenHeader, new FindByIdsReqDTO(friendUserIdsInGroup));
@@ -107,12 +106,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResDTO<?> findResById(String id) {
-        ResDTO<MinimizedUserResponse> response = new ResDTO<>();
+        ResDTO<UserDTO> response = new ResDTO<>();
 
         User foundUser = userRepository.findByIdAndActive(id, true)
                 .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND));
 
-        MinimizedUserResponse mappedUser = minimizedUserMapper.mapToDTO(foundUser);
+        UserDTO mappedUser = minimizedUserMapper.mapToDTO(foundUser);
 
         response.setCode(HttpServletResponse.SC_OK);
         response.setMessage(MessageCode.USER_FETCHED);
@@ -122,10 +121,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResDTO<List<MinimizedUserResponse>> findResByIds(String token, FindByIdsReqDTO request) {
-        ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
+    public ResDTO<List<UserDTO>> findResByIds(String token, FindByIdsReqDTO request) {
+        ResDTO<List<UserDTO>> response = new ResDTO<>();
 
-        List<MinimizedUserResponse> users = userRepository.findByIdInAndActive(request.getUserIds(), true)
+        List<UserDTO> users = userRepository.findByIdInAndActive(request.getUserIds(), true)
                 .stream()
                 .map(minimizedUserMapper::mapToDTO)
                 .filter(user -> !user.isHiddenBanned())
@@ -139,14 +138,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResDTO<List<MinimizedUserResponse>> findFriendsByNotInIds(String token, FindByIdsReqDTO request) {
-        ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
+    public ResDTO<List<UserDTO>> findFriendsByNotInIds(String token, FindByIdsReqDTO request) {
+        ResDTO<List<UserDTO>> response = new ResDTO<>();
 
         String userId = SecurityContextUtils.getUserId();
 
         List<User> userFriends = friendRequestService.getListFriends(userId);
 
-        List<MinimizedUserResponse> users = userFriends
+        List<UserDTO> users = userFriends
                 .stream()
                 .filter(u -> request.getUserIds().stream().noneMatch(id -> id.equals(u.getId())))
                 .map(minimizedUserMapper::mapToDTO)
@@ -176,9 +175,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResDTO<?> searchByName(String token, String name) {
-        ResDTO<List<MinimizedUserResponse>> response = new ResDTO<>();
+        ResDTO<List<UserDTO>> response = new ResDTO<>();
 
-        List<MinimizedUserResponse> userResponses = userRepository.findByNamesContaining(name).stream().map(
+        List<UserDTO> userResponses = userRepository.findByNamesContaining(name).stream().map(
                         minimizedUserMapper::mapToDTO
                 )
                 .filter(u -> !u.isHiddenBanned())
