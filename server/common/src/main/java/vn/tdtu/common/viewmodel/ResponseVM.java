@@ -6,10 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.tdtu.common.utils.MessageUtils;
 
+import java.io.Serializable;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class ResponseVM<D> {
+public class ResponseVM<D> implements Serializable {
     private String message;
     private D data;
     private int code;

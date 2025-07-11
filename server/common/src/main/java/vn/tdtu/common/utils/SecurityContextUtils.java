@@ -49,18 +49,31 @@ public class SecurityContextUtils {
         boolean isPermittedFeignCall = userIdHeader == null;
 
         if(existedAuthentication.isEmpty() && !isPermittedFeignCall) {
-            Jwt jwt = new Jwt("feign-call-token-value", null, null,null,
-                    Map.of(
-                        Constants.JwtClaims.USER_ID,
-                        userIdHeader
-                    )
-            );
-
-            Authentication authentication = new JwtAuthenticationToken(jwt);
-            authentication.setAuthenticated(true);
+            Authentication authentication = getAuthentication(userIdHeader);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
+    }
+
+    private static Authentication getAuthentication(String userIdHeader) {
+        Map<String, Object> dummyHeader = Map.of(
+                "alg", "HS256",
+                "typ", "JWT"
+        );
+
+        Map<String, Object> claims = Map.of(
+                Constants.JwtClaims.USER_ID,
+                userIdHeader
+        );
+
+        Jwt jwt = new Jwt("feign-call-token-value", null, null,
+                dummyHeader,
+                claims
+        );
+
+        Authentication authentication = new JwtAuthenticationToken(jwt);
+        authentication.setAuthenticated(true);
+        return authentication;
     }
 
     public static List<EUserRole> getUserRoles() {
