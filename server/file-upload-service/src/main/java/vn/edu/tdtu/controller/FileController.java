@@ -6,12 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.FileReq;
 import vn.edu.tdtu.dto.response.UploadFileResponse;
 import vn.edu.tdtu.enums.EUploadFolder;
 import vn.edu.tdtu.service.interfaces.IFileService;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ public class FileController {
 
     @PostMapping("/upload/{type}")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file, @PathVariable("type") String type) {
-        ResDTO<UploadFileResponse> response = new ResDTO<>();
+        ResponseVM<UploadFileResponse> response = new ResponseVM<>();
 
         response.setCode(HttpServletResponse.SC_BAD_REQUEST);
         response.setData(null);
@@ -51,7 +51,7 @@ public class FileController {
 
             response.setCode(HttpServletResponse.SC_CREATED);
             response.setData(uploadFileResponse);
-            response.setMessage(MessageCode.FILE_UPLOADED);
+            response.setMessage(MessageCode.File.FILE_UPLOADED);
 
             return ResponseEntity.ok(response);
         } catch (IOException e) {
@@ -62,7 +62,7 @@ public class FileController {
 
     @PostMapping("/upload-all/{type}")
     public ResponseEntity<?> uploadMultiFile(@RequestParam("files") MultipartFile[] files, @PathVariable("type") String type) {
-        ResDTO<List<UploadFileResponse>> response = new ResDTO<>();
+        ResponseVM<List<UploadFileResponse>> response = new ResponseVM<>();
         response.setCode(HttpServletResponse.SC_BAD_REQUEST);
         response.setData(null);
 
@@ -93,7 +93,7 @@ public class FileController {
 
             response.setCode(HttpServletResponse.SC_CREATED);
             response.setData(responses);
-            response.setMessage(MessageCode.FILE_UPLOADED);
+            response.setMessage(MessageCode.File.FILE_UPLOADED);
 
             return ResponseEntity.ok(response);
         } catch (IOException e) {
@@ -107,7 +107,7 @@ public class FileController {
     public ResponseEntity<?> deleteFile(@RequestBody FileReq request, @PathVariable("type") String type) {
         log.info("Delete file method called");
 
-        ResDTO<Map<String, String>> response = new ResDTO<>();
+        ResponseVM<Map<String, String>> response = new ResponseVM<>();
         response.setCode(HttpServletResponse.SC_BAD_REQUEST);
         response.setData(null);
 
@@ -120,7 +120,7 @@ public class FileController {
             boolean isOk = fileService.deleteFile(request.getUrl(), folder);
 
             response.setCode(200);
-            response.setMessage(isOk ? MessageCode.FILE_DELETED : MessageCode.FILE_NOT_FOUND);
+            response.setMessage(isOk ? MessageCode.File.FILE_DELETED : MessageCode.File.FILE_NOT_FOUND);
 
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -132,7 +132,7 @@ public class FileController {
 
     @PostMapping("/update/{type}")
     public ResponseEntity<?> updateFile(@RequestParam("url") String oldUrl, @RequestParam("newFile") MultipartFile newFile, @PathVariable("type") String type) {
-        ResDTO<Map<String, String>> response = new ResDTO<>();
+        ResponseVM<Map<String, String>> response = new ResponseVM<>();
         Map<String, String> data = new HashMap<>();
         data.put("url", null);
         response.setCode(HttpServletResponse.SC_BAD_REQUEST);
@@ -148,7 +148,7 @@ public class FileController {
             data.put("url", newUrl);
             response.setCode(HttpServletResponse.SC_OK);
             response.setData(data);
-            response.setMessage(MessageCode.FILE_UPDATED);
+            response.setMessage(MessageCode.File.FILE_UPDATED);
             return ResponseEntity.status(response.getCode()).body(response);
         } catch (IOException e) {
             log.error(e.getMessage());

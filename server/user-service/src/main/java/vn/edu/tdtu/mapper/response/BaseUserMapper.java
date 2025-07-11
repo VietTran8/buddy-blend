@@ -8,9 +8,9 @@ import vn.edu.tdtu.model.User;
 import vn.edu.tdtu.repository.FriendRequestRepository;
 import vn.edu.tdtu.repository.UserRepository;
 import vn.edu.tdtu.service.interfaces.UserStatusService;
-import vn.edu.tdtu.util.SecurityContextUtils;
 import vn.tdtu.common.dto.UserDTO;
 import vn.tdtu.common.enums.user.EFriendStatus;
+import vn.tdtu.common.utils.SecurityContextUtils;
 
 import java.util.ArrayList;
 import java.util.List;

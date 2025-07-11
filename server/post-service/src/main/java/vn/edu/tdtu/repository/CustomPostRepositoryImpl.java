@@ -33,8 +33,6 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
                 Criteria.where("groupId").in(groupIds)
         ).andOperator(detachCriteria);
 
-        //.and("createdAt").lte(startTime)
-
         Query countQuery = Query.query(criteria);
         long totalElements = mongoTemplate.count(countQuery, Post.class);
 

@@ -4,5 +4,5 @@ import org.springframework.web.multipart.MultipartFile;
 import vn.edu.tdtu.enums.EFileType;
 
 public interface FileService {
-    public String upload(MultipartFile file, EFileType type) throws Exception;
+    String upload(MultipartFile file, EFileType type) throws Exception;
 }

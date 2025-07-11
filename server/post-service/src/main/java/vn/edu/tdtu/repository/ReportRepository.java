@@ -11,5 +11,6 @@ import java.util.Optional;
 @Repository
 public interface ReportRepository extends MongoRepository<Report, String> {
     Optional<Report> findByIdAndActiveOrActive(String id, Boolean active, Boolean active2);
+
     Page<Report> findAllByActiveOrActive(Boolean active, Boolean active2, Pageable pageable);
 }

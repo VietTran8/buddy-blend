@@ -1,18 +1,18 @@
 package vn.edu.tdtu.service.interfaces;
 
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.model.Room;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 public interface RoomService {
-    public void saveRoom(Room room);
+    void saveRoom(Room room);
 
-    public Room findById(String id);
+    Room findById(String id);
 
-    public Room findExistingRoom(String fromUserId, String toUserId);
+    Room findExistingRoom(String fromUserId, String toUserId);
 
-    public ResDTO<?> findRoomsByUser();
+    ResponseVM<?> findRoomsByUser();
 
-    public ResDTO<?> archiveRoom(String opponentId, boolean archive);
+    ResponseVM<?> archiveRoom(String opponentId, boolean archive);
 
-    public ResDTO<?> deleteRoom(String opponentId);
+    ResponseVM<?> deleteRoom(String opponentId);
 }

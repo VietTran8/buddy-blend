@@ -1,42 +1,42 @@
 package vn.edu.tdtu.service.intefaces;
 
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.CreatePostRequest;
 import vn.edu.tdtu.dto.request.FindByIdsReq;
 import vn.edu.tdtu.dto.request.SharePostRequest;
 import vn.edu.tdtu.dto.request.UpdatePostContentRequest;
-import vn.edu.tdtu.dto.response.PaginationResponse;
 import vn.edu.tdtu.model.Post;
 import vn.tdtu.common.dto.PostDTO;
+import vn.tdtu.common.viewmodel.PaginationResponseVM;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.List;
 
 public interface PostService {
-    public Post findPostById(String postId);
+    Post findPostById(String postId);
 
-    public ResDTO<?> findPostRespById(String token, String postId);
+    ResponseVM<?> findPostRespById(String token, String postId);
 
-    public ResDTO<List<PostDTO>> findPostRespByIds(String token, FindByIdsReq req);
+    ResponseVM<List<PostDTO>> findPostRespByIds(String token, FindByIdsReq req);
 
-    public ResDTO<?> getUserIdByPostId(String postId);
+    ResponseVM<?> getUserIdByPostId(String postId);
 
-    public PostDTO mapToPostDTO(String token, Post post);
+    PostDTO mapToPostDTO(String token, Post post);
 
-    public ResDTO<?> getGroupPosts(String token, String groupId, int page, int limit);
+    ResponseVM<?> getGroupPosts(String token, String groupId, int page, int limit);
 
-    public ResDTO<?> getNewsFeed(String token, int page, int size, String startTime);
+    ResponseVM<?> getNewsFeed(String token, int page, int size, String startTime);
 
-    public ResDTO<?> findByContentContaining(String token, String key);
+    ResponseVM<?> findByContentContaining(String token, String key);
 
-    public ResDTO<?> savePost(String token, CreatePostRequest postRequest);
+    ResponseVM<?> savePost(String token, CreatePostRequest postRequest);
 
-    public ResDTO<?> updatePostContent(String token, UpdatePostContentRequest request);
+    ResponseVM<?> updatePostContent(String token, UpdatePostContentRequest request);
 
-    public ResDTO<?> deletePost(String postId);
+    ResponseVM<?> deletePost(String postId);
 
-    public ResDTO<?> sharePost(String token, SharePostRequest request);
+    ResponseVM<?> sharePost(String token, SharePostRequest request);
 
-    public ResDTO<PostDTO> findDetachedPost(String token, String postId);
+    ResponseVM<PostDTO> findDetachedPost(String token, String postId);
 
-    public ResDTO<PaginationResponse<PostDTO>> findUserPosts(String token, String uId, int page, int size);
+    ResponseVM<PaginationResponseVM<PostDTO>> findUserPosts(String token, String uId, int page, int size);
 }

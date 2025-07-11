@@ -16,6 +16,20 @@ import vn.tdtu.common.dto.UserDTO;
 public class RoomResponseMapper {
     private final UserService userService;
 
+    public static MessageResponse mapMsgToMsgResponse(String currentUserId, ChatMessage msg) {
+        MessageResponse msgResponse = new MessageResponse();
+
+        msgResponse.setSentByYou(currentUserId.equals(msg.getFromUserId()));
+        msgResponse.setId(msg.getId());
+        msgResponse.setContent(msg.getContent());
+        msgResponse.setCreatedAt(msg.getCreatedAt());
+        msgResponse.setMedias(msg.getMedias());
+        msgResponse.setFromUserId(msg.getFromUserId());
+        msgResponse.setToUserId(msg.getToUserId());
+
+        return msgResponse;
+    }
+
     public RoomResponse mapToDTO(String currentUserId, Room object) {
         RoomResponse response = new RoomResponse();
         response.setId(object.getId());
@@ -46,19 +60,5 @@ public class RoomResponseMapper {
         }
 
         return response;
-    }
-
-    public static MessageResponse mapMsgToMsgResponse(String currentUserId, ChatMessage msg) {
-        MessageResponse msgResponse = new MessageResponse();
-
-        msgResponse.setSentByYou(currentUserId.equals(msg.getFromUserId()));
-        msgResponse.setId(msg.getId());
-        msgResponse.setContent(msg.getContent());
-        msgResponse.setCreatedAt(msg.getCreatedAt());
-        msgResponse.setMedias(msg.getMedias());
-        msgResponse.setFromUserId(msg.getFromUserId());
-        msgResponse.setToUserId(msg.getToUserId());
-
-        return msgResponse;
     }
 }

@@ -7,13 +7,16 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.message.ExitAllRoomMessage;
 import vn.edu.tdtu.message.JoinRoomMessage;
 import vn.edu.tdtu.message.SeenMessage;
 import vn.edu.tdtu.message.SendMessage;
-import vn.edu.tdtu.util.JwtUtils;
+import vn.tdtu.common.exception.UnauthorizedException;
+import vn.tdtu.common.utils.Constants;
+import vn.tdtu.common.utils.JwtUtils;
+import vn.tdtu.common.utils.MessageCode;
 
 import java.util.Objects;
 
@@ -28,10 +31,10 @@ public class SocketModule {
         this.jwtUtils = jwtUtils;
 
         server.addConnectListener(onConnected());
-        server.addEventListener("send_message", SendMessage.class, onMessageReceived());
-        server.addEventListener("join_room", JoinRoomMessage.class, onJoinRoom());
-        server.addEventListener("exit_rooms", ExitAllRoomMessage.class, onExitAllRoom());
-        server.addEventListener("seen", SeenMessage.class, onSeen());
+        server.addEventListener(Constants.SocketEvent.SEND_MESSAGE, SendMessage.class, onMessageReceived());
+        server.addEventListener(Constants.SocketEvent.JOIN_ROOM, JoinRoomMessage.class, onJoinRoom());
+        server.addEventListener(Constants.SocketEvent.EXIT_ALL_ROOM, ExitAllRoomMessage.class, onExitAllRoom());
+        server.addEventListener(Constants.SocketEvent.SEEN, SeenMessage.class, onSeen());
     }
 
     public ConnectListener onConnected() {
@@ -39,23 +42,23 @@ public class SocketModule {
             @Override
             public void onConnect(SocketIOClient client) {
                 HandshakeData handshakeData = client.getHandshakeData();
-                String bearerToken = handshakeData.getHttpHeaders().get("Authorization");
+                String bearerToken = handshakeData.getHttpHeaders().get(HttpHeaders.AUTHORIZATION);
 
-                if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+                if (bearerToken == null || !bearerToken.startsWith(Constants.BEARER_PREFIX)) {
                     client.disconnect();
                     throw new IllegalArgumentException("Invalid JWT token format");
                 }
 
                 String token = bearerToken.split(" ")[1];
 
-                if (!jwtUtils.validateJwtToken(token)) {
+                if (jwtUtils.isTokenInvalid(token)) {
                     client.disconnect();
-                    throw new UnauthorizedException("You are not authenticated");
+                    throw new UnauthorizedException(MessageCode.Authentication.AUTH_UNAUTHORIZED);
                 }
 
                 String userId = jwtUtils.getUserIdFromJwtToken(bearerToken);
 
-                client.set("userId", userId);
+                client.set(Constants.SocketProperty.USER_ID, userId);
 
                 log.info("User [{}] with session id {} has connected to chat module", userId, client.getSessionId().toString());
             }
@@ -85,7 +88,7 @@ public class SocketModule {
         return new DataListener<SeenMessage>() {
             @Override
             public void onData(SocketIOClient socketIOClient, SeenMessage seenMessage, AckRequest ackRequest) throws Exception {
-                String clientUserId = socketIOClient.get("userId");
+                String clientUserId = socketIOClient.get(Constants.SocketProperty.USER_ID);
 
                 log.info("User [{}] seen message from room [{}]", clientUserId, seenMessage.getFromUserId());
 

@@ -1,7 +1,5 @@
 package vn.edu.tdtu.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -15,16 +13,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class ApplicationConfig {
+    @Value("${kafka.topic.sync-user.name}")
+    private String synUserTopicName;
+    @Value("${kafka.topic.friend-request.name}")
+    private String friendRequestTopicName;
+
     @Bean
     @LoadBalanced
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
-
-    @Value("${kafka.topic.sync-user.name}")
-    private String synUserTopicName;
-    @Value("${kafka.topic.friend-request.name}")
-    private String friendRequestTopicName;
 
     @Bean
     public WebClient webClient() {

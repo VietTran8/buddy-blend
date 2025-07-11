@@ -21,4 +21,5 @@ public class AppConfig {
     public NewTopic syncGroupTopic() {
         return new NewTopic(syncGroupTopicName, 2, (short) 1);
     }
+
 }

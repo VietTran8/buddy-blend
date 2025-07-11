@@ -3,11 +3,11 @@ package vn.edu.tdtu.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.CreateStoryRequest;
 import vn.edu.tdtu.dto.request.DoReactRequest;
 import vn.edu.tdtu.service.interfaces.ReactionService;
 import vn.edu.tdtu.service.interfaces.StoryService;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 @RestController
 @RequestMapping("/api/v1/stories")
@@ -18,17 +18,17 @@ public class StoryController {
 
     @GetMapping
     public ResponseEntity<?> getStories(@RequestHeader("Authorization") String accessTokenHeader) {
-        ResDTO<?> response = storyService.getStories(accessTokenHeader);
+        ResponseVM<?> response = storyService.getStories(accessTokenHeader);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/by-id/{userId}")
     public ResponseEntity<?> getUserStory(
             @RequestHeader("Authorization") String accessTokenHeader,
             @PathVariable("userId") String userId
     ) {
-        ResDTO<?> response = storyService.getUserStory(accessTokenHeader, userId);
+        ResponseVM<?> response = storyService.getUserStory(accessTokenHeader, userId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -38,35 +38,35 @@ public class StoryController {
             @RequestHeader("Authorization") String accessTokenHeader,
             @PathVariable("storyId") String storyId
     ) {
-        ResDTO<?> response = storyService.getViewers(accessTokenHeader, storyId);
+        ResponseVM<?> response = storyService.getViewers(accessTokenHeader, storyId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping
     public ResponseEntity<?> createStory(@RequestBody CreateStoryRequest payload) {
-        ResDTO<?> response = storyService.createStory(payload);
+        ResponseVM<?> response = storyService.createStory(payload);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/views/count/{storyId}")
     public ResponseEntity<?> countStoryView(@PathVariable("storyId") String storyId) {
-        ResDTO<?> response = storyService.countView(storyId);
+        ResponseVM<?> response = storyService.countView(storyId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/react")
     public ResponseEntity<?> doReaction(@RequestHeader("Authorization") String tokenHeader, @RequestBody DoReactRequest payload) {
-        ResDTO<?> response = reactionService.doReact(tokenHeader, payload);
+        ResponseVM<?> response = reactionService.doReact(tokenHeader, payload);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @DeleteMapping("/{storyId}")
     public ResponseEntity<?> deleteStory(@PathVariable("storyId") String storyId) {
-        ResDTO<?> response = storyService.deleteStory(storyId);
+        ResponseVM<?> response = storyService.deleteStory(storyId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }

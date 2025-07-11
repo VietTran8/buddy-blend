@@ -7,8 +7,8 @@ import vn.edu.tdtu.model.Media;
 import vn.edu.tdtu.model.Post;
 import vn.edu.tdtu.repository.MediaRepository;
 import vn.edu.tdtu.service.intefaces.FileService;
-import vn.edu.tdtu.util.StringUtils;
 import vn.tdtu.common.enums.post.EFileType;
+import vn.tdtu.common.utils.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

@@ -7,14 +7,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.InteractNotification;
-import vn.edu.tdtu.dto.response.PaginationResponse;
 import vn.edu.tdtu.enums.EModerateType;
-import vn.tdtu.common.enums.search.ESyncType;
-import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.request.PostPostRequestMapper;
 import vn.edu.tdtu.mapper.request.UpdatePostRequestMapper;
 import vn.edu.tdtu.mapper.response.PostMapper;
@@ -30,9 +25,6 @@ import vn.edu.tdtu.repository.PostRepository;
 import vn.edu.tdtu.service.intefaces.GroupService;
 import vn.edu.tdtu.service.intefaces.PostService;
 import vn.edu.tdtu.service.intefaces.UserService;
-import vn.edu.tdtu.util.DateUtils;
-import vn.edu.tdtu.util.SecurityContextUtils;
-import vn.edu.tdtu.util.StringUtils;
 import vn.tdtu.common.dto.GroupDTO;
 import vn.tdtu.common.dto.PostDTO;
 import vn.tdtu.common.dto.UserDTO;
@@ -40,6 +32,14 @@ import vn.tdtu.common.enums.notification.ENotificationType;
 import vn.tdtu.common.enums.post.EFileType;
 import vn.tdtu.common.enums.post.EPostType;
 import vn.tdtu.common.enums.post.EPrivacy;
+import vn.tdtu.common.enums.search.ESyncType;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.DateUtils;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.utils.StringUtils;
+import vn.tdtu.common.viewmodel.PaginationResponseVM;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -61,19 +61,50 @@ public class PostServiceImpl implements PostService {
     private final MediaRepository mediaRepository;
     private final KafkaEventPublisher kafkaEventPublisher;
 
+    private static Post getPostShare(SharePostRequest request, Post post, UserDTO foundUser) {
+        Post postShare = new Post();
+
+        postShare.setPrivacy(request.getPrivacy());
+        postShare.setCreatedAt(LocalDateTime.now());
+        postShare.setUserId(foundUser.getId());
+        postShare.setDetached(false);
+        postShare.setContent(request.getStatus());
+        postShare.setSharedPostId(post.getId());
+        postShare.setType(EPostType.SHARE);
+        postShare.setNormalizedContent(StringUtils.toSlug(request.getStatus()));
+
+        return postShare;
+    }
+
+    private static InteractNotification getInteractNotification(SharePostRequest request, Post post, UserDTO foundUser, String userId) {
+        InteractNotification notification = new InteractNotification();
+
+        notification.setAvatarUrl(foundUser.getProfilePicture());
+        notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
+        notification.setContent(notification.getUserFullName() + " đã chia sẻ bài viết của bạn");
+        notification.setRefId(request.getPostId());
+        notification.setTitle("Có người tương tác nè!");
+        notification.setFromUserId(userId);
+        notification.setToUserIds(List.of(post.getUserId()));
+        notification.setType(ENotificationType.SHARE);
+        notification.setCreateAt(new Date());
+
+        return notification;
+    }
+
     @Override
     public Post findPostById(String postId) {
         return postRepository.findById(postId).orElse(null);
     }
 
     @Override
-    public ResDTO<?> findPostRespById(String token, String postId) {
-        ResDTO<PostDTO> response = new ResDTO<>();
+    public ResponseVM<?> findPostRespById(String token, String postId) {
+        ResponseVM<PostDTO> response = new ResponseVM<>();
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new BadRequestException(MessageCode.POST_NOT_FOUND_ID, postId));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Post.POST_NOT_FOUND_ID, postId));
 
-        response.setMessage(MessageCode.POST_FETCHED);
+        response.setMessage(MessageCode.Post.POST_FETCHED);
         response.setData(postMapper.mapToDto(token, post.getId(), post, false));
         response.setCode(HttpServletResponse.SC_OK);
 
@@ -81,10 +112,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<List<PostDTO>> findPostRespByIds(String token, FindByIdsReq req) {
+    public ResponseVM<List<PostDTO>> findPostRespByIds(String token, FindByIdsReq req) {
         String userId = SecurityContextUtils.getUserId();
 
-        ResDTO<List<PostDTO>> response = new ResDTO<>();
+        ResponseVM<List<PostDTO>> response = new ResponseVM<>();
         List<String> ids = req.getIds();
 
         List<Post> foundPosts = postRepository.findByIdInAndDetachedNot(ids, true);
@@ -123,21 +154,21 @@ public class PostServiceImpl implements PostService {
 
         response.setCode(200);
         response.setData(posts);
-        response.setMessage(MessageCode.POST_FETCHED);
+        response.setMessage(MessageCode.Post.POST_FETCHED);
 
         return response;
     }
 
     @Override
-    public ResDTO<?> getUserIdByPostId(String postId) {
-        ResDTO<Map<String, String>> response = new ResDTO<>();
+    public ResponseVM<?> getUserIdByPostId(String postId) {
+        ResponseVM<Map<String, String>> response = new ResponseVM<>();
         Map<String, String> data = new HashMap<>();
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("post not found with id: " + postId));
 
         data.put("userId", post.getUserId());
 
-        response.setMessage(MessageCode.USER_FETCHED);
+        response.setMessage(MessageCode.User.USER_FETCHED);
         response.setData(data);
         response.setCode(HttpServletResponse.SC_OK);
 
@@ -145,17 +176,17 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<PostDTO> findDetachedPost(String token, String postId) {
+    public ResponseVM<PostDTO> findDetachedPost(String token, String postId) {
         String authUserId = SecurityContextUtils.getUserId();
 
         Post foundPost = postRepository.findByIdAndDetachedAndUserId(postId, true, authUserId)
-                .orElseThrow(() -> new BadRequestException(MessageCode.POST_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Post.POST_NOT_FOUND));
 
-        ResDTO<PostDTO> response = new ResDTO<>();
+        ResponseVM<PostDTO> response = new ResponseVM<>();
 
         PostDTO responseData = postMapper.mapToDto(token, foundPost.getId(), foundPost, false);
 
-        response.setMessage(MessageCode.POST_FETCHED);
+        response.setMessage(MessageCode.Post.POST_FETCHED);
         response.setData(responseData);
         response.setCode(HttpServletResponse.SC_OK);
 
@@ -168,12 +199,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<?> getGroupPosts(String token, String groupId, int page, int limit) {
+    public ResponseVM<?> getGroupPosts(String token, String groupId, int page, int limit) {
         if (!groupService.allowFetchPost(token, groupId))
-            throw new BadRequestException(MessageCode.GROUP_NOT_PERMITTED);
+            throw new BadRequestException(MessageCode.Post.GROUP_NOT_PERMITTED);
 
-        ResDTO<PaginationResponse<PostDTO>> response = new ResDTO<>();
-        response.setMessage(MessageCode.POST_FETCHED);
+        ResponseVM<PaginationResponseVM<PostDTO>> response = new ResponseVM<>();
+        response.setMessage(MessageCode.Post.POST_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
 
         Page<Post> groupPosts = postRepository.findByGroupIdAndDetachedNotOrderByCreatedAtDesc(groupId, true, PageRequest.of(page - 1, limit));
@@ -186,7 +217,7 @@ public class PostServiceImpl implements PostService {
 
         String userId = SecurityContextUtils.getUserId();
 
-        response.setData(new PaginationResponse<>(
+        response.setData(new PaginationResponseVM<>(
                 page,
                 limit,
                 groupPosts.getTotalPages(),
@@ -207,13 +238,13 @@ public class PostServiceImpl implements PostService {
 
     @Override
 //    @Cacheable(key = "T(java.util.Objects).hash(#a1, #a2, #a3)", value = "news-feed", unless = "#result.data['posts'].isEmpty() or #result.data['posts'] == null")
-    public ResDTO<?> getNewsFeed(String token, int page, int size, String startTime) {
+    public ResponseVM<?> getNewsFeed(String token, int page, int size, String startTime) {
         FetchNewsFeedReq req = new FetchNewsFeedReq();
         req.setPage(page);
         req.setSize(size);
         req.setStartTime(DateUtils.stringToLocalDate(startTime));
 
-        ResDTO<PaginationResponse<PostDTO>> response = new ResDTO<>();
+        ResponseVM<PaginationResponseVM<PostDTO>> response = new ResponseVM<>();
 
         List<String> friendIds = userService.findUserFriendIdsByUserToken(token)
                 .stream()
@@ -227,6 +258,8 @@ public class PostServiceImpl implements PostService {
 
         String authUserId = SecurityContextUtils.getUserId();
 
+        log.info("[getNewsFeed] - authUserId: {}", authUserId);
+
         Page<Post> fetchedPosts = customPostRepository.findNewsFeed(authUserId, friendIds, userGroupIds, req.getStartTime(), page, size);
 
         List<String> sharedPostIds = fetchedPosts.map(Post::getSharedPostId).stream().toList();
@@ -234,7 +267,7 @@ public class PostServiceImpl implements PostService {
         Map<String, Post> sharedPostMap = postRepository.findByIdInAndDetachedNot(sharedPostIds, true)
                 .stream().collect(Collectors.toMap(
                         Post::getId,
-                        post -> post
+                        Function.identity()
                 ));
 
         List<String> postedUserIdsDistinct = Stream.concat(
@@ -247,7 +280,7 @@ public class PostServiceImpl implements PostService {
                 .stream()
                 .collect(Collectors.toMap(UserDTO::getId, Function.identity()));
 
-        List<PostDTO> posts = fetchedPosts.stream().map(
+        List<PostDTO> posts = fetchedPosts.stream().parallel().map(
                 post -> {
                     PostDTO postResponse = postMapper.mapToDto(token, post.getId(), post, sharedPostMap, true);
                     postResponse.setUser(postedUserMap.get(post.getUserId()));
@@ -272,7 +305,7 @@ public class PostServiceImpl implements PostService {
             return true;
         }).peek(post -> doPostCensoring(token, post, friendIds)).toList();
 
-        PaginationResponse<PostDTO> paginationResponse = new PaginationResponse<>();
+        PaginationResponseVM<PostDTO> paginationResponse = new PaginationResponseVM<>();
 
         paginationResponse.setData(posts);
         paginationResponse.setPage(page);
@@ -281,7 +314,7 @@ public class PostServiceImpl implements PostService {
 
         response.setData(paginationResponse);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.POST_FETCHED);
+        response.setMessage(MessageCode.Post.POST_FETCHED);
 
         return response;
     }
@@ -304,19 +337,19 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<?> findByContentContaining(String token, String key) {
-        ResDTO<List<PostDTO>> response = new ResDTO<>();
+    public ResponseVM<?> findByContentContaining(String token, String key) {
+        ResponseVM<List<PostDTO>> response = new ResponseVM<>();
         response.setData(postRepository.findByContent(key).stream().map(
                 p -> postMapper.mapToDto(token, p.getId(), p, false)
         ).toList());
-        response.setMessage(MessageCode.POST_FETCHED);
+        response.setMessage(MessageCode.Post.POST_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
 
         return response;
     }
 
     @Override
-    public ResDTO<?> savePost(String token, CreatePostRequest postRequest) {
+    public ResponseVM<?> savePost(String token, CreatePostRequest postRequest) {
         Post post = postPostRequestMapper.mapToObject(postRequest);
 
         List<UserDTO> taggedUser = userService
@@ -344,8 +377,8 @@ public class PostServiceImpl implements PostService {
         PostDTO postResponse = postMapper.mapToDto(token, post.getId(), post, false);
         postResponse.setMine(post.getUserId().equals(SecurityContextUtils.getUserId()));
 
-        ResDTO<PostDTO> response = new ResDTO<>();
-        response.setMessage(MessageCode.POST_SAVED);
+        ResponseVM<PostDTO> response = new ResponseVM<>();
+        response.setMessage(MessageCode.Post.POST_SAVED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(postResponse);
 
@@ -360,7 +393,6 @@ public class PostServiceImpl implements PostService {
         message.setContent(postRequest.getContent());
 
         log.info(message.toString());
-
         kafkaEventPublisher.pubModerateMessage(message);
         kafkaEventPublisher.pubSyncPostMessage(post, ESyncType.TYPE_CREATE);
 
@@ -370,15 +402,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<?> updatePostContent(String token, UpdatePostContentRequest request) {
+    public ResponseVM<?> updatePostContent(String token, UpdatePostContentRequest request) {
         String userId = SecurityContextUtils.getUserId();
 
         Post foundPost = findPostById(request.getId());
-        ResDTO<PostDTO> response = new ResDTO<>();
+        ResponseVM<PostDTO> response = new ResponseVM<>();
 
         if (foundPost != null) {
             if (!foundPost.getUserId().equals(userId))
-                throw new BadRequestException(MessageCode.POST_CAN_NOT_UPDATE_OTHERS);
+                throw new BadRequestException(MessageCode.Post.POST_CAN_NOT_UPDATE_OTHERS);
 
             updatePostRequestMapper.bindToObject(request, foundPost);
 
@@ -398,7 +430,7 @@ public class PostServiceImpl implements PostService {
 
             postRepository.save(foundPost);
 
-            response.setMessage(MessageCode.POST_DELETED);
+            response.setMessage(MessageCode.Post.POST_UPDATED);
             response.setCode(HttpServletResponse.SC_OK);
             response.setData(postMapper.mapToDto(token, foundPost.getId(), foundPost, false));
 
@@ -411,12 +443,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<?> deletePost(String postId) {
+    public ResponseVM<?> deletePost(String postId) {
         String userId = SecurityContextUtils.getUserId();
 
         Post foundPost = findPostById(postId);
 
-        ResDTO<Map<String, String>> response = new ResDTO<>();
+        ResponseVM<Map<String, String>> response = new ResponseVM<>();
         Map<String, String> data = new HashMap<>();
 
         if (foundPost != null) {
@@ -426,7 +458,7 @@ public class PostServiceImpl implements PostService {
 
                 data.put("deletedId", foundPost.getId());
 
-                response.setMessage(MessageCode.POST_UPDATED);
+                response.setMessage(MessageCode.Post.POST_UPDATED);
                 response.setCode(HttpServletResponse.SC_OK);
                 response.setData(data);
 
@@ -436,7 +468,7 @@ public class PostServiceImpl implements PostService {
 
             }
 
-            response.setMessage(MessageCode.POST_CAN_NOT_DELETE_OTHERS);
+            response.setMessage(MessageCode.Post.POST_CAN_NOT_DELETE_OTHERS);
             response.setCode(HttpServletResponse.SC_BAD_REQUEST);
             response.setData(null);
 
@@ -447,24 +479,24 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<?> sharePost(String token, SharePostRequest request) {
-        ResDTO<PostDTO> response = new ResDTO<>();
+    public ResponseVM<?> sharePost(String token, SharePostRequest request) {
+        ResponseVM<PostDTO> response = new ResponseVM<>();
 
         Post post = postRepository.findById(request.getPostId())
-                .orElseThrow(() -> new BadRequestException(MessageCode.POST_NOT_FOUND_ID, request.getPostId()));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Post.POST_NOT_FOUND_ID, request.getPostId()));
 
         if (post.getType().equals(EPostType.GROUP)) {
             GroupDTO foundGroupInfo = groupService.getGroupById(token, post.getGroupId());
 
             if (foundGroupInfo.isPrivate())
-                throw new BadRequestException(MessageCode.GROUP_NOT_PERMITTED);
+                throw new BadRequestException(MessageCode.Post.GROUP_NOT_PERMITTED);
         }
 
         String userId = SecurityContextUtils.getUserId();
         UserDTO foundUser = userService.findById(token, userId);
 
         if (foundUser == null) {
-            throw new BadRequestException(MessageCode.USER_NOT_FOUND);
+            throw new BadRequestException(MessageCode.User.USER_NOT_FOUND);
         }
 
         Post postShare = getPostShare(request, post, foundUser);
@@ -475,7 +507,7 @@ public class PostServiceImpl implements PostService {
             kafkaEventPublisher.pubSharePostMessage(notification);
         }
 
-        response.setMessage(MessageCode.POST_SHARED);
+        response.setMessage(MessageCode.Post.POST_SHARED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(postMapper.mapToDto(token, post.getId(), post, false));
 
@@ -483,7 +515,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ResDTO<PaginationResponse<PostDTO>> findUserPosts(String token, String uId, int page, int size) {
+    public ResponseVM<PaginationResponseVM<PostDTO>> findUserPosts(String token, String uId, int page, int size) {
         String userId = SecurityContextUtils.getUserId();
 
         if (uId.isEmpty())
@@ -494,37 +526,6 @@ public class PostServiceImpl implements PostService {
 
     private void hideIllegalPostDTO(PostDTO postResponse) {
         postResponse.setSharedPost(null);
-    }
-
-    private static Post getPostShare(SharePostRequest request, Post post, UserDTO foundUser) {
-        Post postShare = new Post();
-
-        postShare.setPrivacy(request.getPrivacy());
-        postShare.setCreatedAt(LocalDateTime.now());
-        postShare.setUserId(foundUser.getId());
-        postShare.setDetached(false);
-        postShare.setContent(request.getStatus());
-        postShare.setSharedPostId(post.getId());
-        postShare.setType(EPostType.SHARE);
-        postShare.setNormalizedContent(StringUtils.toSlug(request.getStatus()));
-
-        return postShare;
-    }
-
-    private static InteractNotification getInteractNotification(SharePostRequest request, Post post, UserDTO foundUser, String userId) {
-        InteractNotification notification = new InteractNotification();
-
-        notification.setAvatarUrl(foundUser.getProfilePicture());
-        notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
-        notification.setContent(notification.getUserFullName() + " đã chia sẻ bài viết của bạn");
-        notification.setRefId(request.getPostId());
-        notification.setTitle("Có người tương tác nè!");
-        notification.setFromUserId(userId);
-        notification.setToUserIds(List.of(post.getUserId()));
-        notification.setType(ENotificationType.SHARE);
-        notification.setCreateAt(new Date());
-
-        return notification;
     }
 
     private void handleSendNewPostNotification(String tokenHeader, PostDTO postResponse) {
@@ -546,7 +547,7 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    private ResDTO<PaginationResponse<PostDTO>> findPostsByUserId(String token, String userId, int page, int size) {
+    private ResponseVM<PaginationResponseVM<PostDTO>> findPostsByUserId(String token, String userId, int page, int size) {
         String authUserId = SecurityContextUtils.getUserId();
 
         List<String> friendIds = userService.findUserFriendIdsByUserToken(token)
@@ -593,9 +594,9 @@ public class PostServiceImpl implements PostService {
 
         }).peek(post -> doPostCensoring(token, post, friendIds)).toList();
 
-        ResDTO<PaginationResponse<PostDTO>> response = new ResDTO<>();
+        ResponseVM<PaginationResponseVM<PostDTO>> response = new ResponseVM<>();
 
-        PaginationResponse<PostDTO> paginationResponse = new PaginationResponse<>();
+        PaginationResponseVM<PostDTO> paginationResponse = new PaginationResponseVM<>();
 
         paginationResponse.setData(myPosts);
         paginationResponse.setPage(page);
@@ -604,7 +605,7 @@ public class PostServiceImpl implements PostService {
 
         response.setData(paginationResponse);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.POST_FETCHED);
+        response.setMessage(MessageCode.Post.POST_FETCHED);
 
         return response;
     }

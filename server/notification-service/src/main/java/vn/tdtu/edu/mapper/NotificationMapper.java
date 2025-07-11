@@ -3,11 +3,11 @@ package vn.tdtu.edu.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.utils.SecurityContextUtils;
 import vn.tdtu.edu.dto.NotificationResponse;
 import vn.tdtu.edu.model.CommonNotification;
 import vn.tdtu.edu.model.UserInfo;
 import vn.tdtu.edu.service.interfaces.UserService;
-import vn.tdtu.edu.util.SecurityContextUtils;
 
 import java.util.Map;
 

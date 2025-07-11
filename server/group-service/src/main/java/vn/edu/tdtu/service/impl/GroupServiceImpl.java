@@ -8,14 +8,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.webjars.NotFoundException;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
-import vn.edu.tdtu.dto.response.*;
-import vn.edu.tdtu.enums.*;
-import vn.tdtu.common.enums.search.ESyncType;
-import vn.edu.tdtu.exception.BadRequestException;
-import vn.edu.tdtu.exception.UnauthorizedException;
+import vn.edu.tdtu.dto.response.GroupIdResponse;
+import vn.edu.tdtu.dto.response.JoinGroupResponse;
+import vn.edu.tdtu.dto.response.Notification;
+import vn.edu.tdtu.enums.EGetMemberOption;
+import vn.edu.tdtu.enums.EHandleLeaveType;
+import vn.edu.tdtu.enums.EMemberAcceptation;
 import vn.edu.tdtu.mapper.GroupMapper;
 import vn.edu.tdtu.message.SyncGroupMsg;
 import vn.edu.tdtu.model.Group;
@@ -29,13 +28,19 @@ import vn.edu.tdtu.repository.httpclient.UserClient;
 import vn.edu.tdtu.service.interfaces.GroupAdminService;
 import vn.edu.tdtu.service.interfaces.GroupMemberService;
 import vn.edu.tdtu.service.interfaces.GroupService;
-import vn.edu.tdtu.utils.SecurityContextUtils;
 import vn.tdtu.common.dto.GroupDTO;
 import vn.tdtu.common.dto.GroupMemberDTO;
 import vn.tdtu.common.dto.UserDTO;
 import vn.tdtu.common.enums.group.EGroupPrivacy;
 import vn.tdtu.common.enums.group.EJoinGroupStatus;
 import vn.tdtu.common.enums.notification.ENotificationType;
+import vn.tdtu.common.enums.search.ESyncType;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.exception.UnauthorizedException;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.viewmodel.PaginationResponseVM;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -58,7 +63,7 @@ public class GroupServiceImpl implements GroupService {
     private final KafkaEventPublisher kafkaPublisher;
 
     @Override
-    public ResDTO<GroupIdResponse> createGroup(CreateGroupRequest payload) {
+    public ResponseVM<GroupIdResponse> createGroup(CreateGroupRequest payload) {
         String userId = SecurityContextUtils.getUserId();
 
         Group group = new Group();
@@ -93,23 +98,23 @@ public class GroupServiceImpl implements GroupService {
                 ESyncType.TYPE_CREATE
         ));
 
-        return new ResDTO<>(
-                MessageCode.GROUP_CREATED_SUCCESS,
+        return new ResponseVM<>(
+                MessageCode.Group.GROUP_CREATED_SUCCESS,
                 new GroupIdResponse(group.getId()),
                 HttpServletResponse.SC_CREATED
         );
     }
 
     @Override
-    public ResDTO<?> updateGroupInfo(String id, UpdateGroupRequest payload) {
-        ResDTO<GroupIdResponse> response = new ResDTO<GroupIdResponse>(
-                MessageCode.GROUP_UPDATED_SUCCESS,
+    public ResponseVM<?> updateGroupInfo(String id, UpdateGroupRequest payload) {
+        ResponseVM<GroupIdResponse> response = new ResponseVM<GroupIdResponse>(
+                MessageCode.Group.GROUP_UPDATED_SUCCESS,
                 new GroupIdResponse(id),
                 HttpServletResponse.SC_OK
         );
 
         Group group = groupRepository.findByIdAndIsDeleted(id, false)
-                .orElseThrow(() -> new BadRequestException(MessageCode.GROUP_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Group.GROUP_NOT_FOUND));
 
         groupAdminService.adminCheck(group.getId());
 
@@ -137,15 +142,15 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResDTO<?> deleteGroup(String id) {
-        ResDTO<GroupIdResponse> response = new ResDTO<GroupIdResponse>(
-                MessageCode.GROUP_DELETED_SUCCESS,
+    public ResponseVM<?> deleteGroup(String id) {
+        ResponseVM<GroupIdResponse> response = new ResponseVM<GroupIdResponse>(
+                MessageCode.Group.GROUP_DELETED_SUCCESS,
                 new GroupIdResponse(id),
                 HttpServletResponse.SC_OK
         );
 
         Group group = groupRepository.findByIdAndIsDeleted(id, false)
-                .orElseThrow(() -> new BadRequestException(MessageCode.GROUP_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Group.GROUP_NOT_FOUND));
 
         groupAdminService.adminCheck(group.getId());
 
@@ -162,22 +167,22 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResDTO<?> joinGroup(String groupId) {
-        ResDTO<JoinGroupResponse> response = new ResDTO<>();
+    public ResponseVM<?> joinGroup(String groupId) {
+        ResponseVM<JoinGroupResponse> response = new ResponseVM<>();
         response.setCode(HttpServletResponse.SC_OK);
 
         Group group = groupRepository.findByIdAndIsDeleted(groupId, false).
-                orElseThrow(() -> new BadRequestException(MessageCode.GROUP_NOT_FOUND));
+                orElseThrow(() -> new BadRequestException(MessageCode.Group.GROUP_NOT_FOUND));
 
         String userId = SecurityContextUtils.getUserId();
 
         if (groupRepository.getIsJoinedToGroup(groupId, userId))
-            throw new BadRequestException(MessageCode.GROUP_ALREADY_JOINED);
+            throw new BadRequestException(MessageCode.Group.GROUP_ALREADY_JOINED);
 
         response.setMessage(
                 group.getPrivacy().equals(EGroupPrivacy.PRIVACY_PRIVATE) ?
-                        MessageCode.GROUP_JOIN_PENDING :
-                        MessageCode.GROUP_JOINED
+                        MessageCode.Group.GROUP_JOIN_PENDING :
+                        MessageCode.Group.GROUP_JOINED
         );
 
         Optional<Member> optionalMember = memberRepository.findByUserId(userId);
@@ -205,47 +210,47 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     @Transactional
-    public ResDTO<?> handleCancelPendingAndLeaveGroup(LeaveGroupRequest payload, EHandleLeaveType type) {
+    public ResponseVM<?> handleCancelPendingAndLeaveGroup(LeaveGroupRequest payload, EHandleLeaveType type) {
         String userId = SecurityContextUtils.getUserId();
 
         GroupMember foundMember = type.equals(EHandleLeaveType.CANCEL_PENDING) ? groupMemberRepository.findPendingMemberInGroup(payload.getGroupId(), payload.getMemberId())
-                .orElseThrow(() -> new BadRequestException(MessageCode.GROUP_MEMBER_NOT_FOUND)) :
+                .orElseThrow(() -> new BadRequestException(MessageCode.Group.GROUP_MEMBER_NOT_FOUND)) :
                 groupMemberRepository.findByGroupIdAndMemberId(payload.getGroupId(), payload.getMemberId())
-                        .orElseThrow(() -> new BadRequestException(MessageCode.GROUP_MEMBER_NOT_FOUND));
+                        .orElseThrow(() -> new BadRequestException(MessageCode.Group.GROUP_MEMBER_NOT_FOUND));
 
         if (!foundMember.getMember().getUserId().equals(userId))
-            throw new BadRequestException(MessageCode.GROUP_NOT_PERMITTED);
+            throw new BadRequestException(MessageCode.Group.GROUP_NOT_PERMITTED);
 
         groupMemberService.removeGroupMemberById(foundMember.getId());
 
-        ResDTO<?> response = new ResDTO<>();
+        ResponseVM<?> response = new ResponseVM<>();
 
         response.setData(null);
         response.setCode(HttpServletResponse.SC_OK);
         response.setMessage(type.equals(EHandleLeaveType.CANCEL_PENDING) ?
-                MessageCode.GROUP_PENDING_CANCELLED :
-                MessageCode.GROUP_LEAVED);
+                MessageCode.Group.GROUP_PENDING_CANCELLED :
+                MessageCode.Group.GROUP_LEAVED);
 
         return response;
     }
 
     @Override
-    public ResDTO<?> getMyGroups() {
-        return new ResDTO<>(
-                MessageCode.GROUP_FETCHED,
+    public ResponseVM<?> getMyGroups() {
+        return new ResponseVM<>(
+                MessageCode.Group.GROUP_FETCHED,
                 groupRepository.findJoinedGroups(SecurityContextUtils.getUserId()),
                 HttpServletResponse.SC_OK
         );
     }
 
     @Override
-    public ResDTO<?> getGroupById(String accessToken, String groupId) {
-        ResDTO<GroupDTO> response = new ResDTO<>();
+    public ResponseVM<?> getGroupById(String accessToken, String groupId) {
+        ResponseVM<GroupDTO> response = new ResponseVM<>();
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.GROUP_FETCHED);
+        response.setMessage(MessageCode.Group.GROUP_FETCHED);
 
         Group group = groupRepository.findByIdAndIsDeleted(groupId, false)
-                .orElseThrow(() -> new BadRequestException(MessageCode.GROUP_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Group.GROUP_NOT_FOUND));
 
         GroupDTO groupResponse = groupMapper.mapToDto(accessToken, group, false);
 
@@ -255,10 +260,10 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResDTO<?> getAllGroupByIds(List<String> groupIds) {
-        ResDTO<List<GroupDTO>> response = new ResDTO<>();
+    public ResponseVM<?> getAllGroupByIds(List<String> groupIds) {
+        ResponseVM<List<GroupDTO>> response = new ResponseVM<>();
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.GROUP_FETCHED);
+        response.setMessage(MessageCode.Group.GROUP_FETCHED);
 
         List<Group> groups = groupRepository.findAllByIdInAndIsDeleted(groupIds, false);
 
@@ -270,10 +275,10 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResDTO<?> getGroupByIdForPost(String groupId) {
-        ResDTO<Group> response = new ResDTO<>();
+    public ResponseVM<?> getGroupByIdForPost(String groupId) {
+        ResponseVM<Group> response = new ResponseVM<>();
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.GROUP_FETCHED);
+        response.setMessage(MessageCode.Group.GROUP_FETCHED);
 
         Group group = groupRepository.findByIdAndIsDeleted(groupId, false)
                 .orElse(null);
@@ -287,14 +292,14 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResDTO<?> moderateMember(ModerateMemberRequest payload) {
+    public ResponseVM<?> moderateMember(ModerateMemberRequest payload) {
         Group foundGroup = groupRepository.findByIdAndIsDeleted(payload.getGroupId(), false)
-                .orElseThrow(() -> new BadRequestException(MessageCode.GROUP_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Group.GROUP_NOT_FOUND));
 
         groupAdminService.adminCheck(foundGroup.getId());
 
         GroupMember foundMember = groupMemberRepository.findPendingMemberInGroup(payload.getGroupId(), payload.getMemberId())
-                .orElseThrow(() -> new BadRequestException(MessageCode.GROUP_MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Group.GROUP_MEMBER_NOT_FOUND));
 
         if (payload.getAcceptOption().equals(EMemberAcceptation.AGREE)) {
             foundMember.setPending(false);
@@ -303,10 +308,10 @@ public class GroupServiceImpl implements GroupService {
             groupMemberService.removeGroupMemberById(foundMember.getId());
         }
 
-        return new ResDTO<>(
+        return new ResponseVM<>(
                 payload.getAcceptOption().equals(EMemberAcceptation.AGREE) ?
-                        MessageCode.GROUP_MEMBER_ACCEPTED :
-                        MessageCode.GROUP_MEMBER_REJECTED,
+                        MessageCode.Group.GROUP_MEMBER_ACCEPTED :
+                        MessageCode.Group.GROUP_MEMBER_REJECTED,
                 payload.getAcceptOption().equals(EMemberAcceptation.AGREE) ? foundMember.getId() : null,
                 HttpServletResponse.SC_OK
         );
@@ -320,10 +325,10 @@ public class GroupServiceImpl implements GroupService {
         UserDTO foundUser = userClient.findById(accessToken, userId).getData();
 
         if (foundUser == null)
-            throw new UnauthorizedException("You are not authenticated");
+            throw new UnauthorizedException(MessageCode.Authentication.AUTH_UNAUTHORIZED);
 
         Group foundGroup = groupRepository.findByIdAndIsDeleted(payload.getGroupId(), false)
-                .orElseThrow(() -> new BadRequestException(MessageCode.GROUP_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Group.GROUP_NOT_FOUND));
 
         notification.setAvatarUrl(foundUser.getProfilePicture());
         notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
@@ -339,9 +344,9 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResDTO<?> getPendingMembersList(String accessToken, String groupId) {
-        ResDTO<List<GroupMemberDTO>> response = new ResDTO<>();
-        response.setMessage(MessageCode.GROUP_MEMBER_FETCHED);
+    public ResponseVM<?> getPendingMembersList(String accessToken, String groupId) {
+        ResponseVM<List<GroupMemberDTO>> response = new ResponseVM<>();
+        response.setMessage(MessageCode.Group.GROUP_MEMBER_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
 
         List<GroupMember> pendingMembers = getPendingGroupMembers(groupId);
@@ -371,8 +376,8 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResDTO<?> getGroupMembers(String accessToken, String groupId, int page, int size, EGetMemberOption option) {
-        ResDTO<PaginationResponse<GroupMemberDTO>> response = new ResDTO<>();
+    public ResponseVM<?> getGroupMembers(String accessToken, String groupId, int page, int size, EGetMemberOption option) {
+        ResponseVM<PaginationResponseVM<GroupMemberDTO>> response = new ResponseVM<>();
         Page<GroupMember> memberPage;
 
         switch (option) {
@@ -403,27 +408,27 @@ public class GroupServiceImpl implements GroupService {
         List<UserDTO> users = userClient.findByIds(accessToken, new FindByIdsRequest(userIds)).getData();
         Map<String, UserDTO> userMap = users.stream().collect(Collectors.toMap(UserDTO::getId, user -> user));
 
-        response.setData(new PaginationResponse<>(
+        response.setData(new PaginationResponseVM<>(
                 page,
                 size,
                 memberPage.getTotalPages(),
-                (int) memberPage.getTotalElements(),
                 memberPage.get().map(member -> new GroupMemberDTO(
                         member.getId(),
                         member.isAdmin(),
                         member.isPending(),
                         member.getJoinedAt(),
                         userMap.get(member.getMember().getUserId()))
-                ).toList()
+                ).toList(),
+                memberPage.getTotalElements()
         ));
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.GROUP_MEMBER_FETCHED);
+        response.setMessage(MessageCode.Group.GROUP_MEMBER_FETCHED);
 
         return response;
     }
 
     @Override
-    public ResDTO<?> getGroupMembers(String groupId) {
+    public ResponseVM<?> getGroupMembers(String groupId) {
         List<String> memberListUserIds = groupMemberRepository.findAllMembersByGroupId(groupId)
                 .stream().map(gMember -> gMember.getMember().getUserId()).toList();
         String authUserId = SecurityContextUtils.getUserId();
@@ -431,17 +436,17 @@ public class GroupServiceImpl implements GroupService {
         if (!memberListUserIds.contains(authUserId))
             throw new BadRequestException("You are not in this group");
 
-        ResDTO<List<String>> response = new ResDTO<>();
+        ResponseVM<List<String>> response = new ResponseVM<>();
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(memberListUserIds);
-        response.setMessage(MessageCode.GROUP_MEMBER_FETCHED);
+        response.setMessage(MessageCode.Group.GROUP_MEMBER_FETCHED);
 
         return response;
     }
 
     @Override
-    public ResDTO<?> getAllFriendGroupMemberUserIds(String accessToken, String groupId) {
-        ResDTO<List<String>> response = new ResDTO<>();
+    public ResponseVM<?> getAllFriendGroupMemberUserIds(String accessToken, String groupId) {
+        ResponseVM<List<String>> response = new ResponseVM<>();
 
         List<UserDTO> userFriends = userClient.findUserFriendIdsByUserToken(accessToken).getData();
         List<GroupMember> memberList = groupMemberRepository.findFriendMembersByGroupId(groupId, userFriends.stream().map(UserDTO::getId).toList());
@@ -450,34 +455,34 @@ public class GroupServiceImpl implements GroupService {
 
         response.setData(userIds);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.GROUP_MEMBER_FETCHED);
+        response.setMessage(MessageCode.Group.GROUP_MEMBER_FETCHED);
 
         return response;
     }
 
     @Override
-    public ResDTO<?> isPrivateGroupOrUserJoined(String groupId) {
+    public ResponseVM<?> isPrivateGroupOrUserJoined(String groupId) {
         String userId = SecurityContextUtils.getUserId();
 
         if (groupRepository.getIsJoinedToGroup(groupId, userId))
-            return new ResDTO<>(
-                    MessageCode.GROUP_MEMBER_JOINED,
+            return new ResponseVM<>(
+                    MessageCode.Group.GROUP_MEMBER_JOINED,
                     true,
                     HttpServletResponse.SC_OK
             );
 
         Group foundGroup = groupRepository.findByIdAndIsDeleted(groupId, false)
-                .orElseThrow(() -> new NotFoundException(MessageCode.GROUP_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(MessageCode.Group.GROUP_NOT_FOUND));
 
         if (foundGroup.getPrivacy().equals(EGroupPrivacy.PRIVACY_PUBLIC))
-            return new ResDTO<>(
-                    MessageCode.GROUP_IS_PUBLIC,
+            return new ResponseVM<>(
+                    MessageCode.Group.GROUP_IS_PUBLIC,
                     true,
                     HttpServletResponse.SC_OK
             );
 
-        return new ResDTO<>(
-                MessageCode.GROUP_IS_PRIVATE,
+        return new ResponseVM<>(
+                MessageCode.Group.GROUP_IS_PRIVATE,
                 false,
                 HttpServletResponse.SC_OK
         );
@@ -485,7 +490,7 @@ public class GroupServiceImpl implements GroupService {
 
     private List<GroupMember> getPendingGroupMembers(String groupId) {
         Group group = groupRepository.findByIdAndIsDeleted(groupId, false)
-                .orElseThrow(() -> new BadRequestException(MessageCode.GROUP_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Group.GROUP_NOT_FOUND));
 
         groupAdminService.adminCheck(group.getId());
 

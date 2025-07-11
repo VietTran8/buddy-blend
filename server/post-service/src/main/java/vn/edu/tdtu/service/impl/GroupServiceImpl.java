@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.repository.httpclient.GroupClient;
 import vn.edu.tdtu.service.intefaces.GroupService;
 import vn.tdtu.common.dto.GroupDTO;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Cacheable(key = "T(java.util.Objects).hash(#a0, #a1)", value = "single-group", unless = "#result == null")
     public GroupDTO getGroupById(String accessToken, String groupId) {
-        ResDTO<GroupDTO> response = groupClient.getGroupInfoById(accessToken, groupId);
+        ResponseVM<GroupDTO> response = groupClient.getGroupInfoById(accessToken, groupId);
         log.info("getGroupById: " + response.toString());
 
         return response.getData();
@@ -28,7 +28,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public List<GroupDTO> getMyGroups(String accessToken) {
-        ResDTO<List<GroupDTO>> response = groupClient.getMyGroups(accessToken);
+        ResponseVM<List<GroupDTO>> response = groupClient.getMyGroups(accessToken);
         log.info("getMyGroups: " + response.toString());
 
         return response.getData();
@@ -36,7 +36,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public boolean allowFetchPost(String accessToken, String groupId) {
-        ResDTO<Boolean> allowResponse = groupClient.allowFetchPost(accessToken, groupId);
+        ResponseVM<Boolean> allowResponse = groupClient.allowFetchPost(accessToken, groupId);
         log.info("getAllowFetch: " + allowResponse.toString());
 
         return allowResponse.getData();
@@ -44,7 +44,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public List<String> getMemberIdList(String accessToken, String groupId) {
-        ResDTO<List<String>> response = groupClient.getMemberIdList(accessToken, groupId);
+        ResponseVM<List<String>> response = groupClient.getMemberIdList(accessToken, groupId);
         log.info("memberIdList: " + response.toString());
 
         return response.getData();

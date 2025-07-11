@@ -3,16 +3,16 @@ package vn.edu.tdtu.service.impl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.FindByIdsReq;
 import vn.edu.tdtu.dto.response.SavePostResponse;
 import vn.edu.tdtu.model.SavePost;
 import vn.edu.tdtu.repository.SavePostRepository;
 import vn.edu.tdtu.service.intefaces.PostService;
 import vn.edu.tdtu.service.intefaces.SavePostService;
-import vn.edu.tdtu.util.SecurityContextUtils;
 import vn.tdtu.common.dto.PostDTO;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,16 +25,16 @@ public class SavePostServiceImpl implements SavePostService {
     private final PostService postService;
 
     @Override
-    public ResDTO<SavePostResponse> handleSavePost(String postId) {
+    public ResponseVM<SavePostResponse> handleSavePost(String postId) {
         String userId = SecurityContextUtils.getUserId();
 
         SavePostResponse responseData = new SavePostResponse();
         responseData.setSavedId(postId);
 
-        ResDTO<SavePostResponse> response = new ResDTO<>();
+        ResponseVM<SavePostResponse> response = new ResponseVM<>();
 
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.POST_SAVE_POST);
+        response.setMessage(MessageCode.Post.POST_SAVE_POST);
         response.setData(responseData);
 
         Optional<SavePost> optionalSavePost = savePostRepository.findByUserId(userId);
@@ -49,7 +49,7 @@ public class SavePostServiceImpl implements SavePostService {
 
         if (savePost.getPostIds().contains(postId)) {
             savePost.getPostIds().remove(postId);
-            response.setMessage(MessageCode.POST_UNSAVE_POST);
+            response.setMessage(MessageCode.Post.POST_UNSAVE_POST);
             responseData.setSavedId(null);
         } else
             savePost.getPostIds().add(postId);
@@ -60,9 +60,9 @@ public class SavePostServiceImpl implements SavePostService {
     }
 
     @Override
-    public ResDTO<List<PostDTO>> getUserSavedPost(String token) {
-        ResDTO<List<PostDTO>> response = new ResDTO<>();
-        response.setMessage(MessageCode.POST_FETCHED);
+    public ResponseVM<List<PostDTO>> getUserSavedPost(String token) {
+        ResponseVM<List<PostDTO>> response = new ResponseVM<>();
+        response.setMessage(MessageCode.Post.POST_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(new ArrayList<>());
 

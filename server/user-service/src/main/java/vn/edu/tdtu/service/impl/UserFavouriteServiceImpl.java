@@ -2,19 +2,19 @@ package vn.edu.tdtu.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.SaveUserFavouriteDTO;
 import vn.edu.tdtu.dto.response.UserFavouriteDetailResp;
 import vn.edu.tdtu.dto.response.UserFavouriteResponse;
-import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.response.FavDetailResponseMapper;
 import vn.edu.tdtu.model.User;
 import vn.edu.tdtu.model.UserFavourite;
 import vn.edu.tdtu.repository.UserFavouriteRepository;
 import vn.edu.tdtu.service.interfaces.UserFavouriteService;
 import vn.edu.tdtu.service.interfaces.UserService;
-import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,31 +31,31 @@ public class UserFavouriteServiceImpl implements UserFavouriteService {
     private final FavDetailResponseMapper favDetailResponseMapper;
 
     @Override
-    public ResDTO<?> getUserFavById(String token, String favId) {
+    public ResponseVM<?> getUserFavById(String token, String favId) {
         String userId = SecurityContextUtils.getUserId();
-        ResDTO<UserFavouriteDetailResp> response = new ResDTO<>();
+        ResponseVM<UserFavouriteDetailResp> response = new ResponseVM<>();
 
         User foundUser = userService.findById(userId);
 
         if (foundUser == null) {
-            throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, userId);
+            throw new BadRequestException(MessageCode.User.USER_NOT_FOUND_ID, userId);
         }
 
         UserFavourite fav = userFavouriteRepository.findByIdAndUser(favId, foundUser).orElseThrow(
-                () -> new BadRequestException(MessageCode.USER_FAVOURITE_NOT_FOUND)
+                () -> new BadRequestException(MessageCode.User.USER_FAVOURITE_NOT_FOUND)
         );
 
         response.setData(favDetailResponseMapper.mapToDto(token, fav));
         response.setCode(200);
-        response.setMessage(MessageCode.USER_FAVOURITE_FETCHED);
+        response.setMessage(MessageCode.User.USER_FAVOURITE_FETCHED);
 
         return response;
     }
 
     @Override
-    public ResDTO<?> getUserFavourites() {
+    public ResponseVM<?> getUserFavourites() {
         String userId = SecurityContextUtils.getUserId();
-        ResDTO<List<UserFavouriteResponse>> response = new ResDTO<>();
+        ResponseVM<List<UserFavouriteResponse>> response = new ResponseVM<>();
 
         User foundUser = userService.findById(userId);
         if (foundUser != null) {
@@ -70,16 +70,16 @@ public class UserFavouriteServiceImpl implements UserFavouriteService {
                         return userFavouriteResponse;
                     }).toList());
             response.setCode(200);
-            response.setMessage(MessageCode.USER_FAVOURITE_FETCHED);
+            response.setMessage(MessageCode.User.USER_FAVOURITE_FETCHED);
 
             return response;
         }
 
-        throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, userId);
+        throw new BadRequestException(MessageCode.User.USER_NOT_FOUND_ID, userId);
     }
 
     @Override
-    public ResDTO<?> saveUserFavorite(SaveUserFavouriteDTO request) {
+    public ResponseVM<?> saveUserFavorite(SaveUserFavouriteDTO request) {
         AtomicReference<String> message = new AtomicReference<>();
         AtomicReference<String> savedId = new AtomicReference<>();
         User foundUser = userService.findById(SecurityContextUtils.getUserId());
@@ -126,7 +126,7 @@ public class UserFavouriteServiceImpl implements UserFavouriteService {
         Map<String, String> data = new HashMap<>();
         data.put("savedId", savedId.get());
 
-        ResDTO<Map<String, String>> response = new ResDTO<>();
+        ResponseVM<Map<String, String>> response = new ResponseVM<>();
         response.setMessage(message.get());
         response.setCode(200);
         response.setData(data);
@@ -135,13 +135,13 @@ public class UserFavouriteServiceImpl implements UserFavouriteService {
     }
 
     @Override
-    public ResDTO<?> deleteUserFavourite(String id) {
+    public ResponseVM<?> deleteUserFavourite(String id) {
         userFavouriteRepository.deleteById(id);
 
-        ResDTO<?> response = new ResDTO<>();
+        ResponseVM<?> response = new ResponseVM<>();
         response.setData(null);
         response.setCode(200);
-        response.setMessage(MessageCode.USER_FAVOURITE_DELETED);
+        response.setMessage(MessageCode.User.USER_FAVOURITE_DELETED);
 
         return response;
     }

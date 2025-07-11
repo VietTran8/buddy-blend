@@ -2,7 +2,7 @@ package vn.edu.tdtu.service.keycloak.interfaces;
 
 import org.keycloak.representations.idm.UserRepresentation;
 import vn.edu.tdtu.dto.keycloak.KeycloakTokenResponse;
-import vn.edu.tdtu.enums.EUserRole;
+import vn.tdtu.common.enums.user.EUserRole;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,4 +25,6 @@ public interface KeycloakService {
     boolean passwordChecking(String email, String password);
 
     KeycloakTokenResponse refreshToken(String refreshToken);
+
+    boolean logoutUser(String refreshToken);
 }

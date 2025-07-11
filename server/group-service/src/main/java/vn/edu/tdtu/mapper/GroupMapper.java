@@ -6,11 +6,11 @@ import vn.edu.tdtu.dto.request.FindByIdsRequest;
 import vn.edu.tdtu.model.Group;
 import vn.edu.tdtu.model.GroupMember;
 import vn.edu.tdtu.repository.httpclient.UserClient;
-import vn.edu.tdtu.utils.SecurityContextUtils;
 import vn.tdtu.common.dto.GroupDTO;
 import vn.tdtu.common.dto.GroupMemberDTO;
 import vn.tdtu.common.dto.UserDTO;
 import vn.tdtu.common.enums.group.EJoinGroupStatus;
+import vn.tdtu.common.utils.SecurityContextUtils;
 
 import java.util.ArrayList;
 import java.util.List;

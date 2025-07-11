@@ -4,9 +4,9 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
-import vn.edu.tdtu.config.openfeign.FeignConfig;
-import vn.edu.tdtu.dto.ResDTO;
+import vn.tdtu.common.config.openfeign.FeignConfig;
 import vn.tdtu.common.dto.GroupDTO;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.List;
 
@@ -14,5 +14,5 @@ import java.util.List;
 public interface GroupClient {
 
     @GetMapping("/all")
-    public ResDTO<List<GroupDTO>> getAllGroupByIds(@RequestHeader("Authorization") String tokenHeader, @RequestParam("ids") List<String> requestParam);
+    ResponseVM<List<GroupDTO>> getAllGroupByIds(@RequestHeader("Authorization") String tokenHeader, @RequestParam("ids") List<String> requestParam);
 }

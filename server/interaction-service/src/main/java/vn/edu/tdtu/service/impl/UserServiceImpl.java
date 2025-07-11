@@ -3,11 +3,11 @@ package vn.edu.tdtu.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.requests.user.FindByIdsRequest;
 import vn.edu.tdtu.repository.httpclient.UserClient;
 import vn.edu.tdtu.service.interfaces.UserService;
 import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.List;
 
@@ -19,13 +19,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO findById(String accessToken, String userId) {
-        ResDTO<UserDTO> response = userClient.findById(accessToken, userId);
+        ResponseVM<UserDTO> response = userClient.findById(accessToken, userId);
         return response.getData();
     }
 
     @Override
     public List<UserDTO> findByIds(String accessToken, List<String> ids) {
-        ResDTO<List<UserDTO>> response = userClient.findByIds(
+        ResponseVM<List<UserDTO>> response = userClient.findByIds(
                 accessToken,
                 new FindByIdsRequest(ids)
         );

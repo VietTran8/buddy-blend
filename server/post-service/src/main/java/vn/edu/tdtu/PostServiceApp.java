@@ -6,7 +6,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"vn.tdtu.common", "vn.edu.tdtu"})
 @EnableAsync
 @EnableCaching
 @EnableFeignClients

@@ -7,11 +7,11 @@ import vn.edu.tdtu.model.Comments;
 import vn.edu.tdtu.repository.CommentReactionRepository;
 import vn.edu.tdtu.repository.CommentsRepository;
 import vn.edu.tdtu.service.interfaces.UserService;
-import vn.edu.tdtu.util.DateUtils;
-import vn.edu.tdtu.util.SecurityContextUtils;
 import vn.tdtu.common.dto.CommentDTO;
 import vn.tdtu.common.dto.ReactionDTO;
 import vn.tdtu.common.enums.interaction.EReactionType;
+import vn.tdtu.common.utils.DateUtils;
+import vn.tdtu.common.utils.SecurityContextUtils;
 
 import java.util.ArrayList;
 import java.util.List;

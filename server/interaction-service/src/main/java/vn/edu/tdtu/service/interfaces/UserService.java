@@ -5,7 +5,7 @@ import vn.tdtu.common.dto.UserDTO;
 import java.util.List;
 
 public interface UserService {
-    public UserDTO findById(String accessToken, String userId);
+    UserDTO findById(String accessToken, String userId);
 
-    public List<UserDTO> findByIds(String accessToken, List<String> ids);
+    List<UserDTO> findByIds(String accessToken, List<String> ids);
 }

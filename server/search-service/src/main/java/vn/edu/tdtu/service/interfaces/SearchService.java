@@ -1,15 +1,16 @@
 package vn.edu.tdtu.service.interfaces;
 
-import vn.edu.tdtu.dto.ResDTO;
+
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 public interface SearchService {
-    public ResDTO<?> search(String token, String key);
+    ResponseVM<?> search(String token, String key);
 
-    public ResDTO<?> fetchResult(String token, String key);
+    ResponseVM<?> fetchResult(String token, String key);
 
-    public ResDTO<?> getSearchHistory(String token);
+    ResponseVM<?> getSearchHistory(String token);
 
-    public ResDTO<?> deleteSearchHistory(String id);
+    ResponseVM<?> deleteSearchHistory(String id);
 
-    public ResDTO<?> deleteAllSearchHistory();
+    ResponseVM<?> deleteAllSearchHistory();
 }

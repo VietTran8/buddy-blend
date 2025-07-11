@@ -4,12 +4,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.requests.AddCommentRequest;
 import vn.edu.tdtu.dto.requests.UpdateCommentRequest;
 import vn.edu.tdtu.dto.response.InteractNotification;
-import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.CommentResponseMapper;
 import vn.edu.tdtu.model.Comments;
 import vn.edu.tdtu.publisher.KafkaEventPublisher;
@@ -17,11 +14,14 @@ import vn.edu.tdtu.repository.CommentsRepository;
 import vn.edu.tdtu.service.interfaces.CommentService;
 import vn.edu.tdtu.service.interfaces.PostService;
 import vn.edu.tdtu.service.interfaces.UserService;
-import vn.edu.tdtu.util.SecurityContextUtils;
 import vn.tdtu.common.dto.CommentDTO;
 import vn.tdtu.common.dto.PostDTO;
 import vn.tdtu.common.dto.UserDTO;
 import vn.tdtu.common.enums.notification.ENotificationType;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -38,7 +38,7 @@ public class CommentsServiceImpl implements CommentService {
     private final PostService postService;
 
     @Override
-    public ResDTO<?> addComment(String token, AddCommentRequest request) {
+    public ResponseVM<?> addComment(String token, AddCommentRequest request) {
         String postId = request.getPostId();
         String parentCommentId = request.getParentId();
         String userIdFromJwtToken = SecurityContextUtils.getUserId();
@@ -46,11 +46,11 @@ public class CommentsServiceImpl implements CommentService {
         UserDTO foundUser = userService.findById(token, userIdFromJwtToken);
 
         if (foundUser == null)
-            throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, userIdFromJwtToken);
+            throw new BadRequestException(MessageCode.User.USER_NOT_FOUND_ID, userIdFromJwtToken);
 
         PostDTO foundPost = postService.findById(token, request.getPostId());
         if (foundPost == null)
-            throw new BadRequestException(MessageCode.POST_NOT_FOUND_ID, request.getPostId());
+            throw new BadRequestException(MessageCode.Post.POST_NOT_FOUND_ID, request.getPostId());
 
         Comments comment = new Comments();
         comment.setCreatedAt(LocalDateTime.now());
@@ -63,7 +63,7 @@ public class CommentsServiceImpl implements CommentService {
         if (parentCommentId != null && commentsRepository.existsById(parentCommentId)) {
             comment.setParentId(request.getParentId());
         } else if (parentCommentId != null && !commentsRepository.existsById(parentCommentId)) {
-            throw new BadRequestException(MessageCode.COMMENT_NOT_FOUND_ID, request.getParentId());
+            throw new BadRequestException(MessageCode.Interaction.COMMENT_NOT_FOUND_ID, request.getParentId());
         }
 
         Comments savedComment = commentsRepository.save(comment);
@@ -91,20 +91,20 @@ public class CommentsServiceImpl implements CommentService {
             kafkaMsgService.publishInteractNoti(interactNotification);
         }
 
-        return new ResDTO<>(MessageCode.COMMENT_CREATED, commentResponse, 200);
+        return new ResponseVM<>(MessageCode.Interaction.COMMENT_CREATED, commentResponse, 200);
     }
 
     @Override
-    public ResDTO<?> countCommentByPostId(String postId) {
-        return new ResDTO<>(
-                MessageCode.COMMENT_FETCHED,
+    public ResponseVM<?> countCommentByPostId(String postId) {
+        return new ResponseVM<>(
+                MessageCode.Interaction.COMMENT_FETCHED,
                 commentsRepository.countByPostId(postId),
                 HttpServletResponse.SC_OK
         );
     }
 
     @Override
-    public ResDTO<?> updateComment(String token, String id, UpdateCommentRequest comment) {
+    public ResponseVM<?> updateComment(String token, String id, UpdateCommentRequest comment) {
         String userId = SecurityContextUtils.getUserId();
 
         CommentDTO updatedComment = commentsRepository.findById(id)
@@ -124,28 +124,28 @@ public class CommentsServiceImpl implements CommentService {
 
                 }).orElseThrow(() -> new RuntimeException("Comment not found with id " + id));
 
-        return new ResDTO<>(MessageCode.COMMENT_UPDATED, updatedComment, 200);
+        return new ResponseVM<>(MessageCode.Interaction.COMMENT_UPDATED, updatedComment, 200);
     }
 
     @Override
-    public ResDTO<?> deleteComment(String id) {
+    public ResponseVM<?> deleteComment(String id) {
         String userId = SecurityContextUtils.getUserId();
-        ResDTO<?> response = new ResDTO<>();
+        ResponseVM<?> response = new ResponseVM<>();
         commentsRepository.findById(id).ifPresentOrElse(
                 cmt -> {
                     if (userId.equals(cmt.getUserId())) {
-                        response.setMessage(MessageCode.COMMENT_DELETED);
+                        response.setMessage(MessageCode.Interaction.COMMENT_DELETED);
                         response.setCode(200);
                         response.setData(null);
 
                         commentsRepository.deleteById(id);
                     } else {
-                        response.setMessage(MessageCode.COMMENT_CAN_NOT_DELETE_OTHERS);
+                        response.setMessage(MessageCode.Interaction.COMMENT_CAN_NOT_DELETE_OTHERS);
                         response.setCode(400);
                         response.setData(null);
                     }
                 }, () -> {
-                    response.setMessage(MessageCode.COMMENT_NOT_FOUND_ID, id);
+                    response.setMessage(MessageCode.Interaction.COMMENT_NOT_FOUND_ID, id);
                     response.setCode(400);
                     response.setData(null);
                 }
@@ -154,7 +154,7 @@ public class CommentsServiceImpl implements CommentService {
     }
 
     @Override
-    public ResDTO<?> findCommentById(String token, String id) {
+    public ResponseVM<?> findCommentById(String token, String id) {
         String userId = SecurityContextUtils.getUserId();
 
         CommentDTO comment = commentsRepository.findById(id)
@@ -165,11 +165,11 @@ public class CommentsServiceImpl implements CommentService {
         comment.getChildren().forEach(cmt -> {
             cmt.setMine(cmt.getUser().getId().equals(userId));
         });
-        return new ResDTO<>(MessageCode.COMMENT_FETCHED, comment, 200);
+        return new ResponseVM<>(MessageCode.Interaction.COMMENT_FETCHED, comment, 200);
     }
 
     @Override
-    public ResDTO<?> findCommentsByPostId(String token, String postId) {
+    public ResponseVM<?> findCommentsByPostId(String token, String postId) {
         String userId = SecurityContextUtils.getUserId();
 
         List<Comments> comments = commentsRepository.findByPostIdAndParentIdIsNull(postId);
@@ -185,11 +185,11 @@ public class CommentsServiceImpl implements CommentService {
         ).sorted(
                 (cmt1, cmt2) -> cmt2.getCreatedAt().compareTo(cmt1.getCreatedAt())
         ).toList();
-        return new ResDTO<>(MessageCode.COMMENT_FETCHED, commentResponses, 200);
+        return new ResponseVM<>(MessageCode.Interaction.COMMENT_FETCHED, commentResponses, 200);
     }
 
     @Override
-    public ResDTO<?> findAllComments(String token) {
+    public ResponseVM<?> findAllComments(String token) {
         String userId = SecurityContextUtils.getUserId();
         List<CommentDTO> commentResponses = commentsRepository.findAll().stream().map(
                 comment -> {
@@ -201,6 +201,6 @@ public class CommentsServiceImpl implements CommentService {
                     return response;
                 }
         ).toList();
-        return new ResDTO<>(MessageCode.COMMENT_FETCHED, commentResponses, 200);
+        return new ResponseVM<>(MessageCode.Interaction.COMMENT_FETCHED, commentResponses, 200);
     }
 }

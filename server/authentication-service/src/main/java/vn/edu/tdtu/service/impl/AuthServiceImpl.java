@@ -1,24 +1,18 @@
 package vn.edu.tdtu.service.impl;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.edu.tdtu.constant.KeycloakUserAttribute;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.constant.RedisKey;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.keycloak.KeycloakTokenResponse;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.AuthTokenResponse;
 import vn.edu.tdtu.dto.response.LoginResponse;
 import vn.edu.tdtu.dto.response.PasswordCheckingResponse;
 import vn.edu.tdtu.dto.response.SignUpResponse;
-import vn.edu.tdtu.enums.EUserRole;
-import vn.edu.tdtu.exception.BadRequestException;
-import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.message.SendOTPMailMessage;
 import vn.edu.tdtu.model.AuthInfo;
 import vn.edu.tdtu.model.data.User;
@@ -28,8 +22,15 @@ import vn.edu.tdtu.service.interfaces.AuthService;
 import vn.edu.tdtu.service.interfaces.RedisService;
 import vn.edu.tdtu.service.interfaces.UserService;
 import vn.edu.tdtu.service.keycloak.interfaces.KeycloakService;
-import vn.edu.tdtu.util.JwtUtils;
+import vn.edu.tdtu.util.CookieUtils;
 import vn.edu.tdtu.util.OTPUtils;
+import vn.tdtu.common.enums.user.EUserRole;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.exception.UnauthorizedException;
+import vn.tdtu.common.utils.Constants;
+import vn.tdtu.common.utils.JwtUtils;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.*;
 
@@ -44,8 +45,20 @@ public class AuthServiceImpl implements AuthService {
     private final KeycloakService keycloakService;
     private final JwtUtils jwtUtils;
 
+    private static UserRepresentation getUserRepresentation(SignUpRequest request, Map<String, List<String>> userAttributes) {
+        UserRepresentation userRepresentation = new UserRepresentation();
+        userRepresentation.setEmail(request.getEmail());
+        userRepresentation.setUsername(request.getEmail());
+        userRepresentation.setFirstName(request.getFirstName());
+        userRepresentation.setLastName(request.getLastName());
+        userRepresentation.setEnabled(true);
+        userRepresentation.setEmailVerified(true);
+        userRepresentation.setAttributes(userAttributes);
+        return userRepresentation;
+    }
+
     @Override
-    public ResDTO<LoginResponse> loginUser(LoginRequest loginRequest) {
+    public ResponseVM<LoginResponse> loginUser(LoginRequest loginRequest, HttpServletResponse response) {
         String email = loginRequest.getEmail();
         String password = loginRequest.getPassword();
 
@@ -55,9 +68,9 @@ public class AuthServiceImpl implements AuthService {
 
         String socketAccessToken = jwtUtils.generateJwtToken(foundUser.getId());
 
-        ResDTO<LoginResponse> responseDto = new ResDTO<>();
+        ResponseVM<LoginResponse> responseDto = new ResponseVM<>();
         responseDto.setCode(HttpServletResponse.SC_OK);
-        responseDto.setMessage(MessageCode.AUTH_LOGIN_SUCCESS);
+        responseDto.setMessage(MessageCode.Authentication.AUTH_LOGIN_SUCCESS);
         responseDto.setData(
                 LoginResponse.builder()
                         .id(foundUser.getId())
@@ -69,23 +82,63 @@ public class AuthServiceImpl implements AuthService {
                         .build()
         );
 
+        String refreshToken = responseDto.getData().getToken().refreshToken();
+        Long refreshExpiresIn = responseDto.getData().getToken().refreshExpiresIn();
+
+        CookieUtils.setCookie(
+                response,
+                Constants.Cookie.REFRESH_TOKEN_COOKIE_NAME,
+                refreshToken,
+                refreshExpiresIn,
+                "/"
+        );
+
         return responseDto;
     }
 
     @Override
-    public ResDTO<LoginResponse> refreshToken(String refreshToken) {
-        if (refreshToken == null)
-            throw new UnauthorizedException(MessageCode.AUTH_REFRESH_TOKEN_NOT_FOUND);
+    public ResponseVM<?> logoutUser(HttpServletRequest request, HttpServletResponse response) {
+        Optional<String> refreshToken = CookieUtils.getCookieValue(request, Constants.Cookie.REFRESH_TOKEN_COOKIE_NAME);
 
-        KeycloakTokenResponse keycloakTokenResponse = keycloakService.refreshToken(refreshToken);
+        if (refreshToken.isEmpty())
+            throw new UnauthorizedException(MessageCode.Authentication.AUTH_REFRESH_TOKEN_NOT_FOUND);
 
-        ResDTO<LoginResponse> responseDto = new ResDTO<>();
+        boolean isLoggedOut = keycloakService.logoutUser(refreshToken.get());
+
+        if(isLoggedOut)
+            CookieUtils.deleteCookie(
+                    response,
+                    Constants.Cookie.REFRESH_TOKEN_COOKIE_NAME,
+                    "/"
+            );
+
+        return ResponseVM.noContent();
+    }
+
+    @Override
+    public ResponseVM<LoginResponse> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        Optional<String> refreshToken = CookieUtils.getCookieValue(request, Constants.Cookie.REFRESH_TOKEN_COOKIE_NAME);
+
+        if (refreshToken.isEmpty())
+            throw new UnauthorizedException(MessageCode.Authentication.AUTH_REFRESH_TOKEN_NOT_FOUND);
+
+        KeycloakTokenResponse keycloakTokenResponse = keycloakService.refreshToken(refreshToken.get());
+
+        ResponseVM<LoginResponse> responseDto = new ResponseVM<>();
         responseDto.setCode(HttpServletResponse.SC_OK);
-        responseDto.setMessage(MessageCode.AUTH_TOKEN_REFRESHED);
+        responseDto.setMessage(MessageCode.Authentication.AUTH_TOKEN_REFRESHED);
         responseDto.setData(
                 LoginResponse.builder()
                         .token(AuthTokenResponse.from(keycloakTokenResponse))
                         .build()
+        );
+
+        CookieUtils.setCookie(
+                response,
+                Constants.Cookie.REFRESH_TOKEN_COOKIE_NAME,
+                responseDto.getData().getToken().refreshToken(),
+                responseDto.getData().getToken().refreshExpiresIn(),
+                "/"
         );
 
         return responseDto;
@@ -93,14 +146,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public ResDTO<SignUpResponse> createAdminUser(SignUpRequest request) {
+    public ResponseVM<SignUpResponse> createAdminUser(SignUpRequest request) {
         AuthInfo foundAuthInfo = authInfoRepository.findByEmail(request.getEmail()).orElse(null);
 
         if (foundAuthInfo == null)
             return signUpUser(request, List.of(EUserRole.ROLE_ADMIN, EUserRole.ROLE_USER));
 
         UserRepresentation keycloakUser = keycloakService.findUserByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException(MessageCode.KEYCLOAK_EXISTS_AUTH_INFO_BUT_NOT_KC_ACCOUNT));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Authentication.KEYCLOAK_EXISTS_AUTH_INFO_BUT_NOT_KC_ACCOUNT));
 
         keycloakService.assignRealmRole(keycloakUser.getId(), Collections.singletonList(EUserRole.ROLE_ADMIN));
 
@@ -111,22 +164,22 @@ public class AuthServiceImpl implements AuthService {
         responseData.setEmail(request.getEmail());
         responseData.setId(foundAuthInfo.getId());
 
-        ResDTO<SignUpResponse> response = new ResDTO<>();
+        ResponseVM<SignUpResponse> response = new ResponseVM<>();
         response.setData(responseData);
         response.setCode(HttpServletResponse.SC_CREATED);
-        response.setMessage(MessageCode.AUTH_ADMIN_ROLE_ASSIGNED);
+        response.setMessage(MessageCode.Authentication.AUTH_ADMIN_ROLE_ASSIGNED);
 
         return response;
     }
 
     @Override
     @Transactional
-    public ResDTO<?> revokeAdminUser(String email) {
+    public ResponseVM<?> revokeAdminUser(String email) {
         AuthInfo foundAuthInfo = authInfoRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND_EMAIL, email));
+                .orElseThrow(() -> new BadRequestException(MessageCode.User.USER_NOT_FOUND_EMAIL, email));
 
         UserRepresentation keycloakUser = keycloakService.findUserByEmail(email)
-                .orElseThrow(() -> new BadRequestException(MessageCode.KEYCLOAK_EXISTS_AUTH_INFO_BUT_NOT_KC_ACCOUNT));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Authentication.KEYCLOAK_EXISTS_AUTH_INFO_BUT_NOT_KC_ACCOUNT));
 
         keycloakService.removeRealmRole(keycloakUser.getId(), Collections.singletonList(EUserRole.ROLE_ADMIN));
 
@@ -137,19 +190,19 @@ public class AuthServiceImpl implements AuthService {
         responseData.setEmail(email);
         responseData.setId(foundAuthInfo.getId());
 
-        ResDTO<SignUpResponse> response = new ResDTO<>();
+        ResponseVM<SignUpResponse> response = new ResponseVM<>();
         response.setData(responseData);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.AUTH_ADMIN_ROLE_REVOKED);
+        response.setMessage(MessageCode.Authentication.AUTH_ADMIN_ROLE_REVOKED);
 
         return response;
     }
 
     @Override
     @Transactional
-    public ResDTO<SignUpResponse> signUpUser(SignUpRequest request, List<EUserRole> userRoles) {
+    public ResponseVM<SignUpResponse> signUpUser(SignUpRequest request, List<EUserRole> userRoles) {
         if (authInfoRepository.existsByEmail(request.getEmail())) {
-            throw new BadRequestException(MessageCode.AUTH_EMAIL_EXISTS);
+            throw new BadRequestException(MessageCode.Authentication.AUTH_EMAIL_EXISTS);
         }
 
         String userId = UUID.randomUUID().toString();
@@ -169,9 +222,9 @@ public class AuthServiceImpl implements AuthService {
 
         authInfoRepository.save(authInfo);
 
-        ResDTO<SignUpResponse> response = new ResDTO<>();
+        ResponseVM<SignUpResponse> response = new ResponseVM<>();
         response.setData(data);
-        response.setMessage(MessageCode.AUTH_REGISTERED);
+        response.setMessage(MessageCode.Authentication.AUTH_REGISTERED);
         response.setCode(HttpServletResponse.SC_CREATED);
 
         return response;
@@ -179,7 +232,7 @@ public class AuthServiceImpl implements AuthService {
 
     private void createKeycloakUser(SignUpRequest request, List<EUserRole> userRoles) {
         Map<String, List<String>> userAttributes = new HashMap<>();
-        userAttributes.put(KeycloakUserAttribute.USER_ID, Collections.singletonList(request.getId()));
+        userAttributes.put(Constants.KeyCloakUserAttribute.USER_ID, Collections.singletonList(request.getId()));
 
         UserRepresentation userRepresentation = getUserRepresentation(request, userAttributes);
 
@@ -189,22 +242,10 @@ public class AuthServiceImpl implements AuthService {
         keycloakService.assignRealmRole(createdKeycloakUserId, userRoles != null ? userRoles : Collections.singletonList(EUserRole.ROLE_USER));
     }
 
-    private static UserRepresentation getUserRepresentation(SignUpRequest request, Map<String, List<String>> userAttributes) {
-        UserRepresentation userRepresentation = new UserRepresentation();
-        userRepresentation.setEmail(request.getEmail());
-        userRepresentation.setUsername(request.getEmail());
-        userRepresentation.setFirstName(request.getFirstName());
-        userRepresentation.setLastName(request.getLastName());
-        userRepresentation.setEnabled(true);
-        userRepresentation.setEmailVerified(true);
-        userRepresentation.setAttributes(userAttributes);
-        return userRepresentation;
-    }
-
     @Override
-    public ResDTO<?> createChangePasswordOTP(CreateChangePasswordRequest request) {
+    public ResponseVM<?> createChangePasswordOTP(CreateChangePasswordRequest request) {
         if (!keycloakService.passwordChecking(request.getEmail(), request.getOldPassword())) {
-            throw new BadRequestException(MessageCode.AUTH_INCORRECT_OLD_PASSWORD);
+            throw new BadRequestException(MessageCode.Authentication.AUTH_INCORRECT_OLD_PASSWORD);
         }
 
         String otp = OTPUtils.generateOTP(6);
@@ -214,40 +255,40 @@ public class AuthServiceImpl implements AuthService {
                 otp
         ));
 
-        redisService.set(RedisKey.combineKey(RedisKey.OTP_KEY, request.getEmail()), otp, 300);
+        redisService.set(Constants.RedisKey.combineKey(Constants.RedisKey.OTP_KEY, request.getEmail()), otp, 300);
 
-        return new ResDTO<>(
-                HttpServletResponse.SC_CREATED,
-                MessageCode.AUTH_OTP_SENT,
-                null
+        return new ResponseVM<>(
+                MessageCode.Authentication.AUTH_OTP_SENT,
+                null,
+                HttpServletResponse.SC_CREATED
         );
     }
 
     @Override
-    public ResDTO<?> changePassword(ChangePasswordRequest request) {
-        String otp = redisService.get(RedisKey.combineKey(RedisKey.OTP_KEY, request.getEmail()));
+    public ResponseVM<?> changePassword(ChangePasswordRequest request) {
+        String otp = redisService.get(Constants.RedisKey.combineKey(Constants.RedisKey.OTP_KEY, request.getEmail()));
 
         if (otp == null || !otp.equals(request.getOtp()))
-            throw new BadRequestException(MessageCode.AUTH_OTP_INCORRECT);
+            throw new BadRequestException(MessageCode.Authentication.AUTH_OTP_INCORRECT);
 
         UserRepresentation foundUser = keycloakService.findUserByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.User.USER_NOT_FOUND));
 
         keycloakService.resetPassword(foundUser.getId(), request.getNewPassword());
 
-        redisService.delete(RedisKey.combineKey(RedisKey.OTP_KEY, request.getEmail()));
+        redisService.delete(Constants.RedisKey.combineKey(Constants.RedisKey.OTP_KEY, request.getEmail()));
 
-        return new ResDTO<>(
-                HttpServletResponse.SC_OK,
-                MessageCode.AUTH_PASSWORD_CHANGED,
-                null
+        return new ResponseVM<>(
+                MessageCode.Authentication.AUTH_PASSWORD_CHANGED,
+                null,
+                HttpServletResponse.SC_OK
         );
     }
 
     @Override
-    public ResDTO<?> createForgotPasswordOTP(CreateForgotPasswordRequest request) {
+    public ResponseVM<?> createForgotPasswordOTP(CreateForgotPasswordRequest request) {
         if (!authInfoRepository.existsByEmail(request.getEmail()))
-            throw new BadRequestException(MessageCode.USER_NOT_FOUND);
+            throw new BadRequestException(MessageCode.User.USER_NOT_FOUND);
 
         String otp = OTPUtils.generateOTP(6);
 
@@ -256,38 +297,38 @@ public class AuthServiceImpl implements AuthService {
                 otp
         ));
 
-        redisService.set(RedisKey.combineKey(RedisKey.OTP_KEY, request.getEmail()), otp, 300);
+        redisService.set(Constants.RedisKey.combineKey(Constants.RedisKey.OTP_KEY, request.getEmail()), otp, 300);
 
-        return new ResDTO<>(
-                HttpServletResponse.SC_CREATED,
-                MessageCode.AUTH_OTP_SENT,
-                null
+        return new ResponseVM<>(
+                MessageCode.Authentication.AUTH_OTP_SENT,
+                null,
+                HttpServletResponse.SC_CREATED
         );
     }
 
     @Override
-    public ResDTO<?> validateOTP(ValidateOTPRequest request) {
+    public ResponseVM<?> validateOTP(ValidateOTPRequest request) {
         if (!authInfoRepository.existsByEmail(request.getEmail()))
-            throw new BadRequestException(MessageCode.USER_NOT_FOUND);
+            throw new BadRequestException(MessageCode.User.USER_NOT_FOUND);
 
-        String otp = redisService.get(RedisKey.combineKey(RedisKey.OTP_KEY, request.getEmail()));
+        String otp = redisService.get(Constants.RedisKey.combineKey(Constants.RedisKey.OTP_KEY, request.getEmail()));
 
         if (otp == null || !otp.equals(request.getOtp()))
-            throw new BadRequestException(MessageCode.AUTH_OTP_INCORRECT);
+            throw new BadRequestException(MessageCode.Authentication.AUTH_OTP_INCORRECT);
 
-        redisService.extendsTtl(RedisKey.combineKey(RedisKey.OTP_KEY, request.getEmail()), 3600);
+        redisService.extendsTtl(Constants.RedisKey.combineKey(Constants.RedisKey.OTP_KEY, request.getEmail()), 3600);
 
-        return new ResDTO<>(
-                HttpServletResponse.SC_OK,
-                MessageCode.AUTH_OTP_CORRECT,
-                null
+        return new ResponseVM<>(
+                MessageCode.Authentication.AUTH_OTP_CORRECT,
+                null,
+                HttpServletResponse.SC_OK
         );
     }
 
     @Override
-    public ResDTO<?> passwordChecking(PasswordCheckingRequest request) {
+    public ResponseVM<?> passwordChecking(PasswordCheckingRequest request) {
         authInfoRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND_EMAIL, request.getEmail()));
+                .orElseThrow(() -> new BadRequestException(MessageCode.User.USER_NOT_FOUND_EMAIL, request.getEmail()));
 
         boolean result = keycloakService.passwordChecking(request.getEmail(), request.getPassword());
 
@@ -297,32 +338,32 @@ public class AuthServiceImpl implements AuthService {
             token = OTPUtils.generateOTP(20);
 
             redisService.set(
-                    RedisKey.combineKey(RedisKey.PASSWORD_CHECKING_TOKEN_KEY, request.getEmail()),
+                    Constants.RedisKey.combineKey(Constants.RedisKey.PASSWORD_CHECKING_TOKEN_KEY, request.getEmail()),
                     token,
                     600
             );
         }
 
-        return new ResDTO<>(
-                result ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST,
-                result ? MessageCode.AUTH_MATCH : MessageCode.AUTH_NONE_MATCH,
-                result ? new PasswordCheckingResponse(token) : null
+        return new ResponseVM<>(
+                result ? MessageCode.Authentication.AUTH_MATCH : MessageCode.Authentication.AUTH_NONE_MATCH,
+                result ? new PasswordCheckingResponse(token) : null,
+                result ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST
         );
     }
 
     @Override
-    public ResDTO<?> confirmTokenChecking(ConfirmTokenCheckingRequest request) {
-        String storedToken = redisService.get(RedisKey.combineKey(
-                RedisKey.PASSWORD_CHECKING_TOKEN_KEY,
+    public ResponseVM<?> confirmTokenChecking(ConfirmTokenCheckingRequest request) {
+        String storedToken = redisService.get(Constants.RedisKey.combineKey(
+                Constants.RedisKey.PASSWORD_CHECKING_TOKEN_KEY,
                 request.getEmail()
         ));
 
         boolean result = request.getToken() != null && request.getToken().equals(storedToken);
 
-        return new ResDTO<>(
-                result ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST,
-                result ? MessageCode.AUTH_MATCH : MessageCode.AUTH_NONE_MATCH,
-                null
+        return new ResponseVM<>(
+                result ? MessageCode.Authentication.AUTH_MATCH : MessageCode.Authentication.AUTH_NONE_MATCH,
+                null,
+                result ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST
         );
     }
 }

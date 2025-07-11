@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import vn.edu.tdtu.dto.request.SaveUserReqDTO;
 import vn.edu.tdtu.enums.EUserRole;
 import vn.edu.tdtu.model.User;
-import vn.edu.tdtu.util.StringUtils;
+import vn.tdtu.common.utils.StringUtils;
 
 import java.time.LocalDateTime;
 

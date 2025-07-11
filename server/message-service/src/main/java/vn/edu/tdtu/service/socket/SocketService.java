@@ -14,6 +14,7 @@ import vn.edu.tdtu.model.Room;
 import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.service.interfaces.ChatMessageService;
 import vn.edu.tdtu.service.interfaces.RoomService;
+import vn.tdtu.common.utils.Constants;
 
 import java.util.*;
 
@@ -30,7 +31,12 @@ public class SocketService {
                 .getRoomOperations(room.getId())
                 .getClients()
                 .forEach(client -> {
-                    client.sendEvent("receive_message", RoomResponseMapper.mapMsgToMsgResponse(client.get("userId"), message));
+                    client.sendEvent(
+                            Constants.SocketEvent.RECEIVE_MESSAGE,
+                            RoomResponseMapper.mapMsgToMsgResponse(
+                                    client.get(Constants.SocketProperty.USER_ID), message
+                            )
+                    );
                 });
     }
 
@@ -41,22 +47,22 @@ public class SocketService {
                 .forEach(client -> {
                     if (client.getSessionId().equals(senderClient.getSessionId())) {
                         Map<String, Object> data = new HashMap<>();
-                        data.put("roomId", room.getId());
+                        data.put(Constants.SocketProperty.ROOM_ID, room.getId());
 
-                        client.sendEvent("joined", data);
+                        client.sendEvent(Constants.SocketEvent.JOINED, data);
                     }
                 });
     }
 
     public void saveMessage(SocketIOClient senderClient, SendMessage messageDto) {
-        Room foundRoom = roomService.findExistingRoom(senderClient.get("userId"), messageDto.getToUserId());
+        Room foundRoom = roomService.findExistingRoom(senderClient.get(Constants.SocketProperty.USER_ID), messageDto.getToUserId());
 
         if (foundRoom != null) {
             ChatMessage newMessage = ChatMessage.builder()
                     .id(UUID.randomUUID().toString())
                     .content(messageDto.getContent())
                     .createdAt(new Date())
-                    .fromUserId(senderClient.get("userId"))
+                    .fromUserId(senderClient.get(Constants.SocketProperty.USER_ID))
                     .toUserId(messageDto.getToUserId())
                     .roomId(foundRoom.getId())
                     .medias(messageDto.getMedias())
@@ -77,36 +83,40 @@ public class SocketService {
     public void joinRoom(SocketIOClient senderClient, JoinRoomMessage message) {
         senderClient.getAllRooms().forEach(senderClient::leaveRoom);
 
-        Room room = roomService.findExistingRoom(senderClient.get("userId"), message.getToUserId());
+        Room room = roomService.findExistingRoom(senderClient.get(Constants.SocketProperty.USER_ID), message.getToUserId());
 
         if (Objects.isNull(room)) {
             room = Room.builder()
-                    .userId1(senderClient.get("userId"))
+                    .userId1(senderClient.get(Constants.SocketProperty.USER_ID))
                     .userId2(message.getToUserId())
                     .latestMessage(null)
                     .createdAt(new Date())
                     .build();
         }
 
-        if (room.getUserId1().equals(senderClient.get("userId"))) {
+        if (room.getUserId1().equals(senderClient.get(Constants.SocketProperty.USER_ID))) {
             room.setUser1LastSeenTime(new Date());
-        } else if (room.getUserId2().equals(senderClient.get("userId"))) {
+        } else if (room.getUserId2().equals(senderClient.get(Constants.SocketProperty.USER_ID))) {
             room.setUser2LastSeenTime(new Date());
         }
 
         roomService.saveRoom(room);
 
-        log.info("User ID[{}] with session id {} Connected to room [{}]", senderClient.get("userId"), senderClient.getSessionId().toString(), room.getId());
+        log.info("User ID[{}] with session id {} Connected to room [{}]",
+                senderClient.get(Constants.SocketProperty.USER_ID),
+                senderClient.getSessionId().toString(),
+                room.getId()
+        );
 
         senderClient.joinRoom(room.getId());
-        sendRoomJoinedMessage(senderClient, senderClient.get("userId"), room);
+        sendRoomJoinedMessage(senderClient, senderClient.get(Constants.SocketProperty.USER_ID), room);
 
         senderClient.getNamespace()
                 .getRoomOperations(room.getId())
                 .getClients()
                 .forEach(client -> {
-                    if (message.getToUserId().equals(client.get("userId"))) {
-                        client.sendEvent("recipient_seen", true);
+                    if (message.getToUserId().equals(client.get(Constants.SocketProperty.USER_ID))) {
+                        client.sendEvent(Constants.SocketEvent.RECIPIENT_SEEN, true);
                     }
                 });
     }
@@ -127,8 +137,8 @@ public class SocketService {
                     .getRoomOperations(room.getId())
                     .getClients()
                     .forEach(client -> {
-                        if (!userId.equals(client.get("userId"))) {
-                            client.sendEvent("recipient_seen", true);
+                        if (!userId.equals(client.get(Constants.SocketProperty.USER_ID))) {
+                            client.sendEvent(Constants.SocketEvent.RECIPIENT_SEEN, true);
                         }
                     });
         }

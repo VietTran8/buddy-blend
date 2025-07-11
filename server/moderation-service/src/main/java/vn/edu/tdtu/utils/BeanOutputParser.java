@@ -7,6 +7,13 @@ import lombok.SneakyThrows;
 import java.io.IOException;
 
 public class BeanOutputParser<T> {
+    private static String cleanJson(String input) {
+        if (input.startsWith("```json") && input.endsWith("```")) {
+            return input.substring(7, input.length() - 3).trim();
+        }
+        return input;
+    }
+
     public T parse(String responseJson, Class<T> clazz) {
         try {
             responseJson = cleanJson(responseJson);
@@ -33,12 +40,5 @@ public class BeanOutputParser<T> {
         } catch (Exception e) {
             throw new RuntimeException("Unable to create prompt for class: " + clazz.getSimpleName(), e);
         }
-    }
-
-    private static String cleanJson(String input) {
-        if (input.startsWith("```json") && input.endsWith("```")) {
-            return input.substring(7, input.length() - 3).trim();
-        }
-        return input;
     }
 }

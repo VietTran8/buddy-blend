@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.support.converter.JsonMessageConverter;
 import org.springframework.web.client.RestTemplate;
+import vn.tdtu.common.utils.JwtUtils;
 
 @Configuration
 public class AppConfig {
@@ -27,6 +28,11 @@ public class AppConfig {
     }
 
     @Bean
+    public JwtUtils jwtUtils() {
+        return new JwtUtils();
+    }
+
+    @Bean
     public NewTopic userConnectedTopic() {
         return new NewTopic(userConnectedTopicName, 2, (short) 1);
     }
@@ -35,4 +41,5 @@ public class AppConfig {
     public NewTopic userDisconnectedTopic() {
         return new NewTopic(userDisconnectedTopicName, 2, (short) 1);
     }
+
 }

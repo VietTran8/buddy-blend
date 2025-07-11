@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.service.interfaces.BlockingService;
 import vn.edu.tdtu.service.interfaces.FriendRequestService;
 import vn.edu.tdtu.service.interfaces.UserFavouriteService;
 import vn.edu.tdtu.service.interfaces.UserService;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -24,25 +24,26 @@ public class UserController {
 
     @GetMapping("")
     public ResponseEntity<?> findAll() {
-        ResDTO<?> response = userService.findAll();
+        ResponseVM<?> response = userService.findAll();
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @GetMapping("/profile")
     public ResponseEntity<?> getUserInfo(@RequestParam(name = "id", required = false, defaultValue = "") String id) {
-        ResDTO<?> response = userService.findProfile(id);
+        ResponseVM<?> response = userService.findProfile(id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    @GetMapping("/{email}/for-auth")
+    @GetMapping("/for-auth/{email}")
     public ResponseEntity<?> findByEmail(@PathVariable("email") String email) {
-        ResDTO<?> response = userService.findByEmailResp(email);
+        ResponseVM<?> response = userService.findByEmailResp(email);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/by-id/{id}")
     public ResponseEntity<?> findById(@PathVariable("id") String id) {
-        ResDTO<?> response = userService.findResById(id);
+        ResponseVM<?> response = userService.findResById(id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -51,165 +52,186 @@ public class UserController {
             @RequestHeader("Authorization") String tokenHeader,
             @PathVariable("groupId") String groupId
     ) {
-        ResDTO<?> response = userService.getUserSuggestionForGroup(tokenHeader, groupId);
+        ResponseVM<?> response = userService.getUserSuggestionForGroup(tokenHeader, groupId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/by-ids")
     public ResponseEntity<?> findByIds(@RequestHeader(name = "Authorization", required = false, defaultValue = "") String token, @RequestBody FindByIdsReqDTO request) {
-        ResDTO<?> response = userService.findResByIds(token, request);
+        ResponseVM<?> response = userService.findResByIds(token, request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/save")
     public ResponseEntity<?> saveUser(@RequestBody SaveUserReqDTO request) {
-        ResDTO<?> response = userService.saveUser(request);
+        ResponseVM<?> response = userService.saveUser(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/exists/{id}")
     public ResponseEntity<?> exists(@PathVariable("id") String id) {
-        ResDTO<?> response = userService.existsById(id);
+        ResponseVM<?> response = userService.existsById(id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @GetMapping("/search")
     public ResponseEntity<?> search(@RequestHeader("Authorization") String token, @RequestParam("key") String key) {
-        ResDTO<?> response = userService.searchByName(token, key);
+        ResponseVM<?> response = userService.searchByName(token, key);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @PostMapping("/bio/update")
     public ResponseEntity<?> updateBio(@RequestBody UpdateBioReqDTO request) {
-        ResDTO<?> response = userService.updateBio(request);
+        ResponseVM<?> response = userService.updateBio(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @PostMapping("/info/update")
     public ResponseEntity<?> updateBio(@RequestBody UpdateInfoReqDTO request) {
-        ResDTO<?> response = userService.updateInfo(request);
+        ResponseVM<?> response = userService.updateInfo(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @PostMapping("/name/update")
     public ResponseEntity<?> updateUserName(@RequestBody RenameReqDTO request) {
-        ResDTO<?> response = userService.renameUser(request);
+        ResponseVM<?> response = userService.renameUser(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @PostMapping("/profile/update")
     public ResponseEntity<?> updateProfilePic(@RequestParam("file") MultipartFile file) {
-        ResDTO<?> response = userService.updatePicture(file, true);
+        ResponseVM<?> response = userService.updatePicture(file, true);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @PostMapping("/cover/update")
     public ResponseEntity<?> updateCover(@RequestParam("file") MultipartFile file) {
-        ResDTO<?> response = userService.updatePicture(file, false);
+        ResponseVM<?> response = userService.updatePicture(file, false);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/disable")
     public ResponseEntity<?> disable(@RequestBody DisableAccountReqDTO request) {
-        ResDTO<?> response = userService.disableAccount(request);
+        ResponseVM<?> response = userService.disableAccount(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @PostMapping("/friend-req")
     public ResponseEntity<?> handle(@RequestBody FriendReqDTO request) {
-        ResDTO<?> response = friendRequestService.handleFriendRequest(request);
+        ResponseVM<?> response = friendRequestService.handleFriendRequest(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @PostMapping("/friend-req/acceptation")
     public ResponseEntity<?> acceptation(@RequestBody FQAcceptationDTO request) {
-        ResDTO<?> response = friendRequestService.friendRequestAcceptation(request);
+        ResponseVM<?> response = friendRequestService.friendRequestAcceptation(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @GetMapping("/friend-reqs")
     public ResponseEntity<?> getFriendRequests(@RequestHeader(name = "Authorization") String token) {
-        ResDTO<?> response = friendRequestService.getListFriendRequestResp(token);
+        ResponseVM<?> response = friendRequestService.getListFriendRequestResp(token);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @GetMapping("/friend-req/{fromUserId}")
     public ResponseEntity<?> getFriendRequestByFromUserId(
             @PathVariable("fromUserId") String fromUserId
     ) {
-        ResDTO<?> response = friendRequestService.getFriendRequestIdByFromUserId(fromUserId);
+        ResponseVM<?> response = friendRequestService.getFriendRequestIdByFromUserId(fromUserId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @GetMapping("/friends")
     public ResponseEntity<?> getFriends(
             @RequestHeader(name = "Authorization") String token,
             @RequestParam(name = "id", required = false) String userId
     ) {
-        ResDTO<?> response = friendRequestService.getListFriendsResp(token, userId);
+        ResponseVM<?> response = friendRequestService.getListFriendsResp(token, userId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @GetMapping("/friends/id")
     public ResponseEntity<?> getFriendIds(@RequestParam(name = "id", required = true) String userId) {
-        ResDTO<?> response = friendRequestService.getFriendIds(userId);
+        ResponseVM<?> response = friendRequestService.getFriendIds(userId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @GetMapping("/friends/suggestions")
     public ResponseEntity<?> getFriendSuggestions() {
-        ResDTO<?> response = friendRequestService.getFriendSuggestions();
+        ResponseVM<?> response = friendRequestService.getFriendSuggestions();
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @PostMapping("/favourite")
     public ResponseEntity<?> saveUserFavourite(@RequestBody SaveUserFavouriteDTO request) {
-        ResDTO<?> response = userFavouriteService.saveUserFavorite(request);
+        ResponseVM<?> response = userFavouriteService.saveUserFavorite(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @GetMapping("/favourite")
     public ResponseEntity<?> getUserFavourite() {
-        ResDTO<?> response = userFavouriteService.getUserFavourites();
+        ResponseVM<?> response = userFavouriteService.getUserFavourites();
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @GetMapping("/favourite/{id}")
     public ResponseEntity<?> getUserFavouriteDetail(@RequestHeader(name = "Authorization") String token,
                                                     @PathVariable("id") String favId) {
-        ResDTO<?> response = userFavouriteService.getUserFavById(token, favId);
+        ResponseVM<?> response = userFavouriteService.getUserFavById(token, favId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @PostMapping("/favourite/delete/{id}")
     public ResponseEntity<?> deleteUserFavourite(@PathVariable("id") String id) {
-        ResDTO<?> response = userFavouriteService.deleteUserFavourite(id);
+        ResponseVM<?> response = userFavouriteService.deleteUserFavourite(id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @PostMapping("/registration/save")
     public ResponseEntity<?> saveRegistrationId(@RequestBody SaveUserResIdReq request) {
-        ResDTO<?> response = userService.saveUserRegistrationId(request);
+        ResponseVM<?> response = userService.saveUserRegistrationId(request);
         log.info("Registration ID: " + request.getRegistrationId());
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @PostMapping("/registration/remove")
     public ResponseEntity<?> removeRegistrationId(@RequestBody SaveUserResIdReq request) {
-        ResDTO<?> response = userService.removeUserRegistrationId(request);
+        ResponseVM<?> response = userService.removeUserRegistrationId(request);
         log.info("Registration ID: " + request.getRegistrationId());
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @PostMapping("/block/{blockUserId}")
     public ResponseEntity<?> handleBlockUser(@PathVariable("blockUserId") String banUserId) {
-        ResDTO<?> response = blockingService.handleUserBlocking(banUserId);
+        ResponseVM<?> response = blockingService.handleUserBlocking(banUserId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    //Authenticated
     @GetMapping("/block")
     public ResponseEntity<?> getBlockedUsers() {
-        ResDTO<?> response = blockingService.getBlockedUserList();
+        ResponseVM<?> response = blockingService.getBlockedUserList();
         return ResponseEntity.status(response.getCode()).body(response);
     }
 }

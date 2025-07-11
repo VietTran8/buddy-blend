@@ -1,9 +1,10 @@
 package vn.edu.tdtu.service.interfaces;
 
-import vn.edu.tdtu.dto.ResDTO;
+
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 public interface BlockingService {
-    ResDTO<?> handleUserBlocking(String banUserId);
+    ResponseVM<?> handleUserBlocking(String banUserId);
 
-    ResDTO<?> getBlockedUserList();
+    ResponseVM<?> getBlockedUserList();
 }

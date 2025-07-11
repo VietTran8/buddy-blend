@@ -8,14 +8,14 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.request.FindByIdsReq;
-import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.model.es.SyncPost;
 import vn.edu.tdtu.repository.EsPostRepository;
 import vn.edu.tdtu.repository.httpclient.PostClient;
 import vn.edu.tdtu.service.interfaces.PostService;
 import vn.tdtu.common.dto.PostDTO;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.MessageCode;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,7 +40,7 @@ public class PostServiceImpl implements PostService {
                     foundPost.setContent(post.getContent());
                     postRepository.save(post);
                 }, () -> {
-                    throw new BadRequestException(MessageCode.POST_NOT_FOUND_ID, post.getId());
+                    throw new BadRequestException(MessageCode.Post.POST_NOT_FOUND_ID, post.getId());
                 }
         );
     }

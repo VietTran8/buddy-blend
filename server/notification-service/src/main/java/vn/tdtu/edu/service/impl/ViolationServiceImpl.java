@@ -3,9 +3,9 @@ package vn.tdtu.edu.service.impl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.tdtu.edu.constant.MessageCode;
-import vn.tdtu.edu.dto.ResDTO;
-import vn.tdtu.edu.exception.BadRequestException;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.viewmodel.ResponseVM;
 import vn.tdtu.edu.model.Violation;
 import vn.tdtu.edu.repository.ViolationRepository;
 import vn.tdtu.edu.service.interfaces.ViolationService;
@@ -16,27 +16,27 @@ public class ViolationServiceImpl implements ViolationService {
     private final ViolationRepository violationRepository;
 
     @Override
-    public ResDTO<Violation> findByRefId(String refId) {
+    public ResponseVM<Violation> findByRefId(String refId) {
         Violation foundViolation = violationRepository.findByRefId(refId)
-                .orElseThrow(() -> new BadRequestException(MessageCode.VIOLATION_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Notification.VIOLATION_NOT_FOUND));
 
-        ResDTO<Violation> response = new ResDTO<>();
+        ResponseVM<Violation> response = new ResponseVM<>();
         response.setData(foundViolation);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.VIOLATION_FETCHED);
+        response.setMessage(MessageCode.Notification.VIOLATION_FETCHED);
 
         return response;
     }
 
     @Override
-    public ResDTO<Violation> findById(String id) {
+    public ResponseVM<Violation> findById(String id) {
         Violation foundViolation = violationRepository.findById(id)
-                .orElseThrow(() -> new BadRequestException(MessageCode.VIOLATION_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Notification.VIOLATION_NOT_FOUND));
 
-        ResDTO<Violation> response = new ResDTO<>();
+        ResponseVM<Violation> response = new ResponseVM<>();
         response.setData(foundViolation);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.VIOLATION_FETCHED);
+        response.setMessage(MessageCode.Notification.VIOLATION_FETCHED);
 
         return response;
     }

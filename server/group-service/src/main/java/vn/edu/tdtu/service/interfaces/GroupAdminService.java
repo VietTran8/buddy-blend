@@ -1,10 +1,10 @@
 package vn.edu.tdtu.service.interfaces;
 
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.PromoteToAdminRequest;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 public interface GroupAdminService {
-    public void adminCheck(String groupId);
+    void adminCheck(String groupId);
 
-    public ResDTO<?> promoteToAdmin(PromoteToAdminRequest request);
+    ResponseVM<?> promoteToAdmin(PromoteToAdminRequest request);
 }

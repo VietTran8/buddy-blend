@@ -4,15 +4,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.FQAcceptationDTO;
 import vn.edu.tdtu.dto.request.FriendReqDTO;
 import vn.edu.tdtu.dto.response.FriendRequestResponse;
 import vn.edu.tdtu.dto.response.HandleFriendRequestResponse;
 import vn.edu.tdtu.enums.EFriendReqStatus;
-import vn.edu.tdtu.exception.BadRequestException;
-import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.mapper.request.AddFriendReqMapper;
 import vn.edu.tdtu.mapper.response.FriendRequestResponseMapper;
 import vn.edu.tdtu.mapper.response.MinimizedUserMapper;
@@ -23,8 +19,12 @@ import vn.edu.tdtu.publisher.KafkaEventPublisher;
 import vn.edu.tdtu.repository.FriendRequestRepository;
 import vn.edu.tdtu.repository.UserRepository;
 import vn.edu.tdtu.service.interfaces.FriendRequestService;
-import vn.edu.tdtu.util.SecurityContextUtils;
 import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.exception.UnauthorizedException;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,28 +40,59 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     private final MinimizedUserMapper minimizedUserMapper;
     private final FriendRequestResponseMapper friendRequestResponseMapper;
 
+    private static void rejectFriendRequest(FriendRequest fRequest, Map<String, String> data, ResponseVM<Map<String, String>> response) {
+        fRequest.setStatus(EFriendReqStatus.DENIED);
+
+        data.put("status", fRequest.getStatus().name());
+
+        response.setData(data);
+        response.setMessage(MessageCode.User.FRIEND_REQUEST_REJECTED);
+        response.setCode(HttpServletResponse.SC_OK);
+    }
+
+    private static void acceptFriend(FriendRequest fRequest, Map<String, String> data, ResponseVM<Map<String, String>> response) {
+        fRequest.setStatus(EFriendReqStatus.ACCEPTED);
+
+        data.put("status", fRequest.getStatus().name());
+
+        response.setData(data);
+        response.setMessage(MessageCode.User.FRIEND_REQUEST_ACCEPTED);
+        response.setCode(HttpServletResponse.SC_OK);
+    }
+
+    private static FriendRequestMessage getFriendRequestMessage(FriendRequest newRequest) {
+        FriendRequestMessage notification = new FriendRequestMessage();
+        notification.setFromUserId(newRequest.getFromUser().getId());
+        notification.setNotificationKey(newRequest.getToUser().getNotificationKey());
+        notification.setContent(newRequest.getFromUser().getUserFullName() + " đã gửi cho bạn lời mời kết bạn");
+        notification.setTitle("Yêu cầu kết bạn");
+        notification.setToUserId(newRequest.getToUser().getId());
+
+        return notification;
+    }
+
     @Override
-    public ResDTO<?> handleFriendRequest(FriendReqDTO request) {
+    public ResponseVM<?> handleFriendRequest(FriendReqDTO request) {
         String fromUserId = SecurityContextUtils.getUserId();
-        ResDTO<HandleFriendRequestResponse> response = new ResDTO<>();
+        ResponseVM<HandleFriendRequestResponse> response = new ResponseVM<>();
 
         log.info(fromUserId);
         if (fromUserId == null) {
-            throw new BadRequestException(MessageCode.AUTH_UNAUTHORIZED);
+            throw new BadRequestException(MessageCode.Authentication.AUTH_UNAUTHORIZED);
         }
 
         if (fromUserId.equals(request.getToUserId())) {
-            throw new BadRequestException(MessageCode.FRIEND_REQUEST_CAN_NOT_SEND);
+            throw new BadRequestException(MessageCode.User.FRIEND_REQUEST_CAN_NOT_SEND);
         }
 
         FriendRequest newRequest = addFriendReqMapper.mapToObject(fromUserId, request);
 
         if (newRequest.getFromUser() == null) {
-            throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, fromUserId);
+            throw new BadRequestException(MessageCode.User.USER_NOT_FOUND_ID, fromUserId);
         }
 
         if (newRequest.getToUser() == null) {
-            throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, request.getToUserId());
+            throw new BadRequestException(MessageCode.User.USER_NOT_FOUND_ID, request.getToUserId());
         }
 
         User fromUser = newRequest.getFromUser(),
@@ -71,7 +102,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 .findByToUserAndFromUserOrFromUserAndToUser(toUser, fromUser, toUser, fromUser)
                 .stream().anyMatch(req -> fromUserId.equals(req.getToUser().getId()) && req.getStatus().equals(EFriendReqStatus.PENDING))) {
 
-            throw new BadRequestException(MessageCode.FRIEND_REQUEST_CAN_NOT_SEND_TO_USER_ID, request.getToUserId());
+            throw new BadRequestException(MessageCode.User.FRIEND_REQUEST_CAN_NOT_SEND_TO_USER_ID, request.getToUserId());
         }
 
         List<User> toUserListFriends = getListFriends(toUser.getId());
@@ -121,8 +152,8 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
     @Override
-    public ResDTO<?> getListFriendsResp(String token, String id) {
-        ResDTO<List<UserDTO>> response = new ResDTO<>();
+    public ResponseVM<?> getListFriendsResp(String token, String id) {
+        ResponseVM<List<UserDTO>> response = new ResponseVM<>();
         String userId = id == null ? SecurityContextUtils.getUserId() : id;
 
         List<UserDTO> minimizedUsers = getListFriends(userId).stream().map(
@@ -130,31 +161,31 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         ).filter(friend -> !friend.isHiddenBanned()).toList();
 
         if (userId != null) {
-            response.setMessage(MessageCode.FRIEND_REQUEST_FRIEND_LIST_FETCHED);
+            response.setMessage(MessageCode.User.FRIEND_REQUEST_FRIEND_LIST_FETCHED);
             response.setCode(HttpServletResponse.SC_OK);
             response.setData(minimizedUsers);
 
             return response;
         }
 
-        throw new UnauthorizedException(MessageCode.AUTH_UNAUTHORIZED);
+        throw new UnauthorizedException(MessageCode.Authentication.AUTH_UNAUTHORIZED);
     }
 
     @Override
-    public ResDTO<?> getFriendIds(String userId) {
-        ResDTO<List<String>> response = new ResDTO<>();
+    public ResponseVM<?> getFriendIds(String userId) {
+        ResponseVM<List<String>> response = new ResponseVM<>();
 
         List<User> minimizedUsers = getListFriends(userId);
 
         if (userId != null) {
-            response.setMessage(MessageCode.FRIEND_REQUEST_FRIEND_LIST_FETCHED);
+            response.setMessage(MessageCode.User.FRIEND_REQUEST_FRIEND_LIST_FETCHED);
             response.setCode(HttpServletResponse.SC_OK);
             response.setData(minimizedUsers.stream().map(User::getId).toList());
 
             return response;
         }
 
-        throw new BadRequestException(MessageCode.USER_ID_NOT_NULL);
+        throw new BadRequestException(MessageCode.User.USER_ID_NOT_NULL);
     }
 
     @Override
@@ -169,16 +200,16 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
     @Override
-    public ResDTO<?> getListFriendRequestResp(String token) {
-        ResDTO<List<FriendRequestResponse>> response = new ResDTO<>();
+    public ResponseVM<?> getListFriendRequestResp(String token) {
+        ResponseVM<List<FriendRequestResponse>> response = new ResponseVM<>();
 
         String userId = SecurityContextUtils.getUserId();
 
         if (userId == null) {
-            throw new UnauthorizedException(MessageCode.AUTH_UNAUTHORIZED);
+            throw new UnauthorizedException(MessageCode.Authentication.AUTH_UNAUTHORIZED);
         }
 
-        response.setMessage(MessageCode.FRIEND_REQUEST_FETCHED);
+        response.setMessage(MessageCode.User.FRIEND_REQUEST_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
         response.setData(
                 getListFriendRequest(userId)
@@ -193,12 +224,12 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
     @Override
-    public ResDTO<?> getFriendRequestIdByFromUserId(String fromUserId) {
+    public ResponseVM<?> getFriendRequestIdByFromUserId(String fromUserId) {
         FriendRequest foundFriendRequest = friendRequestRepository.findByFromUserIdAndToUserId(fromUserId, SecurityContextUtils.getUserId())
-                .orElseThrow(() -> new BadRequestException(MessageCode.FRIEND_REQUEST_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.User.FRIEND_REQUEST_NOT_FOUND));
 
-        return new ResDTO<>(
-                MessageCode.FRIEND_REQUEST_FETCHED,
+        return new ResponseVM<>(
+                MessageCode.User.FRIEND_REQUEST_FETCHED,
                 foundFriendRequest.getId(),
                 HttpServletResponse.SC_OK
         );
@@ -210,23 +241,23 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
     @Override
-    public ResDTO<?> friendRequestAcceptation(FQAcceptationDTO request) {
-        ResDTO<Map<String, String>> response = new ResDTO<>();
+    public ResponseVM<?> friendRequestAcceptation(FQAcceptationDTO request) {
+        ResponseVM<Map<String, String>> response = new ResponseVM<>();
         Map<String, String> data = new HashMap<>();
 
         FriendRequest fRequest = friendRequestRepository.findById(request.getFriendReqId()).orElseThrow(
-                () -> new BadRequestException(MessageCode.FRIEND_REQUEST_NOT_FOUND)
+                () -> new BadRequestException(MessageCode.User.FRIEND_REQUEST_NOT_FOUND)
         );
 
         if (!fRequest.getToUser().getId().equals(SecurityContextUtils.getUserId())) {
-            throw new BadRequestException(MessageCode.AUTH_NOT_PERMITTED);
+            throw new BadRequestException(MessageCode.Authentication.AUTH_NOT_PERMITTED);
         }
 
         data.put("requestId", fRequest.getId());
         data.put("status", fRequest.getStatus().name());
 
         if (!fRequest.getStatus().equals(EFriendReqStatus.PENDING))
-            throw new BadRequestException(MessageCode.FRIEND_REQUEST_JUST_HANDLE_PENDING);
+            throw new BadRequestException(MessageCode.User.FRIEND_REQUEST_JUST_HANDLE_PENDING);
 
         if (request.getIsAccept()) {
             acceptFriend(fRequest, data, response);
@@ -242,7 +273,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
     @Override
-    public ResDTO<?> getFriendSuggestions() {
+    public ResponseVM<?> getFriendSuggestions() {
         String authUserId = SecurityContextUtils.getUserId();
 
         List<User> myFriends = getListFriends(authUserId);
@@ -264,37 +295,16 @@ public class FriendRequestServiceImpl implements FriendRequestService {
                 .sorted(Comparator.comparing(UserDTO::getUserFullName))
                 .toList();
 
-        ResDTO<List<UserDTO>> response = new ResDTO<>();
+        ResponseVM<List<UserDTO>> response = new ResponseVM<>();
         response.setData(responseData);
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.FRIEND_REQUEST_SUGGESTION_FETCHED);
+        response.setMessage(MessageCode.User.FRIEND_REQUEST_SUGGESTION_FETCHED);
 
         return response;
 
     }
 
-
-    private static void rejectFriendRequest(FriendRequest fRequest, Map<String, String> data, ResDTO<Map<String, String>> response) {
-        fRequest.setStatus(EFriendReqStatus.DENIED);
-
-        data.put("status", fRequest.getStatus().name());
-
-        response.setData(data);
-        response.setMessage(MessageCode.FRIEND_REQUEST_REJECTED);
-        response.setCode(HttpServletResponse.SC_OK);
-    }
-
-    private static void acceptFriend(FriendRequest fRequest, Map<String, String> data, ResDTO<Map<String, String>> response) {
-        fRequest.setStatus(EFriendReqStatus.ACCEPTED);
-
-        data.put("status", fRequest.getStatus().name());
-
-        response.setData(data);
-        response.setMessage(MessageCode.FRIEND_REQUEST_ACCEPTED);
-        response.setCode(HttpServletResponse.SC_OK);
-    }
-
-    private void sendFriendRequest(FriendRequest newRequest, HandleFriendRequestResponse responseData, ResDTO<HandleFriendRequestResponse> response) {
+    private void sendFriendRequest(FriendRequest newRequest, HandleFriendRequestResponse responseData, ResponseVM<HandleFriendRequestResponse> response) {
         friendRequestRepository.save(newRequest);
 
         responseData.setRequestId(newRequest.getId());
@@ -305,27 +315,16 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         kafkaEventPublisher.pubFriendRequestNoti(notification);
 
         response.setData(responseData);
-        response.setMessage(MessageCode.FRIEND_REQUEST_SENT);
+        response.setMessage(MessageCode.User.FRIEND_REQUEST_SENT);
         response.setCode(HttpServletResponse.SC_OK);
     }
 
-    private static FriendRequestMessage getFriendRequestMessage(FriendRequest newRequest) {
-        FriendRequestMessage notification = new FriendRequestMessage();
-        notification.setFromUserId(newRequest.getFromUser().getId());
-        notification.setNotificationKey(newRequest.getToUser().getNotificationKey());
-        notification.setContent(newRequest.getFromUser().getUserFullName() + " đã gửi cho bạn lời mời kết bạn");
-        notification.setTitle("Yêu cầu kết bạn");
-        notification.setToUserId(newRequest.getToUser().getId());
-
-        return notification;
-    }
-
-    private void unfriend(HandleFriendRequestResponse data, ResDTO<HandleFriendRequestResponse> response, User fromUser, User toUser) {
+    private void unfriend(HandleFriendRequestResponse data, ResponseVM<HandleFriendRequestResponse> response, User fromUser, User toUser) {
         List<FriendRequest> friendRequests = friendRequestRepository.findByToUserAndFromUserOrFromUserAndToUser(toUser, fromUser, toUser, fromUser).stream().filter(req -> req.isActive() && req.getStatus().equals(EFriendReqStatus.ACCEPTED)).toList();
         FriendRequest friendRequest = friendRequests.stream().findFirst().orElse(null);
 
         if (friendRequest == null) {
-            throw new BadRequestException(MessageCode.FRIEND_REQUEST_NOT_FOUND);
+            throw new BadRequestException(MessageCode.User.FRIEND_REQUEST_NOT_FOUND);
         }
 
         friendRequestRepository.delete(friendRequest);
@@ -333,16 +332,16 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         data.setStatus(EFriendReqStatus.CANCELLED);
 
         response.setData(data);
-        response.setMessage(MessageCode.FRIEND_REQUEST_UNFRIENDED);
+        response.setMessage(MessageCode.User.FRIEND_REQUEST_UNFRIENDED);
         response.setCode(HttpServletResponse.SC_OK);
     }
 
-    private void cancelFriendRequest(HandleFriendRequestResponse data, ResDTO<HandleFriendRequestResponse> response, User fromUser, User toUser) {
+    private void cancelFriendRequest(HandleFriendRequestResponse data, ResponseVM<HandleFriendRequestResponse> response, User fromUser, User toUser) {
         List<FriendRequest> friendRequests = friendRequestRepository.findByToUserAndFromUserOrFromUserAndToUser(toUser, fromUser, toUser, fromUser).stream().filter(req -> req.isActive() && req.getStatus().equals(EFriendReqStatus.PENDING)).toList();
         FriendRequest friendRequest = friendRequests.stream().findFirst().orElse(null);
 
         if (friendRequest == null) {
-            throw new BadRequestException(MessageCode.FRIEND_REQUEST_NOT_FOUND);
+            throw new BadRequestException(MessageCode.User.FRIEND_REQUEST_NOT_FOUND);
         }
 
         friendRequestRepository.delete(friendRequest);
@@ -350,7 +349,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         data.setStatus(EFriendReqStatus.CANCELLED);
 
         response.setData(data);
-        response.setMessage(MessageCode.FRIEND_REQUEST_CANCELLED);
+        response.setMessage(MessageCode.User.FRIEND_REQUEST_CANCELLED);
         response.setCode(HttpServletResponse.SC_OK);
     }
 }

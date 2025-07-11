@@ -4,9 +4,9 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
-import vn.edu.tdtu.config.openfeign.FeignConfig;
-import vn.edu.tdtu.dto.ResDTO;
+import vn.tdtu.common.config.openfeign.FeignConfig;
 import vn.tdtu.common.dto.GroupDTO;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.List;
 
@@ -14,14 +14,14 @@ import java.util.List;
 public interface GroupClient {
 
     @GetMapping("/min/{groupId}")
-    public ResDTO<GroupDTO> getGroupInfoById(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
+    ResponseVM<GroupDTO> getGroupInfoById(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
 
     @GetMapping("")
-    public ResDTO<List<GroupDTO>> getMyGroups(@RequestHeader("Authorization") String accessToken);
+    ResponseVM<List<GroupDTO>> getMyGroups(@RequestHeader("Authorization") String accessToken);
 
     @GetMapping("/{groupId}/allow-fetch-post")
-    public ResDTO<Boolean> allowFetchPost(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
+    ResponseVM<Boolean> allowFetchPost(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
 
     @GetMapping("/{groupId}/members/id")
-    public ResDTO<List<String>> getMemberIdList(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
+    ResponseVM<List<String>> getMemberIdList(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
 }

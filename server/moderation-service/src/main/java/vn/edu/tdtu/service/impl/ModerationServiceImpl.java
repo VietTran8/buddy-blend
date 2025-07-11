@@ -23,6 +23,7 @@ import vn.edu.tdtu.message.ModerateMessage;
 import vn.edu.tdtu.service.interfaces.GeminiService;
 import vn.edu.tdtu.service.interfaces.ModerationService;
 import vn.edu.tdtu.utils.BeanOutputParser;
+import vn.tdtu.common.utils.Constants;
 
 import java.io.IOException;
 import java.net.URI;
@@ -39,6 +40,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class ModerationServiceImpl implements ModerationService {
+    private final GeminiService geminiService;
     @Value("${sight.engine.api.key.user}")
     private String userKey;
     @Value("${sight.engine.api.key.secret}")
@@ -51,7 +53,34 @@ public class ModerationServiceImpl implements ModerationService {
     private Resource moderationResource;
     @Value("classpath:/prompts/reason_parsing.st")
     private Resource reasonParsingResource;
-    private final GeminiService geminiService;
+
+    private static ModerateResponseDto handleBulkResponseData(BulkModerationResponse moderationResponse) {
+        boolean result = true;
+        StringBuilder rejectReason = new StringBuilder();
+
+        for (ModerationResponse data : moderationResponse.getData()) {
+            if ("reject".equalsIgnoreCase(data.getSummary().getAction())) {
+                result = false;
+                rejectReason.append(data.getSummary().getReject_reason()
+                                .stream()
+                                .map(RejectReason::getText)
+                                .collect(Collectors.joining("; ")))
+                        .append("; ");
+            }
+        }
+
+        handleRejectMessage(rejectReason);
+
+        return ModerateResponseDto.builder()
+                .accept(result)
+                .rejectReason(rejectReason.toString())
+                .build();
+    }
+
+    private static void handleRejectMessage(StringBuilder rejectReason) {
+        if (!rejectReason.isEmpty())
+            rejectReason.delete(rejectReason.length() - 2, rejectReason.length());
+    }
 
     @Override
     public ModerateResponseDto moderateImage(String mediaUrl) {
@@ -177,9 +206,9 @@ public class ModerationServiceImpl implements ModerationService {
             builder.addTextBody("url[]", mediaUrl, ContentType.TEXT_PLAIN);
         });
 
-        builder.addTextBody("workflow", workflow, ContentType.TEXT_PLAIN);
-        builder.addTextBody("api_user", userKey, ContentType.TEXT_PLAIN);
-        builder.addTextBody("api_secret", secretKey, ContentType.TEXT_PLAIN);
+        builder.addTextBody(Constants.SightEngine.REQUEST_BODY_WORKFLOW, workflow, ContentType.TEXT_PLAIN);
+        builder.addTextBody(Constants.SightEngine.REQUEST_BODY_API_USER, userKey, ContentType.TEXT_PLAIN);
+        builder.addTextBody(Constants.SightEngine.REQUEST_BODY_API_SECRET, secretKey, ContentType.TEXT_PLAIN);
 
         HttpEntity entity = builder.build();
         httpPost.setEntity(entity);
@@ -239,34 +268,6 @@ public class ModerationServiceImpl implements ModerationService {
                 .accept(false)
                 .rejectReason("Error during moderation")
                 .build();
-    }
-
-    private static ModerateResponseDto handleBulkResponseData(BulkModerationResponse moderationResponse) {
-        boolean result = true;
-        StringBuilder rejectReason = new StringBuilder();
-
-        for (ModerationResponse data : moderationResponse.getData()) {
-            if ("reject".equalsIgnoreCase(data.getSummary().getAction())) {
-                result = false;
-                rejectReason.append(data.getSummary().getReject_reason()
-                                .stream()
-                                .map(RejectReason::getText)
-                                .collect(Collectors.joining("; ")))
-                        .append("; ");
-            }
-        }
-
-        handleRejectMessage(rejectReason);
-
-        return ModerateResponseDto.builder()
-                .accept(result)
-                .rejectReason(rejectReason.toString())
-                .build();
-    }
-
-    private static void handleRejectMessage(StringBuilder rejectReason) {
-        if (!rejectReason.isEmpty())
-            rejectReason.delete(rejectReason.length() - 2, rejectReason.length());
     }
 
     private String getVietnameseRejectReason(String englishRejectReason) {

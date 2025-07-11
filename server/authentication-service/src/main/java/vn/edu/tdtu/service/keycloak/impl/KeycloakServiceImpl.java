@@ -11,15 +11,15 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.config.keycloak.KeycloakPropsConfig;
-import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.keycloak.KeycloakAuthTokenRequest;
-import vn.edu.tdtu.dto.keycloak.KeycloakRefreshTokenRequest;
+import vn.edu.tdtu.dto.keycloak.KeycloakRefreshTokenOrLogoutRequest;
 import vn.edu.tdtu.dto.keycloak.KeycloakTokenResponse;
-import vn.edu.tdtu.enums.EUserRole;
-import vn.edu.tdtu.exception.BadRequestException;
-import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.service.keycloak.interfaces.KeycloakClientService;
 import vn.edu.tdtu.service.keycloak.interfaces.KeycloakService;
+import vn.tdtu.common.enums.user.EUserRole;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.exception.UnauthorizedException;
+import vn.tdtu.common.utils.MessageCode;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,13 +38,13 @@ public class KeycloakServiceImpl implements KeycloakService {
             realmResource.users().get(keycloakUserId).roles()
                     .realmLevel()
                     .add(role.stream().map(
-                                item -> realmResource.roles()
-                                        .get(item.name())
-                                        .toRepresentation()).toList()
+                            item -> realmResource.roles()
+                                    .get(item.name())
+                                    .toRepresentation()).toList()
                     );
 
         } catch (Exception e) {
-            throw new BadRequestException(MessageCode.KEYCLOAK_ASSIGN_ROLES_FAILED, e.getMessage());
+            throw new BadRequestException(MessageCode.Authentication.KEYCLOAK_ASSIGN_ROLES_FAILED, e.getMessage());
         }
     }
 
@@ -58,7 +58,7 @@ public class KeycloakServiceImpl implements KeycloakService {
                     );
 
         } catch (Exception e) {
-            throw new BadRequestException(MessageCode.KEYCLOAK_REMOVE_ROLES_FAILED, e.getMessage());
+            throw new BadRequestException(MessageCode.Authentication.KEYCLOAK_REMOVE_ROLES_FAILED, e.getMessage());
         }
     }
 
@@ -73,7 +73,7 @@ public class KeycloakServiceImpl implements KeycloakService {
             realmResource.users().get(keycloakUserId)
                     .resetPassword(credentialRepresentation);
         } catch (Exception e) {
-            throw new BadRequestException(MessageCode.KEYCLOAK_RESET_PASSWORD_FAILED, e.getMessage());
+            throw new BadRequestException(MessageCode.Authentication.KEYCLOAK_RESET_PASSWORD_FAILED, e.getMessage());
         }
     }
 
@@ -86,7 +86,7 @@ public class KeycloakServiceImpl implements KeycloakService {
                     .users()
                     .create(userRepresentation);
         } catch (Exception e) {
-            throw new BadRequestException(MessageCode.KEYCLOAK_CREATE_USER_FAILED, e.getMessage());
+            throw new BadRequestException(MessageCode.Authentication.KEYCLOAK_CREATE_USER_FAILED, e.getMessage());
         }
 
         int createStatus = createUserResponse.getStatus();
@@ -94,7 +94,7 @@ public class KeycloakServiceImpl implements KeycloakService {
         if (createStatus == HttpStatus.SC_CREATED)
             return createUserResponse.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
 
-        throw new BadRequestException(MessageCode.KEYCLOAK_CREATE_USER_FAILED_W_STATUS, createStatus, createUserResponse.readEntity(String.class));
+        throw new BadRequestException(MessageCode.Authentication.KEYCLOAK_CREATE_USER_FAILED_W_STATUS, createStatus, createUserResponse.readEntity(String.class));
     }
 
     @Override
@@ -104,7 +104,7 @@ public class KeycloakServiceImpl implements KeycloakService {
                     .get(keycloakUserId)
                     .update(userRepresentation);
         } catch (Exception e) {
-            throw new BadRequestException(MessageCode.KEYCLOAK_UPDATE_USER_FAILED, e.getMessage());
+            throw new BadRequestException(MessageCode.Authentication.KEYCLOAK_UPDATE_USER_FAILED, e.getMessage());
         }
     }
 
@@ -151,7 +151,7 @@ public class KeycloakServiceImpl implements KeycloakService {
 
     @Override
     public KeycloakTokenResponse refreshToken(String refreshToken) {
-        KeycloakRefreshTokenRequest request = new KeycloakRefreshTokenRequest(
+        KeycloakRefreshTokenOrLogoutRequest refreshTokenRequest = new KeycloakRefreshTokenOrLogoutRequest(
                 OAuth2Constants.REFRESH_TOKEN,
                 keycloakPropsConfig.getResource(),
                 keycloakPropsConfig.getCredentials().getSecret(),
@@ -159,10 +159,30 @@ public class KeycloakServiceImpl implements KeycloakService {
         );
 
         try {
-            return keycloakClientService.refreshToken(request);
+            return keycloakClientService.refreshToken(refreshTokenRequest);
         } catch (AuthenticationException e) {
             log.error(e.getMessage());
-            throw new UnauthorizedException(MessageCode.AUTH_INVALID_REFRESH_TOKEN);
+            throw new UnauthorizedException(MessageCode.Authentication.AUTH_INVALID_REFRESH_TOKEN);
+        }
+    }
+
+    @Override
+    public boolean logoutUser(String refreshToken) {
+        KeycloakRefreshTokenOrLogoutRequest logoutRequest = new KeycloakRefreshTokenOrLogoutRequest(
+                keycloakPropsConfig.getResource(),
+                keycloakPropsConfig.getCredentials().getSecret(),
+                refreshToken
+        );
+
+        try {
+            keycloakClientService.logout(logoutRequest);
+            return true;
+        } catch (AuthenticationException e) {
+            log.error("[logout] Authentication failed with error ", e);
+            throw new UnauthorizedException(MessageCode.Authentication.AUTH_INVALID_REFRESH_TOKEN);
+        } catch (Exception e) {
+            log.warn("[logout] Exception occurred during logout", e);
+            throw new BadRequestException(MessageCode.Authentication.KEYCLOAK_LOGOUT_FAILED, e.getMessage());
         }
     }
 }

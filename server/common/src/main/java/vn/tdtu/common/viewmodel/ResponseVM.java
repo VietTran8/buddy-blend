@@ -1,5 +1,6 @@
 package vn.tdtu.common.viewmodel;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,5 +20,28 @@ public class ResponseVM<D> {
 
     public String getMessage() {
         return MessageUtils.getMessage(this.message);
+    }
+
+    public ResponseVM<D> withMessage(String message) {
+        this.message = message;
+        return this;
+    }
+
+    public ResponseVM<D> withData(D message) {
+        this.data = data;
+        return this;
+    }
+
+    public ResponseVM<D> withCode(Integer code) {
+        this.code = code;
+        return this;
+    }
+
+    public static ResponseVM<?> noContent() {
+        return new ResponseVM<>(
+                null,
+                null,
+                HttpServletResponse.SC_NO_CONTENT
+        );
     }
 }

@@ -3,10 +3,10 @@ package vn.edu.tdtu.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.repository.httpclient.PostClient;
 import vn.edu.tdtu.service.interfaces.PostService;
 import vn.tdtu.common.dto.PostDTO;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 @Service
 @Slf4j
@@ -16,7 +16,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostDTO findById(String token, String postId) {
-        ResDTO<PostDTO> response = postClient.findById(token, postId);
+        ResponseVM<PostDTO> response = postClient.findById(token, postId);
 
         return response.getData();
     }

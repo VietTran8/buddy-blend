@@ -3,9 +3,9 @@ package vn.edu.tdtu.mapper;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.model.CommentReactions;
 import vn.edu.tdtu.model.Reactions;
-import vn.edu.tdtu.util.DateUtils;
 import vn.tdtu.common.dto.ReactionDTO;
 import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.utils.DateUtils;
 
 import java.util.List;
 

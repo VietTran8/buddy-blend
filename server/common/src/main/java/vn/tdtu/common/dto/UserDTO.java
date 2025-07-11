@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.tdtu.common.enums.user.EFriendStatus;
-import vn.tdtu.common.enums.user.EUserMappingType;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -21,6 +20,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDTO implements Serializable {
+
     @Schema(description = "Unique identifier of the user")
     private String id;
 
@@ -98,37 +98,20 @@ public class UserDTO implements Serializable {
     @Schema(description = "Mutual friend profile image")
     private String profileImage;
 
-    public UserDTO(UserDTO baseUser, EUserMappingType mappingType) {
-        if(EUserMappingType.TYPE_MINIMIZED.equals(mappingType)) {
-            this.setId(baseUser.getId());
-            this.setEmail(baseUser.getEmail());
-            this.setFirstName(baseUser.getFirstName());
-            this.setMiddleName(baseUser.getMiddleName());
-            this.setLastName(baseUser.getLastName());
-            this.setProfilePicture(baseUser.getProfilePicture());
-            this.setCreatedAt(baseUser.getCreatedAt());
-            this.setUserFullName(baseUser.getUserFullName());
-            this.setNotificationKey(baseUser.getNotificationKey());
-            this.setFriend(baseUser.isFriend());
-            this.setMutualFriends(baseUser.getMutualFriends());
-            this.setFriendsCount(baseUser.getFriendsCount());
-            this.setOnline(baseUser.isOnline());
-            this.setFriendStatus(baseUser.getFriendStatus());
-        } else if (EUserMappingType.TYPE_DETAILED.equals(mappingType)) {
-            this.setId(baseUser.getId());
-            this.setEmail(baseUser.getEmail());
-            this.setFirstName(baseUser.getFirstName());
-            this.setMiddleName(baseUser.getMiddleName());
-            this.setLastName(baseUser.getLastName());
-            this.setProfilePicture(baseUser.getProfilePicture());
-            this.setCreatedAt(baseUser.getCreatedAt());
-            this.setUserFullName(baseUser.getUserFullName());
-            this.setNotificationKey(baseUser.getNotificationKey());
-            this.setFriend(baseUser.isFriend());
-            this.setMutualFriends(baseUser.getMutualFriends());
-            this.setFriendsCount(baseUser.getFriendsCount());
-            this.setOnline(baseUser.isOnline());
-            this.setFriendStatus(baseUser.getFriendStatus());
-        }
+    public UserDTO(UserDTO baseUser) {
+        this.setId(baseUser.getId());
+        this.setEmail(baseUser.getEmail());
+        this.setFirstName(baseUser.getFirstName());
+        this.setMiddleName(baseUser.getMiddleName());
+        this.setLastName(baseUser.getLastName());
+        this.setProfilePicture(baseUser.getProfilePicture());
+        this.setCreatedAt(baseUser.getCreatedAt());
+        this.setUserFullName(baseUser.getUserFullName());
+        this.setNotificationKey(baseUser.getNotificationKey());
+        this.setFriend(baseUser.isFriend());
+        this.setMutualFriends(baseUser.getMutualFriends());
+        this.setFriendsCount(baseUser.getFriendsCount());
+        this.setOnline(baseUser.isOnline());
+        this.setFriendStatus(baseUser.getFriendStatus());
     }
 }

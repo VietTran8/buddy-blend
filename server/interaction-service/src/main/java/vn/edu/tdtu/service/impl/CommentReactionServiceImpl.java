@@ -1,8 +1,6 @@
 package vn.edu.tdtu.service.impl;
 
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.requests.DoCommentReactRequest;
 import vn.edu.tdtu.mapper.CommentReactionMapper;
 import vn.edu.tdtu.mapper.ReactResponseMapper;
@@ -10,10 +8,12 @@ import vn.edu.tdtu.model.CommentReactions;
 import vn.edu.tdtu.repository.CommentReactionRepository;
 import vn.edu.tdtu.service.interfaces.CommentReactionService;
 import vn.edu.tdtu.service.interfaces.UserService;
-import vn.edu.tdtu.util.SecurityContextUtils;
 import vn.tdtu.common.dto.ReactionDTO;
 import vn.tdtu.common.dto.UserDTO;
 import vn.tdtu.common.enums.interaction.EReactionType;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,8 +29,8 @@ public record CommentReactionServiceImpl(
 ) implements CommentReactionService {
 
     @Override
-    public ResDTO<?> doReact(DoCommentReactRequest request) {
-        ResDTO<List<ReactionDTO>> responseData = new ResDTO<>();
+    public ResponseVM<?> doReact(DoCommentReactRequest request) {
+        ResponseVM<List<ReactionDTO>> responseData = new ResponseVM<>();
         responseData.setCode(200);
         responseData.setData(null);
 
@@ -39,16 +39,16 @@ public record CommentReactionServiceImpl(
                 (reaction) -> {
                     if (request.getType().equals(reaction.getType())) {
                         commentReactionRepository.delete(reaction);
-                        responseData.setMessage(MessageCode.REACTION_UNCREATED);
+                        responseData.setMessage(MessageCode.Interaction.REACTION_UNCREATED);
                     } else {
                         reaction.setType(request.getType());
                         reaction.setCreatedAt(LocalDateTime.now());
-                        responseData.setMessage(MessageCode.REACTION_UPDATED);
+                        responseData.setMessage(MessageCode.Interaction.REACTION_UPDATED);
                         commentReactionRepository.save(reaction);
                     }
                 }, () -> {
                     CommentReactions commentReactions = commentReactionMapper.mapToObject(userId, request);
-                    responseData.setMessage(MessageCode.REACTION_CREATED);
+                    responseData.setMessage(MessageCode.Interaction.REACTION_CREATED);
                     commentReactionRepository.save(commentReactions);
                 }
         );
@@ -60,8 +60,8 @@ public record CommentReactionServiceImpl(
     }
 
     @Override
-    public ResDTO<Map<EReactionType, List<ReactionDTO>>> getReactsByCmtId(String token, String cmtId) {
-        ResDTO<Map<EReactionType, List<ReactionDTO>>> response = new ResDTO<>();
+    public ResponseVM<Map<EReactionType, List<ReactionDTO>>> getReactsByCmtId(String token, String cmtId) {
+        ResponseVM<Map<EReactionType, List<ReactionDTO>>> response = new ResponseVM<>();
         String userId = SecurityContextUtils.getUserId();
 
         List<CommentReactions> reactions = commentReactionRepository.findReactionsByCmtIdOrderByCreatedAtDesc(cmtId);
@@ -75,7 +75,7 @@ public record CommentReactionServiceImpl(
 
         response.setCode(200);
         response.setData(reactResponses);
-        response.setMessage(MessageCode.REACTION_FETCHED);
+        response.setMessage(MessageCode.Interaction.REACTION_FETCHED);
 
         return response;
     }

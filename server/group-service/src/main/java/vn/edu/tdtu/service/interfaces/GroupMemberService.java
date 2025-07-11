@@ -1,9 +1,10 @@
 package vn.edu.tdtu.service.interfaces;
 
-import vn.edu.tdtu.dto.ResDTO;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 public interface GroupMemberService {
-    public void removeGroupMemberById(String id);
+    void removeGroupMemberById(String id);
 
-    public ResDTO<?> removeMember(String groupId, String memberId);
+    ResponseVM<?> removeMember(String groupId, String memberId);
+
 }

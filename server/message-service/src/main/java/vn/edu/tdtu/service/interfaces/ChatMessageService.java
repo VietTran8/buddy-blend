@@ -1,14 +1,14 @@
 package vn.edu.tdtu.service.interfaces;
 
 import vn.edu.tdtu.dto.MessageResponse;
-import vn.edu.tdtu.dto.PaginationResponse;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.model.ChatMessage;
+import vn.tdtu.common.viewmodel.PaginationResponseVM;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.Date;
 
 public interface ChatMessageService {
-    public ChatMessage saveMessage(ChatMessage message);
+    ChatMessage saveMessage(ChatMessage message);
 
-    public ResDTO<PaginationResponse<MessageResponse>> getRoomMessages(String roomId, Date anchorDate, int page, int size);
+    ResponseVM<PaginationResponseVM<MessageResponse>> getRoomMessages(String roomId, Date anchorDate, int page, int size);
 }

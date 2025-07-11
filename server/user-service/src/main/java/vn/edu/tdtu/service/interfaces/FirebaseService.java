@@ -6,11 +6,11 @@ import vn.edu.tdtu.model.User;
 import java.util.List;
 
 public interface FirebaseService {
-    public String getAccessToken();
+    String getAccessToken();
 
-    public void removeUserRegistrationId(User user, List<String> registrationIds);
+    void removeUserRegistrationId(User user, List<String> registrationIds);
 
-    public void saveUserDeviceGroup(User user, List<String> registrationIds);
+    void saveUserDeviceGroup(User user, List<String> registrationIds);
 
-    public FcmResponse getNotificationKey(String notificationKeyName);
+    FcmResponse getNotificationKey(String notificationKeyName);
 }

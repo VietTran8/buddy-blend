@@ -4,14 +4,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.CreateStoryRequest;
 import vn.edu.tdtu.dto.response.LatestStoriesResponse;
-import vn.edu.tdtu.dto.response.StoryIdResponse;
 import vn.edu.tdtu.dto.response.StoryResponse;
 import vn.edu.tdtu.dto.response.ViewerResponse;
-import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.StoryMapper;
 import vn.edu.tdtu.mapper.ViewerMapper;
 import vn.edu.tdtu.model.Story;
@@ -20,8 +16,12 @@ import vn.edu.tdtu.repository.StoryRepository;
 import vn.edu.tdtu.repository.ViewerRepository;
 import vn.edu.tdtu.service.interfaces.StoryService;
 import vn.edu.tdtu.service.interfaces.UserService;
-import vn.edu.tdtu.util.SecurityContextUtils;
 import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.viewmodel.IDResponseVM;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -42,7 +42,7 @@ public class StoryServiceImpl implements StoryService {
     private final ViewerMapper viewerMapper;
 
     @Override
-    public ResDTO<StoryIdResponse> createStory(CreateStoryRequest payload) {
+    public ResponseVM<IDResponseVM> createStory(CreateStoryRequest payload) {
         String userId = SecurityContextUtils.getUserId();
         Story story = new Story();
 
@@ -60,35 +60,35 @@ public class StoryServiceImpl implements StoryService {
 
         storyRepository.save(story);
 
-        return new ResDTO<>(
-                MessageCode.STORY_CREATED,
-                new StoryIdResponse(story.getId()),
+        return new ResponseVM<>(
+                MessageCode.Story.STORY_CREATED,
+                new IDResponseVM(story.getId()),
                 HttpServletResponse.SC_CREATED
         );
     }
 
     @Override
-    public ResDTO<StoryIdResponse> deleteStory(String storyId) {
+    public ResponseVM<IDResponseVM> deleteStory(String storyId) {
         String userId = SecurityContextUtils.getUserId();
         Story foundStory = storyRepository.findById(storyId)
-                .orElseThrow(() -> new BadRequestException(MessageCode.STORY_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Story.STORY_NOT_FOUND));
 
         if (!foundStory.getUserId().equals(userId))
-            throw new BadRequestException(MessageCode.STORY_CAN_NOT_DELETE_OTHER);
+            throw new BadRequestException(MessageCode.Story.STORY_CAN_NOT_DELETE_OTHER);
 
         storyRepository.deleteById(foundStory.getId());
 
-        return new ResDTO<>(
-                MessageCode.STORY_DELETED,
-                new StoryIdResponse(storyId),
+        return new ResponseVM<>(
+                MessageCode.Story.STORY_DELETED,
+                new IDResponseVM(storyId),
                 HttpServletResponse.SC_CREATED
         );
     }
 
     @Override
-    public ResDTO<StoryIdResponse> countView(String storyId) {
+    public ResponseVM<IDResponseVM> countView(String storyId) {
         Story foundStory = storyRepository.findById(storyId)
-                .orElseThrow(() -> new BadRequestException(MessageCode.STORY_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Story.STORY_NOT_FOUND));
 
         String userId = SecurityContextUtils.getUserId();
 
@@ -105,17 +105,17 @@ public class StoryServiceImpl implements StoryService {
             storyRepository.save(foundStory);
         }
 
-        return new ResDTO<>(
-                MessageCode.VIEWER_COUNTED,
-                new StoryIdResponse(foundStory.getId()),
+        return new ResponseVM<>(
+                MessageCode.Story.VIEWER_COUNTED,
+                new IDResponseVM(foundStory.getId()),
                 HttpServletResponse.SC_OK
         );
     }
 
     @Override
-    public ResDTO<?> getViewers(String accessToken, String storyId) {
+    public ResponseVM<?> getViewers(String accessToken, String storyId) {
         Story foundStory = storyRepository.findById(storyId)
-                .orElseThrow(() -> new BadRequestException(MessageCode.STORY_FETCHED));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Story.STORY_FETCHED));
 
         List<Viewer> viewers = foundStory.getViewers();
 
@@ -132,21 +132,21 @@ public class StoryServiceImpl implements StoryService {
 
         List<ViewerResponse> viewerResponses = viewerMapper.mapToDtos(viewers, userMap);
 
-        return new ResDTO<>(
-                MessageCode.VIEWER_NOT_FOUND,
+        return new ResponseVM<>(
+                MessageCode.Story.VIEWER_NOT_FOUND,
                 viewerResponses,
                 HttpServletResponse.SC_OK
         );
     }
 
     @Override
-    public ResDTO<?> getUserStory(String accessTokenHeader, String userId) {
+    public ResponseVM<?> getUserStory(String accessTokenHeader, String userId) {
         UserDTO foundUser = userService.getUserById(accessTokenHeader, userId);
 
         List<UserDTO> friends = userService.getUserFriends(accessTokenHeader);
 
         if (foundUser == null)
-            throw new BadRequestException(MessageCode.USER_NOT_FOUND_MSG);
+            throw new BadRequestException(MessageCode.User.USER_NOT_FOUND);
 
         List<StoryResponse> stories = storyRepository.findUserStory(
                         userId,
@@ -162,17 +162,17 @@ public class StoryServiceImpl implements StoryService {
                 })
                 .toList();
 
-        ResDTO<List<StoryResponse>> response = new ResDTO<>();
+        ResponseVM<List<StoryResponse>> response = new ResponseVM<>();
 
         response.setData(stories);
-        response.setMessage(MessageCode.STORY_FETCHED);
+        response.setMessage(MessageCode.Story.STORY_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
 
         return response;
     }
 
     @Override
-    public ResDTO<?> getStories(String accessToken) {
+    public ResponseVM<?> getStories(String accessToken) {
         String userId = SecurityContextUtils.getUserId();
         List<UserDTO> friends = userService.getUserFriends(accessToken);
 
@@ -211,8 +211,8 @@ public class StoryServiceImpl implements StoryService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        return new ResDTO<>(
-                MessageCode.STORY_FETCHED,
+        return new ResponseVM<>(
+                MessageCode.Story.STORY_FETCHED,
                 storyResponses,
                 HttpServletResponse.SC_OK
         );

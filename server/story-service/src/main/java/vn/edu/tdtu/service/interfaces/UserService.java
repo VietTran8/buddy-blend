@@ -5,9 +5,9 @@ import vn.tdtu.common.dto.UserDTO;
 import java.util.List;
 
 public interface UserService {
-    public List<UserDTO> getUsersByIds(String accessToken, List<String> userIds);
+    List<UserDTO> getUsersByIds(String accessToken, List<String> userIds);
 
-    public UserDTO getUserById(String accessToken, String userId);
+    UserDTO getUserById(String accessToken, String userId);
 
-    public List<UserDTO> getUserFriends(String accessToken);
+    List<UserDTO> getUserFriends(String accessToken);
 }

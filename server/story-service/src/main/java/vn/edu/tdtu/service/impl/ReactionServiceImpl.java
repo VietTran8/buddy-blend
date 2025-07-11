@@ -3,13 +3,10 @@ package vn.edu.tdtu.service.impl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.DoReactRequest;
 import vn.edu.tdtu.dto.response.DoReactResponse;
 import vn.edu.tdtu.dto.response.InteractNotification;
 import vn.edu.tdtu.enums.ENotificationType;
-import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.model.Reaction;
 import vn.edu.tdtu.model.Story;
 import vn.edu.tdtu.model.Viewer;
@@ -18,8 +15,11 @@ import vn.edu.tdtu.repository.StoryRepository;
 import vn.edu.tdtu.repository.ViewerRepository;
 import vn.edu.tdtu.service.interfaces.ReactionService;
 import vn.edu.tdtu.service.interfaces.UserService;
-import vn.edu.tdtu.util.SecurityContextUtils;
 import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -34,17 +34,17 @@ public class ReactionServiceImpl implements ReactionService {
     private final UserService userService;
 
     @Override
-    public ResDTO<DoReactResponse> doReact(String accessToken, DoReactRequest payload) {
+    public ResponseVM<DoReactResponse> doReact(String accessToken, DoReactRequest payload) {
         String userId = SecurityContextUtils.getUserId();
 
         Story foundStory = storyRepository.findById(payload.getStoryId())
-                .orElseThrow(() -> new BadRequestException(MessageCode.STORY_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Story.STORY_NOT_FOUND));
 
         if (foundStory.getUserId().equals(userId))
-            throw new BadRequestException(MessageCode.STORY_CAN_NOT_SELF_REACT);
+            throw new BadRequestException(MessageCode.Story.STORY_CAN_NOT_SELF_REACT);
 
         Viewer foundViewer = viewerRepository.findTopByStoryAndUserId(foundStory, userId)
-                .orElseThrow(() -> new BadRequestException(MessageCode.VIEWER_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Story.VIEWER_NOT_FOUND));
 
         foundViewer.getReactions().add(newReaction(foundViewer, userId, payload));
 
@@ -52,8 +52,8 @@ public class ReactionServiceImpl implements ReactionService {
 
         sendNotification(accessToken, payload, userId, foundStory);
 
-        return new ResDTO<>(
-                MessageCode.REACTION_CREATED,
+        return new ResponseVM<>(
+                MessageCode.Story.REACTION_CREATED,
                 new DoReactResponse(payload),
                 HttpServletResponse.SC_CREATED
         );

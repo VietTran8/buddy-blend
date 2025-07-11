@@ -7,30 +7,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import vn.edu.tdtu.security.UserDetailsServiceImpl;
+import vn.tdtu.common.utils.JwtUtils;
 
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
-    private final UserDetailsServiceImpl userDetailsService;
     @Value("${kafka.topic.send-otp-mail.name}")
     private String sendOtpMailTopicName;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(passwordEncoder());
-        provider.setUserDetailsService(userDetailsService);
-
-        return provider;
     }
 
     @Bean
@@ -42,7 +31,13 @@ public class ApplicationConfig {
     }
 
     @Bean
+    public JwtUtils jwtUtils() {
+        return new JwtUtils();
+    }
+
+    @Bean
     public NewTopic sendMailTopic() {
         return new NewTopic(sendOtpMailTopicName, 2, (short) 1);
     }
+
 }

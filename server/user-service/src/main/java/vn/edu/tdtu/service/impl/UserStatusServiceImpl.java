@@ -2,9 +2,9 @@ package vn.edu.tdtu.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.RedisKey;
 import vn.edu.tdtu.service.interfaces.RedisService;
 import vn.edu.tdtu.service.interfaces.UserStatusService;
+import vn.tdtu.common.utils.Constants;
 
 @Service
 @RequiredArgsConstructor
@@ -13,6 +13,6 @@ public class UserStatusServiceImpl implements UserStatusService {
 
     @Override
     public boolean isUserOnline(String userId) {
-        return redisService.getSetSize(RedisKey.combineKey(RedisKey.USER_STATUS_KEY, userId)) > 0;
+        return redisService.getSetSize(Constants.RedisKey.combineKey(Constants.RedisKey.USER_STATUS_KEY, userId)) > 0;
     }
 }

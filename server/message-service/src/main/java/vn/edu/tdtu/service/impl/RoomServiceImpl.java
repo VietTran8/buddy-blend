@@ -3,15 +3,15 @@ package vn.edu.tdtu.service.impl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.RoomResponse;
-import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.RoomResponseMapper;
 import vn.edu.tdtu.model.Room;
 import vn.edu.tdtu.repository.RoomRepository;
 import vn.edu.tdtu.service.interfaces.RoomService;
-import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.Date;
 import java.util.List;
@@ -39,13 +39,13 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResDTO<?> findRoomsByUser() {
+    public ResponseVM<?> findRoomsByUser() {
         String userId = SecurityContextUtils.getUserId();
         List<Room> rooms = roomRepository.findByUserId1OrUserId2(userId, userId);
 
-        ResDTO<List<RoomResponse>> response = new ResDTO<>();
+        ResponseVM<List<RoomResponse>> response = new ResponseVM<>();
         response.setCode(200);
-        response.setMessage(MessageCode.ROOM_FETCHED);
+        response.setMessage(MessageCode.Message.ROOM_FETCHED);
         response.setData(rooms.stream()
                 .map(room -> roomResponseMapper.mapToDTO(userId, room))
                 .sorted((room1, room2) -> {
@@ -60,18 +60,18 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResDTO<?> archiveRoom(String opponentId, boolean archived) {
+    public ResponseVM<?> archiveRoom(String opponentId, boolean archived) {
         String authUserId = SecurityContextUtils.getUserId();
         Room foundRoom = findExistingRoom(authUserId, opponentId);
 
         if (foundRoom == null)
-            throw new BadRequestException(MessageCode.ROOM_NOT_FOUND);
+            throw new BadRequestException(MessageCode.Message.ROOM_NOT_FOUND);
 
         foundRoom.setArchived(archived);
 
         roomRepository.save(foundRoom);
 
-        return new ResDTO<>(
+        return new ResponseVM<>(
                 String.format("Room %s successfully", archived ? "archived" : "unarchived"),
                 null,
                 HttpServletResponse.SC_OK
@@ -79,7 +79,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResDTO<?> deleteRoom(String opponentId) {
+    public ResponseVM<?> deleteRoom(String opponentId) {
         return null;
     }
 }

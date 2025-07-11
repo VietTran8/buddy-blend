@@ -9,10 +9,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.utils.Constants;
 import vn.tdtu.edu.dto.Message;
 import vn.tdtu.edu.dto.NewMessageNoti;
 import vn.tdtu.edu.dto.fcm.NotificationContent;
@@ -34,15 +36,12 @@ import java.util.List;
 public class NotificationSender {
     private final UserService userService;
     private final SocketModule socketModule;
-    private final static String SCOPES = "https://www.googleapis.com/auth/firebase.messaging";
-    @Value("${fcm.project.id}")
-    private String projectId;
 
     public String getAccessToken() {
         try {
             GoogleCredentials googleCredentials = GoogleCredentials
                     .fromStream(new ClassPathResource("service-account.json").getInputStream())
-                    .createScoped(List.of(SCOPES));
+                    .createScoped(List.of(Constants.Firebase.SCOPES));
 
             googleCredentials.refreshIfExpired();
             return googleCredentials.getAccessToken().getTokenValue();
@@ -76,8 +75,6 @@ public class NotificationSender {
     public boolean sendCommonNotification(CommonNotificationMessage commonNotification) {
         socketModule.emitNotification(commonNotification);
 
-        String SEND_NOTI_URL = "https://fcm.googleapis.com/v1/projects/" + projectId + "/messages:send";
-
         UserDTO foundUser = userService.findById(commonNotification.getToUserIds().get(0));
         if (foundUser != null) {
             String notificationKey = foundUser.getNotificationKey();
@@ -88,9 +85,9 @@ public class NotificationSender {
             String token = getAccessToken();
 
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-                HttpPost httpPost = new HttpPost(SEND_NOTI_URL);
-                httpPost.setHeader("Authorization", "Bearer " + token);
-                httpPost.setHeader("Content-Type", "application/json");
+                HttpPost httpPost = new HttpPost(Constants.Firebase.NOTIFICATION_PUBLISH_URL);
+                httpPost.setHeader(HttpHeaders.AUTHORIZATION, Constants.BEARER_PREFIX + token);
+                httpPost.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 NotificationRequestBody<CommonNotificationMessage> requestBody = new NotificationRequestBody<>();
@@ -115,12 +112,13 @@ public class NotificationSender {
                     if (status == 200) {
                         log.info("Notification sent successfully.");
                         return true;
-                    } else {
-                        String responseBody = EntityUtils.toString(response.getEntity());
-                        log.info("Failed to send notification. Status code: " + status);
-                        log.info("Response Body: " + responseBody);
-                        return false;
                     }
+
+                    String responseBody = EntityUtils.toString(response.getEntity());
+                    log.info("Failed to send notification. Status code: " + status);
+                    log.info("Response Body: " + responseBody);
+
+                    return false;
                 });
             } catch (Exception e) {
                 log.error("Error sending notification", e);
@@ -132,8 +130,6 @@ public class NotificationSender {
     }
 
     public boolean sendChatNotification(Message message) {
-        String SEND_NOTI_URL = "https://fcm.googleapis.com/v1/projects/" + projectId + "/messages:send";
-
         String toUserId = message.getToUserId();
         String fromUserId = message.getFromUserId();
 
@@ -161,9 +157,9 @@ public class NotificationSender {
         String token = getAccessToken();
 
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpPost httpPost = new HttpPost(SEND_NOTI_URL);
-            httpPost.setHeader("Authorization", "Bearer " + token);
-            httpPost.setHeader("Content-Type", "application/json");
+            HttpPost httpPost = new HttpPost(Constants.Firebase.NOTIFICATION_PUBLISH_URL);
+            httpPost.setHeader(HttpHeaders.AUTHORIZATION, Constants.BEARER_PREFIX + token);
+            httpPost.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
             ObjectMapper objectMapper = new ObjectMapper();
             NotificationRequestBody<Message> requestBody = new NotificationRequestBody<>();

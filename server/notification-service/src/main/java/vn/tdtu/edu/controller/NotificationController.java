@@ -4,13 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.tdtu.edu.dto.ResDTO;
+import vn.tdtu.common.viewmodel.ResponseVM;
 import vn.tdtu.edu.service.interfaces.NotificationService;
-
-
-//**
-// some changes: added pagination on fetch user notifications
-// **//
 
 @RestController
 @RequestMapping("/api/v1/notifications")
@@ -23,14 +18,20 @@ public class NotificationController {
                                                  @RequestParam(name = "size", required = false, defaultValue = "10") int size,
                                                  @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenHeader
     ) {
-        ResDTO<?> response = notificationService.findAllUserNotifications(tokenHeader, page, size);
+        ResponseVM<?> response = notificationService.findAllUserNotifications(tokenHeader, page, size);
         return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @GetMapping("/test-resource")
+    public ResponseEntity<?> testGetResource() {
+        ResponseVM<?> response = notificationService.testGetResource();
+        return ResponseEntity.status(200).body(response);
     }
 
     @PostMapping("/detach/{id}")
     public ResponseEntity<?> detachNotification(@PathVariable("id") String id,
                                                 @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenHeader) {
-        ResDTO<?> response = notificationService.detachNotification(tokenHeader, id);
+        ResponseVM<?> response = notificationService.detachNotification(tokenHeader, id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -39,7 +40,7 @@ public class NotificationController {
     public ResponseEntity<?> readNotification(@PathVariable("id") String id,
                                               @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenHeader
     ) {
-        ResDTO<?> response = notificationService.readNotification(tokenHeader, id);
+        ResponseVM<?> response = notificationService.readNotification(tokenHeader, id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 }

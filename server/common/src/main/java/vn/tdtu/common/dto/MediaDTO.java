@@ -14,6 +14,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 public class MediaDTO implements Serializable {
+
     @Schema(description = "Unique identifier for the media")
     private String id;
 

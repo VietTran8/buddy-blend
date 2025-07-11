@@ -1,33 +1,37 @@
 package vn.edu.tdtu.service.interfaces;
 
-import vn.edu.tdtu.dto.ResDTO;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.LoginResponse;
 import vn.edu.tdtu.dto.response.SignUpResponse;
-import vn.edu.tdtu.enums.EUserRole;
+import vn.tdtu.common.enums.user.EUserRole;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.List;
 
 public interface AuthService {
-    public ResDTO<LoginResponse> loginUser(LoginRequest loginRequest);
+    ResponseVM<LoginResponse> loginUser(LoginRequest loginRequest, HttpServletResponse response);
 
-    public ResDTO<LoginResponse> refreshToken(String refreshToken);
+    ResponseVM<?> logoutUser(HttpServletRequest request, HttpServletResponse response);
 
-    public ResDTO<SignUpResponse> createAdminUser(SignUpRequest request);
+    ResponseVM<LoginResponse> refreshToken(HttpServletRequest request, HttpServletResponse response);
 
-    public ResDTO<?> revokeAdminUser(String email);
+    ResponseVM<SignUpResponse> createAdminUser(SignUpRequest request);
 
-    public ResDTO<SignUpResponse> signUpUser(SignUpRequest request, List<EUserRole> userRoles);
+    ResponseVM<?> revokeAdminUser(String email);
 
-    public ResDTO<?> createChangePasswordOTP(CreateChangePasswordRequest request);
+    ResponseVM<SignUpResponse> signUpUser(SignUpRequest request, List<EUserRole> userRoles);
 
-    public ResDTO<?> changePassword(ChangePasswordRequest request);
+    ResponseVM<?> createChangePasswordOTP(CreateChangePasswordRequest request);
 
-    public ResDTO<?> createForgotPasswordOTP(CreateForgotPasswordRequest request);
+    ResponseVM<?> changePassword(ChangePasswordRequest request);
 
-    public ResDTO<?> validateOTP(ValidateOTPRequest request);
+    ResponseVM<?> createForgotPasswordOTP(CreateForgotPasswordRequest request);
 
-    public ResDTO<?> passwordChecking(PasswordCheckingRequest request);
+    ResponseVM<?> validateOTP(ValidateOTPRequest request);
 
-    public ResDTO<?> confirmTokenChecking(ConfirmTokenCheckingRequest request);
+    ResponseVM<?> passwordChecking(PasswordCheckingRequest request);
+
+    ResponseVM<?> confirmTokenChecking(ConfirmTokenCheckingRequest request);
 }

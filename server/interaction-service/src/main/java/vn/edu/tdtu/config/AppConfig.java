@@ -1,6 +1,5 @@
 package vn.edu.tdtu.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -23,4 +22,5 @@ public class AppConfig {
     public NewTopic interactNoti() {
         return new NewTopic(notificationName, 2, (short) 1);
     }
+
 }

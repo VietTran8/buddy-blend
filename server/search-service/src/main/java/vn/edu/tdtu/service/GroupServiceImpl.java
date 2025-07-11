@@ -7,13 +7,13 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.model.es.SyncGroup;
 import vn.edu.tdtu.repository.EsGroupRepository;
 import vn.edu.tdtu.repository.httpclient.GroupClient;
 import vn.edu.tdtu.service.interfaces.GroupService;
 import vn.tdtu.common.dto.GroupDTO;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.MessageCode;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,7 +37,7 @@ public class GroupServiceImpl implements GroupService {
                     foundGroup.setName(group.getName());
                     groupRepository.save(foundGroup);
                 }, () -> {
-                    throw new BadRequestException(MessageCode.GROUP_NOT_FOUND_ID, group.getId());
+                    throw new BadRequestException(MessageCode.Group.GROUP_NOT_FOUND_ID, group.getId());
                 }
         );
     }

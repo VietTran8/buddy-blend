@@ -2,7 +2,7 @@ import { http } from "../config";
 import { Blocking, BaseResponse, IdResponse, UpdateUserInfoRequest, RenameUserRequest, User, UserDetails } from "../types";
 
 export const getUserById = async (id: string): Promise<BaseResponse<User>> => {
-    const response: BaseResponse<User> = await http.get(`/users/${id}`);
+    const response: BaseResponse<User> = await http.get(`/users/by-id/${id}`);
 
     return response;
 }

@@ -1,43 +1,43 @@
 package vn.edu.tdtu.service.interfaces;
 
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.GroupIdResponse;
 import vn.edu.tdtu.enums.EGetMemberOption;
 import vn.edu.tdtu.enums.EHandleLeaveType;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.List;
 
 public interface GroupService {
-    public ResDTO<GroupIdResponse> createGroup(CreateGroupRequest payload);
+    ResponseVM<GroupIdResponse> createGroup(CreateGroupRequest payload);
 
-    public ResDTO<?> updateGroupInfo(String id, UpdateGroupRequest payload);
+    ResponseVM<?> updateGroupInfo(String id, UpdateGroupRequest payload);
 
-    public ResDTO<?> deleteGroup(String id);
+    ResponseVM<?> deleteGroup(String id);
 
-    public ResDTO<?> joinGroup(String groupId);
+    ResponseVM<?> joinGroup(String groupId);
 
-    public ResDTO<?> handleCancelPendingAndLeaveGroup(LeaveGroupRequest payload, EHandleLeaveType type);
+    ResponseVM<?> handleCancelPendingAndLeaveGroup(LeaveGroupRequest payload, EHandleLeaveType type);
 
-    public ResDTO<?> getMyGroups();
+    ResponseVM<?> getMyGroups();
 
-    public ResDTO<?> getGroupById(String accessToken, String groupId);
+    ResponseVM<?> getGroupById(String accessToken, String groupId);
 
-    public ResDTO<?> getAllGroupByIds(List<String> groupId);
+    ResponseVM<?> getAllGroupByIds(List<String> groupId);
 
-    public ResDTO<?> getGroupByIdForPost(String groupId);
+    ResponseVM<?> getGroupByIdForPost(String groupId);
 
-    public ResDTO<?> moderateMember(ModerateMemberRequest payload);
+    ResponseVM<?> moderateMember(ModerateMemberRequest payload);
 
-    public void inviteUsers(String accessToken, InviteUsersRequest payload);
+    void inviteUsers(String accessToken, InviteUsersRequest payload);
 
-    public ResDTO<?> getPendingMembersList(String accessToken, String groupId);
+    ResponseVM<?> getPendingMembersList(String accessToken, String groupId);
 
-    public ResDTO<?> getGroupMembers(String accessToken, String groupId, int page, int size, EGetMemberOption option);
+    ResponseVM<?> getGroupMembers(String accessToken, String groupId, int page, int size, EGetMemberOption option);
 
-    public ResDTO<?> getGroupMembers(String groupId);
+    ResponseVM<?> getGroupMembers(String groupId);
 
-    public ResDTO<?> getAllFriendGroupMemberUserIds(String accessToken, String groupId);
+    ResponseVM<?> getAllFriendGroupMemberUserIds(String accessToken, String groupId);
 
-    public ResDTO<?> isPrivateGroupOrUserJoined(String groupId);
+    ResponseVM<?> isPrivateGroupOrUserJoined(String groupId);
 }

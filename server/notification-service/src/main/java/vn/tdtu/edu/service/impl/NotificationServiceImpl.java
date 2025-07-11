@@ -5,17 +5,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import vn.tdtu.common.dto.UserDTO;
-import vn.tdtu.edu.constant.MessageCode;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.Constants;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.viewmodel.PaginationResponseVM;
+import vn.tdtu.common.viewmodel.ResponseVM;
 import vn.tdtu.edu.dto.NotificationResponse;
-import vn.tdtu.edu.dto.PaginationResponse;
-import vn.tdtu.edu.dto.ResDTO;
-import vn.tdtu.edu.exception.BadRequestException;
 import vn.tdtu.edu.mapper.NotificationMapper;
 import vn.tdtu.edu.model.CommonNotification;
 import vn.tdtu.edu.repository.NotificationRepository;
 import vn.tdtu.edu.service.interfaces.NotificationService;
 import vn.tdtu.edu.service.interfaces.UserService;
-import vn.tdtu.edu.util.SecurityContextUtils;
 
 import java.util.Map;
 import java.util.Set;
@@ -34,9 +35,9 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public ResDTO<PaginationResponse<NotificationResponse>> findAllUserNotifications(String tokenHeader, int page, int size) {
+    public ResponseVM<PaginationResponseVM<NotificationResponse>> findAllUserNotifications(String tokenHeader, int page, int size) {
         String userId = SecurityContextUtils.getUserId();
-        ResDTO<PaginationResponse<NotificationResponse>> response = new ResDTO<>();
+        ResponseVM<PaginationResponseVM<NotificationResponse>> response = new ResponseVM<>();
 
         Page<CommonNotification> notificationPage = repository.findByToUserId(userId, PageRequest.of(page - 1, size));
 
@@ -50,42 +51,47 @@ public class NotificationServiceImpl implements NotificationService {
                 ));
 
         response.setCode(200);
-        response.setData(new PaginationResponse<>(
+        response.setData(new PaginationResponseVM<>(
                 page,
                 size,
                 notificationPage.getTotalPages(),
                 notificationPage.get().map(noti -> notificationMapper.mapToDto(noti, fromUserMap)).toList(),
                 notificationPage.getTotalElements()
         ));
-        response.setMessage(MessageCode.NOTIFICATION_FETCHED);
+        response.setMessage(MessageCode.Notification.NOTIFICATION_FETCHED);
 
         return response;
     }
 
     @Override
-    public ResDTO<?> detachNotification(String tokenHeader, String notificationId) {
+    public ResponseVM<?> detachNotification(String tokenHeader, String notificationId) {
         CommonNotification notification = repository.findById(notificationId)
-                .orElseThrow(() -> new BadRequestException(MessageCode.NOTIFICATION_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Notification.NOTIFICATION_NOT_FOUND));
 
         if (notification.getToUsers().stream().noneMatch(
                 user -> SecurityContextUtils.getUserId().equals(user.getUserId())
         ))
-            throw new BadRequestException(MessageCode.NOTIFICATION_NOT_PERMITTED);
+            throw new BadRequestException(MessageCode.Notification.NOTIFICATION_NOT_PERMITTED);
 
         repository.deleteById(notificationId);
 
-        return new ResDTO<>(MessageCode.NOTIFICATION_DETACHED, null, 200);
+        return new ResponseVM<>(MessageCode.Notification.NOTIFICATION_DETACHED, null, 200);
     }
 
     @Override
-    public ResDTO<?> readNotification(String tokenHeader, String notificationId) {
+    public ResponseVM<?> testGetResource() {
+        return new ResponseVM<>().withMessage(Constants.Firebase.NOTIFICATION_PUBLISH_URL);
+    }
+
+    @Override
+    public ResponseVM<?> readNotification(String tokenHeader, String notificationId) {
         CommonNotification notification = repository.findById(notificationId)
-                .orElseThrow(() -> new BadRequestException(MessageCode.NOTIFICATION_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Notification.NOTIFICATION_NOT_FOUND));
 
         if (notification.getToUsers().stream().noneMatch(
                 user -> SecurityContextUtils.getUserId().equals(user.getUserId())
         ))
-            throw new BadRequestException(MessageCode.NOTIFICATION_NOT_PERMITTED);
+            throw new BadRequestException(MessageCode.Notification.NOTIFICATION_NOT_PERMITTED);
 
         notification.setToUsers(
                 notification.getToUsers().stream().peek(
@@ -98,6 +104,6 @@ public class NotificationServiceImpl implements NotificationService {
 
         repository.save(notification);
 
-        return new ResDTO<>(MessageCode.NOTIFICATION_READ, null, 200);
+        return new ResponseVM<>(MessageCode.Notification.NOTIFICATION_READ, null, 200);
     }
 }

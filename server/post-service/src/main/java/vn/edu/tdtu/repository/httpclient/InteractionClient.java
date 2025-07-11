@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
-import vn.edu.tdtu.config.openfeign.FeignConfig;
-import vn.edu.tdtu.dto.ResDTO;
+import vn.tdtu.common.config.openfeign.FeignConfig;
 import vn.tdtu.common.dto.CommentDTO;
 import vn.tdtu.common.dto.ReactionDTO;
 import vn.tdtu.common.enums.interaction.EReactionType;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.List;
 import java.util.Map;
@@ -18,19 +18,19 @@ import java.util.Map;
 public interface InteractionClient {
 
     @GetMapping("/api/v1/comments")
-    public ResDTO<List<CommentDTO>> findCommentsByPostId(
+    ResponseVM<List<CommentDTO>> findCommentsByPostId(
             @RequestHeader("Authorization") String accessToken,
             @RequestParam("postId") String postId
     );
 
     @GetMapping("/api/v1/reacts")
-    public ResDTO<Map<EReactionType, List<ReactionDTO>>> findReactionsByPostId(
+    ResponseVM<Map<EReactionType, List<ReactionDTO>>> findReactionsByPostId(
             @RequestHeader("Authorization") String accessToken,
             @RequestParam("postId") String postId
     );
 
     @GetMapping("/api/v1/comments/count/post/{id}")
-    public ResDTO<Long> countCommentByPostId(
+    ResponseVM<Long> countCommentByPostId(
             @RequestHeader("Authorization") String accessToken,
             @PathVariable("id") String id
     );

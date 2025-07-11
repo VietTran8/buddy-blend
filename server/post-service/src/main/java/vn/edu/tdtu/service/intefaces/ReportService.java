@@ -1,13 +1,13 @@
 package vn.edu.tdtu.service.intefaces;
 
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.ApprovePostRequest;
 import vn.edu.tdtu.dto.request.ReportRequest;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 public interface ReportService {
-    public ResDTO<?> reportPost(ReportRequest request);
+    ResponseVM<?> reportPost(ReportRequest request);
 
-    public ResDTO<?> getAllReport(String token, int page, int size);
+    ResponseVM<?> getAllReport(String token, int page, int size);
 
-    public ResDTO<?> approvePost(ApprovePostRequest request);
+    ResponseVM<?> approvePost(ApprovePostRequest request);
 }

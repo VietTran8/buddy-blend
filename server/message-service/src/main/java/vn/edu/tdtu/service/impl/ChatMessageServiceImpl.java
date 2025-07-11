@@ -5,15 +5,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.MessageResponse;
-import vn.edu.tdtu.dto.PaginationResponse;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.mapper.RoomResponseMapper;
 import vn.edu.tdtu.model.ChatMessage;
 import vn.edu.tdtu.repository.ChatMessageRepository;
 import vn.edu.tdtu.service.interfaces.ChatMessageService;
-import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.viewmodel.PaginationResponseVM;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.Date;
 
@@ -28,13 +28,13 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     }
 
     @Override
-    public ResDTO<PaginationResponse<MessageResponse>> getRoomMessages(String roomId, Date anchorDate, int page, int size) {
-        ResDTO<PaginationResponse<MessageResponse>> response = new ResDTO<>();
+    public ResponseVM<PaginationResponseVM<MessageResponse>> getRoomMessages(String roomId, Date anchorDate, int page, int size) {
+        ResponseVM<PaginationResponseVM<MessageResponse>> response = new ResponseVM<>();
         Page<ChatMessage> messagePage = chatMessageRepository.findByRoomIdAndCreatedAtBeforeOrderByCreatedAtDesc(roomId, anchorDate, PageRequest.of(page - 1, size));
 
         String userId = SecurityContextUtils.getUserId();
 
-        response.setData(new PaginationResponse<>(
+        response.setData(new PaginationResponseVM<>(
                 page,
                 size,
                 messagePage.getTotalPages(),
@@ -42,7 +42,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                 messagePage.getTotalElements()
         ));
         response.setCode(HttpServletResponse.SC_OK);
-        response.setMessage(MessageCode.MESSAGE_FETCHED);
+        response.setMessage(MessageCode.Message.MESSAGE_FETCHED);
 
         return response;
     }

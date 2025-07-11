@@ -26,6 +26,14 @@ public class GeminiServiceImpl implements GeminiService {
     @Value("${gemini.api.key}")
     private String geminiApiKey;
 
+    private static String getStringFromResource(Resource resource) {
+        try {
+            return resource.getContentAsString(StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            return "";
+        }
+    }
+
     @Override
     public String call(String prompt) {
         GeminiText text = new GeminiText(prompt);
@@ -56,13 +64,5 @@ public class GeminiServiceImpl implements GeminiService {
     public String call(String templatePrompt, Map<String, String> context) {
         String prompt = PromptUtil.create(templatePrompt, context);
         return call(prompt);
-    }
-
-    private static String getStringFromResource(Resource resource) {
-        try {
-            return resource.getContentAsString(StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            return "";
-        }
     }
 }

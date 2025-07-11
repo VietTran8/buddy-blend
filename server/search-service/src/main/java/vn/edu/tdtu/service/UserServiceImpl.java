@@ -8,14 +8,14 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
 import vn.edu.tdtu.dto.request.FindByUserIdsReq;
-import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.model.es.SyncUser;
 import vn.edu.tdtu.repository.EsUserRepository;
 import vn.edu.tdtu.repository.httpclient.UserClient;
 import vn.edu.tdtu.service.interfaces.UserService;
 import vn.tdtu.common.dto.UserDTO;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.MessageCode;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
 
                     userRepository.save(foundUser);
                 }, () -> {
-                    throw new BadRequestException(MessageCode.USER_NOT_FOUND_ID, user.getId());
+                    throw new BadRequestException(MessageCode.User.USER_NOT_FOUND_ID, user.getId());
                 }
         );
     }

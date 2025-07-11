@@ -14,4 +14,5 @@ public class AppConfig {
     public NewTopic interactNoti() {
         return new NewTopic(notificationName, 2, (short) 1);
     }
+
 }

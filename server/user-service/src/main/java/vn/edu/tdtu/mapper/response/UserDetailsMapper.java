@@ -3,13 +3,12 @@ package vn.edu.tdtu.mapper.response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.model.User;
 import vn.edu.tdtu.repository.UserRepository;
-import vn.edu.tdtu.util.SecurityContextUtils;
 import vn.tdtu.common.dto.UserDTO;
-import vn.tdtu.common.enums.user.EUserMappingType;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,7 @@ public class UserDetailsMapper {
         String authUserId = SecurityContextUtils.getUserId();
 
         User authUser = userRepository.findByIdAndActive(authUserId, true)
-                .orElseThrow(() -> new BadRequestException(MessageCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.User.USER_NOT_FOUND));
 
         if (isBanned(authUser, user)) {
             return null;
@@ -38,7 +37,7 @@ public class UserDetailsMapper {
         List<User> myFriends = baseUserMapper.getListFriends(authUser);
         List<User> userFriends = baseUserMapper.getListFriends(user);
 
-        UserDTO userDetails = new UserDTO(baseUserMapper.baseMapToDto(user), EUserMappingType.TYPE_DETAILED);
+        UserDTO userDetails = new UserDTO(baseUserMapper.baseMapToDto(user));
 
         userDetails.setFriend(myFriends.stream().anyMatch(f -> !authUserId.equals(user.getId())
                 && f.getId().equals(user.getId())));

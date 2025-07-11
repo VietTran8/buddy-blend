@@ -7,14 +7,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.ApprovePostRequest;
 import vn.edu.tdtu.dto.request.ReportRequest;
-import vn.edu.tdtu.dto.response.PaginationResponse;
 import vn.edu.tdtu.dto.response.ReportResponse;
 import vn.edu.tdtu.enums.EModerateType;
-import vn.edu.tdtu.exception.BadRequestException;
 import vn.edu.tdtu.mapper.response.ReportResponseMapper;
 import vn.edu.tdtu.message.ModerationNotificationMsg;
 import vn.edu.tdtu.model.Media;
@@ -25,7 +21,11 @@ import vn.edu.tdtu.repository.MediaRepository;
 import vn.edu.tdtu.repository.PostRepository;
 import vn.edu.tdtu.repository.ReportRepository;
 import vn.edu.tdtu.service.intefaces.ReportService;
-import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.tdtu.common.exception.BadRequestException;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.utils.SecurityContextUtils;
+import vn.tdtu.common.viewmodel.PaginationResponseVM;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.*;
 
@@ -40,10 +40,10 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     @CacheEvict(cacheNames = "reports", allEntries = true)
-    public ResDTO<?> reportPost(ReportRequest request) {
+    public ResponseVM<?> reportPost(ReportRequest request) {
         String userId = SecurityContextUtils.getUserId();
 
-        ResDTO<Map<String, String>> response = new ResDTO<>();
+        ResponseVM<Map<String, String>> response = new ResponseVM<>();
         Map<String, String> data = new HashMap<>();
 
         Report report = new Report();
@@ -54,11 +54,11 @@ public class ReportServiceImpl implements ReportService {
         report.setActive(true);
 
         Post post = postRepository.findById(request.getPostId())
-                .orElseThrow(() -> new BadRequestException(MessageCode.POST_NOT_FOUND_ID, request.getPostId()));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Post.POST_NOT_FOUND_ID, request.getPostId()));
 
         report.setPostId(post.getId());
 
-        response.setMessage(MessageCode.REPORT_SUBMITTED);
+        response.setMessage(MessageCode.Post.REPORT_SUBMITTED);
         response.setData(data);
         response.setCode(200);
 
@@ -70,7 +70,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     @Cacheable(key = "T(java.util.Objects).hash(#a1, #a2)", value = "reports", unless = "#result.data.data.isEmpty()")
-    public ResDTO<?> getAllReport(String token, int page, int size) {
+    public ResponseVM<?> getAllReport(String token, int page, int size) {
         Page<Report> reportPage = reportRepository
                 .findAllByActiveOrActive(null, true, PageRequest.of(page - 1, size));
 
@@ -79,28 +79,28 @@ public class ReportServiceImpl implements ReportService {
                 .map(p -> reportResponseMapper.mapToDto(token, p))
                 .toList();
 
-        PaginationResponse<ReportResponse> paginationResponse = new PaginationResponse<>();
+        PaginationResponseVM<ReportResponse> paginationResponse = new PaginationResponseVM<>();
         paginationResponse.setData(reports);
         paginationResponse.setPage(page);
         paginationResponse.setTotalPages(reportPage.getTotalPages());
         paginationResponse.setLimit(size);
 
-        ResDTO<PaginationResponse<ReportResponse>> response = new ResDTO<>();
+        ResponseVM<PaginationResponseVM<ReportResponse>> response = new ResponseVM<>();
         response.setData(paginationResponse);
         response.setCode(200);
-        response.setMessage(MessageCode.REPORT_FETCHED);
+        response.setMessage(MessageCode.Post.REPORT_FETCHED);
 
         return response;
     }
 
     @Override
-    public ResDTO<?> approvePost(ApprovePostRequest request) {
+    public ResponseVM<?> approvePost(ApprovePostRequest request) {
         Report foundReport = reportRepository.findByIdAndActiveOrActive(request.getReportId(), null, true)
-                .orElseThrow(() -> new BadRequestException(MessageCode.REPORT_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(MessageCode.Post.REPORT_NOT_FOUND));
 
-        if(!request.getAccept()) {
+        if (!request.getAccept()) {
             Post foundPost = postRepository.findByIdAndDetached(foundReport.getPostId(), false).orElseThrow(
-                    () -> new BadRequestException(MessageCode.POST_NOT_FOUND)
+                    () -> new BadRequestException(MessageCode.Post.POST_NOT_FOUND)
             );
 
             foundPost.setDetached(true);
@@ -129,8 +129,8 @@ public class ReportServiceImpl implements ReportService {
         foundReport.setActive(false);
         reportRepository.save(foundReport);
 
-        return new ResDTO<>(
-            request.getAccept() ? MessageCode.POST_ACCEPTED : MessageCode.POST_DETACHED,
+        return new ResponseVM<>(
+                request.getAccept() ? MessageCode.Post.POST_ACCEPTED : MessageCode.Post.POST_DETACHED,
                 null,
                 HttpServletResponse.SC_OK
         );

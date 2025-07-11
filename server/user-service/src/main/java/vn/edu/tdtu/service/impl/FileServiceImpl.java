@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.enums.EFileType;
 import vn.edu.tdtu.repository.httpclient.FileClient;
 import vn.edu.tdtu.service.interfaces.FileService;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.Map;
 
@@ -19,7 +19,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public String upload(MultipartFile file, EFileType type) throws Exception {
-        ResDTO<Map<String, String>> response = fileClient.uploadFile(type.getType(), file);
+        ResponseVM<Map<String, String>> response = fileClient.uploadFile(type.getType(), file);
 
         return response.getData().get("url");
     }

@@ -6,14 +6,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.edu.tdtu.constant.CommonConstant;
-import vn.edu.tdtu.constant.MessageCode;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.LoginResponse;
-import vn.edu.tdtu.exception.UnauthorizedException;
 import vn.edu.tdtu.service.interfaces.AuthService;
 import vn.edu.tdtu.util.CookieUtils;
+import vn.tdtu.common.exception.UnauthorizedException;
+import vn.tdtu.common.utils.Constants;
+import vn.tdtu.common.utils.MessageCode;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -24,118 +24,61 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-        ResDTO<LoginResponse> responseBody = authService.loginUser(loginRequest);
-
-        String refreshToken = responseBody.getData().getToken().refreshToken();
-        Long refreshExpiresIn = responseBody.getData().getToken().refreshExpiresIn();
-
-        CookieUtils.setCookie(
-                response,
-                CommonConstant.REFRESH_TOKEN_COOKIE_NAME,
-                refreshToken,
-                refreshExpiresIn,
-                "/"
-        );
-
+        ResponseVM<LoginResponse> responseBody = authService.loginUser(loginRequest, response);
         return ResponseEntity.status(responseBody.getCode()).body(responseBody);
     }
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUpUser(@RequestBody SignUpRequest signUpRequest) {
-        ResDTO<?> response = authService.signUpUser(signUpRequest, null);
-        return ResponseEntity.status(response.getCode()).body(response);
-    }
-
-    /**
-     * Create a new admin user if not exists, else, update from normal user to admin user
-     */
-    @PostMapping("/create-admin")
-    public ResponseEntity<?> createAdmin(@RequestBody SignUpRequest signUpRequest) {
-        ResDTO<?> response = authService.createAdminUser(signUpRequest);
-        return ResponseEntity.status(response.getCode()).body(response);
-    }
-
-    @PostMapping("/revoke-admin/{email}")
-    public ResponseEntity<?> revokeAdmin(@PathVariable("email") String email) {
-        ResDTO<?> response = authService.revokeAdminUser(email);
+        ResponseVM<?> response = authService.signUpUser(signUpRequest, null);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logoutUser(HttpServletResponse response) {
-        CookieUtils.setCookie(
-                response,
-                CommonConstant.REFRESH_TOKEN_COOKIE_NAME,
-                "",
-                0L,
-                "/"
-        );
-
+    public ResponseEntity<?> logoutUser(HttpServletRequest request, HttpServletResponse response) {
+        authService.logoutUser(request, response);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
-        jakarta.servlet.http.Cookie[] cookies = request.getCookies();
-
-        if (cookies == null)
-            throw new UnauthorizedException(MessageCode.AUTH_REFRESH_TOKEN_NOT_FOUND);
-
-        String refreshToken = null;
-
-        for (jakarta.servlet.http.Cookie cookie : cookies) {
-            if (CommonConstant.REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
-                refreshToken = cookie.getValue();
-                break;
-            }
-        }
-
-        ResDTO<LoginResponse> responseBody = authService.refreshToken(refreshToken);
-
-        CookieUtils.setCookie(
-                response,
-                CommonConstant.REFRESH_TOKEN_COOKIE_NAME,
-                responseBody.getData().getToken().refreshToken(),
-                responseBody.getData().getToken().refreshExpiresIn(),
-                "/"
-        );
-
+        ResponseVM<LoginResponse> responseBody = authService.refreshToken(request, response);
         return ResponseEntity.status(responseBody.getCode()).body(responseBody);
     }
 
     @PostMapping("/create-change-pass")
     public ResponseEntity<?> createChangePasswordOtp(@RequestBody CreateChangePasswordRequest changePasswordRequest) {
-        ResDTO<?> response = authService.createChangePasswordOTP(changePasswordRequest);
+        ResponseVM<?> response = authService.createChangePasswordOTP(changePasswordRequest);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/create-forgot-pass")
     public ResponseEntity<?> createForgotPasswordOtp(@RequestBody CreateForgotPasswordRequest changePasswordRequest) {
-        ResDTO<?> response = authService.createForgotPasswordOTP(changePasswordRequest);
+        ResponseVM<?> response = authService.createForgotPasswordOTP(changePasswordRequest);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/change-pass")
     public ResponseEntity<?> changePasswordOtp(@RequestBody ChangePasswordRequest changePasswordRequest) {
-        ResDTO<?> response = authService.changePassword(changePasswordRequest);
+        ResponseVM<?> response = authService.changePassword(changePasswordRequest);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/validate-otp")
     public ResponseEntity<?> validateOtp(@RequestBody ValidateOTPRequest validateOTPRequest) {
-        ResDTO<?> response = authService.validateOTP(validateOTPRequest);
+        ResponseVM<?> response = authService.validateOTP(validateOTPRequest);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/password-checking")
     public ResponseEntity<?> passwordChecking(@RequestBody PasswordCheckingRequest request) {
-        ResDTO<?> response = authService.passwordChecking(request);
+        ResponseVM<?> response = authService.passwordChecking(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/confirm-token-checking")
     public ResponseEntity<?> confirmTokenChecking(@RequestBody ConfirmTokenCheckingRequest request) {
-        ResDTO<?> response = authService.confirmTokenChecking(request);
+        ResponseVM<?> response = authService.confirmTokenChecking(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 }

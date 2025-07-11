@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.service.interfaces.ChatMessageService;
 import vn.edu.tdtu.service.interfaces.RoomService;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.Date;
 
@@ -19,7 +19,7 @@ public class RoomController {
 
     @GetMapping()
     public ResponseEntity<?> getRooms() {
-        ResDTO<?> response = roomService.findRoomsByUser();
+        ResponseVM<?> response = roomService.findRoomsByUser();
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -31,7 +31,7 @@ public class RoomController {
             @RequestParam(name = "anchorDate")
             @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Date anchorDate
     ) {
-        ResDTO<?> response = chatMessageService.getRoomMessages(id, anchorDate, page, size);
+        ResponseVM<?> response = chatMessageService.getRoomMessages(id, anchorDate, page, size);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 }

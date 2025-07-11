@@ -1,6 +1,5 @@
 package vn.tdtu.common.exception;
 
-
 import vn.tdtu.common.utils.MessageUtils;
 
 public class UnauthorizedException extends RuntimeException {

@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import vn.edu.tdtu.dto.ResDTO;
 import vn.edu.tdtu.dto.requests.AddCommentRequest;
 import vn.edu.tdtu.dto.requests.UpdateCommentRequest;
 import vn.edu.tdtu.service.interfaces.CommentService;
+import vn.tdtu.common.viewmodel.ResponseVM;
 
 @RestController
 @RequestMapping("/api/v1/comments")
@@ -19,7 +19,7 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<?> addComment(@RequestHeader("Authorization") String token,
                                         @RequestBody AddCommentRequest comment) {
-        ResDTO<?> response = commentsService.addComment(token, comment);
+        ResponseVM<?> response = commentsService.addComment(token, comment);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -27,26 +27,26 @@ public class CommentController {
     public ResponseEntity<?> updateComment(@RequestHeader("Authorization") String token,
                                            @PathVariable("id") String id,
                                            @RequestBody UpdateCommentRequest comment) {
-        ResDTO<?> response = commentsService.updateComment(token, id, comment);
+        ResponseVM<?> response = commentsService.updateComment(token, id, comment);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/delete/{id}")
     public ResponseEntity<?> deleteComment(@PathVariable("id") String id) {
-        ResDTO<?> response = commentsService.deleteComment(id);
+        ResponseVM<?> response = commentsService.deleteComment(id);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findCommentById(@RequestHeader(name = "Authorization") String token,
                                              @PathVariable("id") String id) {
-        ResDTO<?> response = commentsService.findCommentById(token, id);
+        ResponseVM<?> response = commentsService.findCommentById(token, id);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/count/post/{id}")
     public ResponseEntity<?> countComments(@PathVariable("id") String id) {
-        ResDTO<?> response = commentsService.countCommentByPostId(id);
+        ResponseVM<?> response = commentsService.countCommentByPostId(id);
         return ResponseEntity.ok(response);
     }
 
@@ -54,11 +54,11 @@ public class CommentController {
     public ResponseEntity<?> findAllComments(@RequestHeader(name = "Authorization") String token,
                                              @RequestParam(name = "postId", required = false) String postId) {
         if (postId != null) {
-            ResDTO<?> response = commentsService.findCommentsByPostId(token, postId);
+            ResponseVM<?> response = commentsService.findCommentsByPostId(token, postId);
             return ResponseEntity.ok(response);
         }
 
-        ResDTO<?> response = commentsService.findAllComments(token);
+        ResponseVM<?> response = commentsService.findAllComments(token);
         return ResponseEntity.ok(response);
     }
 }

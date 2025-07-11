@@ -6,6 +6,7 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.cloud.netflix.hystrix.EnableHystrix;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import vn.edu.tdtu.filter.ForwardTokenFilter;
 
 @Configuration
 @EnableHystrix
@@ -19,7 +20,7 @@ public class GatewayConfig {
                 .route("user-service", r -> r.path("/api/v1/users/**")
                         .filters(f -> f.filter(filter))
                         .uri("lb://user-service"))
-                .route("auth-service", r -> r.path("/api/v1/auth/**")
+                .route("auth-service", r -> r.path("/api/v1/auth/**", "/api/v1/admin/auth/**")
                         .filters(f -> f.filter(filter))
                         .uri("lb://auth-service"))
                 .route("search-service", r -> r.path("/api/v1/search/**")

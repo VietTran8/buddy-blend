@@ -5,12 +5,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import vn.edu.tdtu.dto.response.InteractNotification;
-import vn.tdtu.common.enums.search.ESyncType;
 import vn.edu.tdtu.message.ModerateMessage;
 import vn.edu.tdtu.message.ModerationNotificationMsg;
 import vn.edu.tdtu.message.NewPostMessage;
 import vn.edu.tdtu.message.SyncPostMsg;
 import vn.edu.tdtu.model.Post;
+import vn.tdtu.common.enums.search.ESyncType;
 
 @Service
 @RequiredArgsConstructor

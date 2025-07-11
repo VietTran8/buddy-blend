@@ -22,6 +22,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PostDTO implements Serializable {
+
     @Schema(description = "Post ID")
     private String id;
 

@@ -8,17 +8,17 @@ import vn.edu.tdtu.model.PostTag;
 import vn.edu.tdtu.repository.MediaRepository;
 import vn.edu.tdtu.repository.PostRepository;
 import vn.edu.tdtu.repository.SavePostRepository;
-import vn.edu.tdtu.service.impl.UserServiceImpl;
 import vn.edu.tdtu.service.intefaces.GroupService;
 import vn.edu.tdtu.service.intefaces.InteractionService;
-import vn.edu.tdtu.util.DateUtils;
-import vn.edu.tdtu.util.SecurityContextUtils;
+import vn.edu.tdtu.service.intefaces.UserService;
 import vn.tdtu.common.dto.GroupDTO;
 import vn.tdtu.common.dto.PostDTO;
 import vn.tdtu.common.dto.ReactionDTO;
 import vn.tdtu.common.dto.UserDTO;
 import vn.tdtu.common.enums.interaction.EReactionType;
 import vn.tdtu.common.enums.post.EPostType;
+import vn.tdtu.common.utils.DateUtils;
+import vn.tdtu.common.utils.SecurityContextUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,13 +28,26 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class PostMapper {
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final GroupService groupService;
     private final InteractionService interactionService;
     private final SavePostRepository savePostRepository;
     private final PostRepository postRepository;
     private final MediaRepository mediaRepository;
     private final MediaResponseMapper mediaResponseMapper;
+
+    public static ReactionDTO findUserReaction(Map<EReactionType, List<ReactionDTO>> reactionsMap, String userId) {
+        for (Map.Entry<EReactionType, List<ReactionDTO>> entry : reactionsMap.entrySet()) {
+            List<ReactionDTO> reactsList = entry.getValue();
+
+            for (ReactionDTO react : reactsList) {
+                if (react.getUser().getId().equals(userId)) {
+                    return react;
+                }
+            }
+        }
+        return null;
+    }
 
     public PostDTO mapToDto(String token, String postId, Post post, Map<String, Post> sharedPostsMap, boolean bulkFetch) {
         PostDTO postResponse = mapToDto(token, postId, post, bulkFetch);
@@ -51,11 +64,11 @@ public class PostMapper {
     }
 
     public PostDTO mapToDto(String token, String postId, Post post, boolean bulkFetch) {
-
+        String authUserId = SecurityContextUtils.getUserId();
         PostDTO postResponse = mapToBasePostDto(token, post, bulkFetch);
 
         postResponse.setNoShared(0);
-        postResponse.setSaved(savePostRepository.existsByUserIdAndPostIdsContains(SecurityContextUtils.getUserId(), postId));
+        postResponse.setSaved(savePostRepository.existsByUserIdAndPostIdsContains(authUserId, postId));
 
         Map<EReactionType, List<ReactionDTO>> reactionsMap = interactionService.findReactionsByPostId(token, postId);
 
@@ -69,24 +82,19 @@ public class PostMapper {
         postResponse.setNoReactions(totalElements);
         postResponse.setNoComments(commentsCount);
 
-        String userId;
-        if (token != null && !token.isEmpty()) {
-            userId = SecurityContextUtils.getUserId();
-
-            postResponse.setMine(userId.equals(post.getUserId()));
-        } else {
-            userId = "";
+        if (authUserId != null && !authUserId.isEmpty()) {
+            postResponse.setMine(authUserId.equals(post.getUserId()));
         }
 
-        if (reactionsMap != null && !userId.isEmpty()) {
-            ReactionDTO react = findUserReaction(reactionsMap, userId);
+        if (reactionsMap != null && authUserId != null && !authUserId.isEmpty()) {
+            ReactionDTO react = findUserReaction(reactionsMap, authUserId);
             postResponse.setReacted(react != null ? react.getType() : null);
         }
 
         if (!bulkFetch && post.getType().equals(EPostType.SHARE)) {
             Post foundSharedPost = postRepository.findById(post.getSharedPostId()).orElse(null);
 
-            postResponse.setSharedPost(mapToBasePostDto(token, foundSharedPost, bulkFetch));
+            postResponse.setSharedPost(mapToBasePostDto(token, foundSharedPost, false));
         }
 
         return postResponse;
@@ -129,19 +137,6 @@ public class PostMapper {
         return postResponse;
     }
 
-    public static ReactionDTO findUserReaction(Map<EReactionType, List<ReactionDTO>> reactionsMap, String userId) {
-        for (Map.Entry<EReactionType, List<ReactionDTO>> entry : reactionsMap.entrySet()) {
-            List<ReactionDTO> reactsList = entry.getValue();
-
-            for (ReactionDTO react : reactsList) {
-                if (react.getUser().getId().equals(userId)) {
-                    return react;
-                }
-            }
-        }
-        return null;
-    }
-
     private List<ReactionDTO> findTopReact(Map<EReactionType, List<ReactionDTO>> reactionsMap) {
         Map<EReactionType, List<ReactionDTO>> sortedMap = reactionsMap.entrySet()
                 .stream()
@@ -153,6 +148,7 @@ public class PostMapper {
                         (e1, e2) -> e1,
                         LinkedHashMap::new
                 ));
+
         List<ReactionDTO> topReacts = new ArrayList<>();
 
         sortedMap.forEach((k, v) -> {

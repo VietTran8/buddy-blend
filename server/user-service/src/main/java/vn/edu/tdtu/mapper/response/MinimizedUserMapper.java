@@ -5,9 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import vn.edu.tdtu.model.User;
 import vn.edu.tdtu.repository.UserRepository;
-import vn.edu.tdtu.util.SecurityContextUtils;
 import vn.tdtu.common.dto.UserDTO;
-import vn.tdtu.common.enums.user.EUserMappingType;
+import vn.tdtu.common.utils.SecurityContextUtils;
 
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class MinimizedUserMapper {
             return null;
         }
 
-        UserDTO minimizedUser = new UserDTO(baseUserMapper.baseMapToDto(user), EUserMappingType.TYPE_MINIMIZED);
+        UserDTO minimizedUser = new UserDTO(baseUserMapper.baseMapToDto(user));
 
         String authUserId = SecurityContextUtils.getUserId();
 
