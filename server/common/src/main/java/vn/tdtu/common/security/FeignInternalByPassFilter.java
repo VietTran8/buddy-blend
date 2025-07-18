@@ -29,7 +29,7 @@ public class FeignInternalByPassFilter extends OncePerRequestFilter {
         log.debug("[FeignInternalByPassFilter] - Processing request with auth header: {}", request.getHeader(HttpHeaders.AUTHORIZATION));
 
         if(requestUtils.isFeignCall.test(request)) {
-            SecurityContextUtils.byPassAuthentication(request, requestUtils);
+            SecurityContextUtils.byPassAuthentication(request);
         }
 
         filterChain.doFilter(request, response);

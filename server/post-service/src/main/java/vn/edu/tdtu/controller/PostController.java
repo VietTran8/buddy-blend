@@ -25,36 +25,30 @@ public class PostController {
 
     @GetMapping("/news-feed")
     public ResponseEntity<?> getNewFeeds(
-            @RequestHeader(name = "Authorization") String token,
             @RequestParam("page") int page,
             @RequestParam("size") int size,
             @RequestParam("startTime") String startTime
     ) {
-        ResponseVM<?> response = postService.getNewsFeed(token, page, size, startTime);
+        ResponseVM<?> response = postService.getNewsFeed(page, size, startTime);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("")
     @CacheEvict(cacheNames = "news-feed", allEntries = true)
-    public ResponseEntity<?> post(
-            @RequestHeader(name = "Authorization") String token,
-            @RequestBody CreatePostRequest requestBody
-    ) {
-        ResponseVM<?> response = postService.savePost(token, requestBody);
+    public ResponseEntity<?> post(@RequestBody CreatePostRequest requestBody) {
+        ResponseVM<?> response = postService.savePost(requestBody);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findById(@RequestHeader("Authorization") String token,
-                                      @PathVariable("id") String id) {
-        ResponseVM<?> response = postService.findPostRespById(token, id);
+    public ResponseEntity<?> findById(@PathVariable("id") String id) {
+        ResponseVM<?> response = postService.findPostRespById(id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/find-all")
-    public ResponseEntity<?> findByIds(@RequestHeader("Authorization") String token,
-                                       @RequestBody FindByIdsReq req) {
-        ResponseVM<?> response = postService.findPostRespByIds(token, req);
+    public ResponseEntity<?> findByIds(@RequestBody FindByIdsReq req) {
+        ResponseVM<?> response = postService.findPostRespByIds(req);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -65,8 +59,8 @@ public class PostController {
     }
 
     @GetMapping("/save/posts")
-    public ResponseEntity<?> getUserSavedPosts(@RequestHeader("Authorization") String tokenHeader) {
-        ResponseVM<?> response = savePostService.getUserSavedPost(tokenHeader);
+    public ResponseEntity<?> getUserSavedPosts() {
+        ResponseVM<?> response = savePostService.getUserSavedPost();
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -78,19 +72,19 @@ public class PostController {
 
     @GetMapping("/search")
     public ResponseEntity<?> search(
-            @RequestHeader(name = "Authorization", required = false, defaultValue = "") String token,
+            
             @RequestParam("key") String key) {
-        ResponseVM<?> response = postService.findByContentContaining(token, key);
+        ResponseVM<?> response = postService.findByContentContaining(key);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/update")
     @CacheEvict(cacheNames = "news-feed", allEntries = true)
     public ResponseEntity<?> update(
-            @RequestHeader("Authorization") String token,
+            
             @RequestBody UpdatePostContentRequest request
     ) {
-        ResponseVM<?> response = postService.updatePostContent(token, request);
+        ResponseVM<?> response = postService.updatePostContent(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -103,38 +97,33 @@ public class PostController {
 
     @PostMapping("/share")
     @CacheEvict(cacheNames = "news-feed", allEntries = true)
-    public ResponseEntity<?> sharePost(
-            @RequestHeader("Authorization") String token,
-            @RequestBody SharePostRequest request
-    ) {
-        ResponseVM<?> response = postService.sharePost(token, request);
+    public ResponseEntity<?> sharePost(@RequestBody SharePostRequest request) {
+        ResponseVM<?> response = postService.sharePost(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/group/{groupId}")
     public ResponseEntity<?> getGroupPosts(
-            @RequestHeader("Authorization") String token,
             @PathVariable("groupId") String groupId,
             @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int limit
     ) {
-        ResponseVM<?> response = postService.getGroupPosts(token, groupId, page, limit);
+        ResponseVM<?> response = postService.getGroupPosts(groupId, page, limit);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/detached/{postId}")
-    public ResponseEntity<?> getDetachedPost(@RequestHeader("Authorization") String tokenHeader, @PathVariable("postId") String postId) {
-        ResponseVM<PostDTO> response = postService.findDetachedPost(tokenHeader, postId);
+    public ResponseEntity<?> getDetachedPost(@PathVariable("postId") String postId) {
+        ResponseVM<PostDTO> response = postService.findDetachedPost(postId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping()
-    public ResponseEntity<?> getMyPost(@RequestHeader("Authorization") String token,
-                                       @RequestParam(name = "userId", required = false, defaultValue = "") String userId,
+    public ResponseEntity<?> getMyPost(@RequestParam(name = "userId", required = false, defaultValue = "") String userId,
                                        @RequestParam(name = "page", required = false, defaultValue = "1") int page,
                                        @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
-        ResponseVM<?> response = postService.findUserPosts(token, userId, page, size);
+        ResponseVM<?> response = postService.findUserPosts(userId, page, size);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 }

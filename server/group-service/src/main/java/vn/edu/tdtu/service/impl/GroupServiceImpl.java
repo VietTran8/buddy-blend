@@ -244,7 +244,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResponseVM<?> getGroupById(String accessToken, String groupId) {
+    public ResponseVM<?> getGroupById(String groupId) {
         ResponseVM<GroupDTO> response = new ResponseVM<>();
         response.setCode(HttpServletResponse.SC_OK);
         response.setMessage(MessageCode.Group.GROUP_FETCHED);
@@ -252,7 +252,7 @@ public class GroupServiceImpl implements GroupService {
         Group group = groupRepository.findByIdAndIsDeleted(groupId, false)
                 .orElseThrow(() -> new BadRequestException(MessageCode.Group.GROUP_NOT_FOUND));
 
-        GroupDTO groupResponse = groupMapper.mapToDto(accessToken, group, false);
+        GroupDTO groupResponse = groupMapper.mapToDto(group, false);
 
         response.setData(groupResponse);
 
@@ -268,7 +268,7 @@ public class GroupServiceImpl implements GroupService {
         List<Group> groups = groupRepository.findAllByIdInAndIsDeleted(groupIds, false);
 
         response.setData(groups.stream().map(
-                group -> groupMapper.mapToDto(null, group, true)
+                group -> groupMapper.mapToDto(group, true)
         ).toList());
 
         return response;
@@ -318,11 +318,11 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public void inviteUsers(String accessToken, InviteUsersRequest payload) {
+    public void inviteUsers(InviteUsersRequest payload) {
         Notification notification = new Notification();
         String userId = SecurityContextUtils.getUserId();
 
-        UserDTO foundUser = userClient.findById(accessToken, userId).getData();
+        UserDTO foundUser = userClient.findById(userId).getData();
 
         if (foundUser == null)
             throw new UnauthorizedException(MessageCode.Authentication.AUTH_UNAUTHORIZED);
@@ -344,7 +344,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResponseVM<?> getPendingMembersList(String accessToken, String groupId) {
+    public ResponseVM<?> getPendingMembersList(String groupId) {
         ResponseVM<List<GroupMemberDTO>> response = new ResponseVM<>();
         response.setMessage(MessageCode.Group.GROUP_MEMBER_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
@@ -356,7 +356,7 @@ public class GroupServiceImpl implements GroupService {
                 .map(member -> member.getMember().getUserId())
                 .toList();
 
-        List<UserDTO> users = userClient.findByIds(accessToken, new FindByIdsRequest(memberUserIds)).getData();
+        List<UserDTO> users = userClient.findByIds(new FindByIdsRequest(memberUserIds)).getData();
 
         Map<String, UserDTO> userMap = users.stream().collect(Collectors.toMap(UserDTO::getId, user -> user));
 
@@ -376,7 +376,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResponseVM<?> getGroupMembers(String accessToken, String groupId, int page, int size, EGetMemberOption option) {
+    public ResponseVM<?> getGroupMembers(String groupId, int page, int size, EGetMemberOption option) {
         ResponseVM<PaginationResponseVM<GroupMemberDTO>> response = new ResponseVM<>();
         Page<GroupMember> memberPage;
 
@@ -391,7 +391,7 @@ public class GroupServiceImpl implements GroupService {
                 break;
             }
             case FRIEND_MEMBERS -> {
-                List<UserDTO> userFriends = userClient.findUserFriendIdsByUserToken(accessToken).getData();
+                List<UserDTO> userFriends = userClient.findUserFriendIds().getData();
 
                 memberPage = groupMemberRepository.findFriendMembersByGroupId(groupId, userFriends.stream().map(UserDTO::getId).toList(), PageRequest.of(page - 1, size));
                 break;
@@ -405,7 +405,7 @@ public class GroupServiceImpl implements GroupService {
         List<GroupMember> memberList = memberPage.get().toList();
 
         List<String> userIds = memberList.stream().map(member -> member.getMember().getUserId()).toList();
-        List<UserDTO> users = userClient.findByIds(accessToken, new FindByIdsRequest(userIds)).getData();
+        List<UserDTO> users = userClient.findByIds(new FindByIdsRequest(userIds)).getData();
         Map<String, UserDTO> userMap = users.stream().collect(Collectors.toMap(UserDTO::getId, user -> user));
 
         response.setData(new PaginationResponseVM<>(
@@ -445,10 +445,10 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResponseVM<?> getAllFriendGroupMemberUserIds(String accessToken, String groupId) {
+    public ResponseVM<?> getAllFriendGroupMemberUserIds(String groupId) {
         ResponseVM<List<String>> response = new ResponseVM<>();
 
-        List<UserDTO> userFriends = userClient.findUserFriendIdsByUserToken(accessToken).getData();
+        List<UserDTO> userFriends = userClient.findUserFriendIds().getData();
         List<GroupMember> memberList = groupMemberRepository.findFriendMembersByGroupId(groupId, userFriends.stream().map(UserDTO::getId).toList());
 
         List<String> userIds = memberList.stream().map(member -> member.getMember().getUserId()).toList();

@@ -6,5 +6,5 @@ import vn.tdtu.common.dto.PostDTO;
 import java.util.List;
 
 public interface PostService {
-    List<PostDTO> findByIds(String token, FindByIdsReq reqDTO);
+    List<PostDTO> findByIds(FindByIdsReq reqDTO);
 }

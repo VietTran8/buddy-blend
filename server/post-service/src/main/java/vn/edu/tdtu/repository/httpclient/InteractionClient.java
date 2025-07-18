@@ -18,20 +18,11 @@ import java.util.Map;
 public interface InteractionClient {
 
     @GetMapping("/api/v1/comments")
-    ResponseVM<List<CommentDTO>> findCommentsByPostId(
-            @RequestHeader("Authorization") String accessToken,
-            @RequestParam("postId") String postId
-    );
+    ResponseVM<List<CommentDTO>> findCommentsByPostId(@RequestParam("postId") String postId);
 
     @GetMapping("/api/v1/reacts")
-    ResponseVM<Map<EReactionType, List<ReactionDTO>>> findReactionsByPostId(
-            @RequestHeader("Authorization") String accessToken,
-            @RequestParam("postId") String postId
-    );
+    ResponseVM<Map<EReactionType, List<ReactionDTO>>> findReactionsByPostId(@RequestParam("postId") String postId);
 
     @GetMapping("/api/v1/comments/count/post/{id}")
-    ResponseVM<Long> countCommentByPostId(
-            @RequestHeader("Authorization") String accessToken,
-            @PathVariable("id") String id
-    );
+    ResponseVM<Long> countCommentByPostId(@PathVariable("id") String id);
 }

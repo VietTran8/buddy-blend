@@ -9,5 +9,5 @@ import java.util.List;
 public interface SavePostService {
     ResponseVM<SavePostResponse> handleSavePost(String postId);
 
-    ResponseVM<List<PostDTO>> getUserSavedPost(String token);
+    ResponseVM<List<PostDTO>> getUserSavedPost();
 }

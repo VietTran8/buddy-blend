@@ -34,11 +34,11 @@ public class SearchServiceImpl implements SearchService {
     @Override
     @CacheEvict(cacheNames = "search-history", allEntries = true)
     @Cacheable(key = "T(java.util.Objects).hash(#p0, #p1)", value = "search-result", unless = "#result.data.users.isEmpty() and #result.data.posts.isEmpty()")
-    public ResponseVM<?> search(String token, String key) {
-        if (token != null && !repository.existsByQuery(key)) {
+    public ResponseVM<?> search(String authUserId, String key) {
+        if(authUserId != null) {
             SearchHistory searchHistory = new SearchHistory();
             searchHistory.setQuery(key);
-            searchHistory.setUserId(SecurityContextUtils.getUserId());
+            searchHistory.setUserId(authUserId);
             searchHistory.setCreatedAt(new Date());
 
             repository.save(searchHistory);
@@ -46,9 +46,9 @@ public class SearchServiceImpl implements SearchService {
 
         SearchResponse data = new SearchResponse();
 
-        data.setUsers(userService.searchUserFullName(token, key, null));
-        data.setPosts(postService.findByContentContaining(token, key, null));
-        data.setGroups(groupService.findByNameContaining(token, key, null));
+        data.setUsers(userService.searchUserFullName(key, null));
+        data.setPosts(postService.findByContentContaining(key, null));
+        data.setGroups(groupService.findByNameContaining(key, null));
 
         ResponseVM<SearchResponse> response = new ResponseVM<>();
         response.setCode(HttpServletResponse.SC_OK);
@@ -60,12 +60,12 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     @Cacheable(key = "T(java.util.Objects).hash(#p0, #p1)", value = "fetch-result", unless = "#result.data.users.isEmpty() and #result.data.posts.isEmpty()")
-    public ResponseVM<?> fetchResult(String token, String key) {
+    public ResponseVM<?> fetchResult(String authUserId, String key) {
         SearchResponse data = new SearchResponse();
 
-        data.setUsers(userService.searchUserFullName(token, key, Fuzziness.ONE.asString()));
-        data.setPosts(postService.findByContentContaining(token, key, Fuzziness.ONE.asString()));
-        data.setGroups(groupService.findByNameContaining(token, key, Fuzziness.ONE.asString()));
+        data.setUsers(userService.searchUserFullName(key, Fuzziness.ONE.asString()));
+        data.setPosts(postService.findByContentContaining(key, Fuzziness.ONE.asString()));
+        data.setGroups(groupService.findByNameContaining(key, Fuzziness.ONE.asString()));
 
         ResponseVM<SearchResponse> response = new ResponseVM<>();
         response.setCode(HttpServletResponse.SC_OK);
@@ -77,17 +77,17 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     @Cacheable(key = "T(java.util.Objects).hash(#p0)", value = "search-history", unless = "#result.data.isEmpty() and #result.data.isEmpty()")
-    public ResponseVM<?> getSearchHistory(String token) {
+    public ResponseVM<?> getSearchHistory(String authUserId) {
         ResponseVM<List<SearchHistory>> response = new ResponseVM<>();
         response.setMessage(MessageCode.Search.SEARCH_HISTORY_FETCHED);
         response.setData(new ArrayList<>());
         response.setCode(HttpServletResponse.SC_OK);
 
-        List<SearchHistory> searchHistories = repository.findByUserId(SecurityContextUtils.getUserId())
-                .stream().sorted(Comparator.comparingLong(s -> ((SearchHistory) s).getCreatedAt().getTime()).reversed())
-                .toList();
+        if (authUserId != null) {
+            List<SearchHistory> searchHistories = repository.findByUserId(authUserId)
+                    .stream().sorted(Comparator.comparingLong(s -> ((SearchHistory) s).getCreatedAt().getTime()).reversed())
+                    .toList();
 
-        if (token != null) {
             response.setData(searchHistories);
         }
 

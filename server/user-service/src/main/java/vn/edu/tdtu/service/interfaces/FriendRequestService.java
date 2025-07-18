@@ -13,13 +13,13 @@ public interface FriendRequestService {
 
     List<User> getListFriends(String userId);
 
-    ResponseVM<?> getListFriendsResp(String token, String id);
+    ResponseVM<?> getListFriendsResp(String id);
 
     ResponseVM<?> getFriendIds(String userId);
 
     List<FriendRequest> getListFriendRequest(String userId);
 
-    ResponseVM<?> getListFriendRequestResp(String token);
+    ResponseVM<?> getListFriendRequestResp();
 
     ResponseVM<?> getFriendRequestIdByFromUserId(String fromUserId);
 

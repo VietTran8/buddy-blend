@@ -15,10 +15,9 @@ public class NotificationController {
 
     @GetMapping()
     public ResponseEntity<?> getAllNotifications(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
-                                                 @RequestParam(name = "size", required = false, defaultValue = "10") int size,
-                                                 @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenHeader
+                                                 @RequestParam(name = "size", required = false, defaultValue = "10") int size
     ) {
-        ResponseVM<?> response = notificationService.findAllUserNotifications(tokenHeader, page, size);
+        ResponseVM<?> response = notificationService.findAllUserNotifications(page, size);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -29,18 +28,16 @@ public class NotificationController {
     }
 
     @PostMapping("/detach/{id}")
-    public ResponseEntity<?> detachNotification(@PathVariable("id") String id,
-                                                @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenHeader) {
-        ResponseVM<?> response = notificationService.detachNotification(tokenHeader, id);
+    public ResponseEntity<?> detachNotification(@PathVariable("id") String id) {
+        ResponseVM<?> response = notificationService.detachNotification(id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
 
     @PostMapping("/read/{id}")
-    public ResponseEntity<?> readNotification(@PathVariable("id") String id,
-                                              @RequestHeader(HttpHeaders.AUTHORIZATION) String tokenHeader
+    public ResponseEntity<?> readNotification(@PathVariable("id") String id
     ) {
-        ResponseVM<?> response = notificationService.readNotification(tokenHeader, id);
+        ResponseVM<?> response = notificationService.readNotification(id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 }

@@ -12,5 +12,5 @@ public interface GroupService {
 
     void deleteGroup(String groupId);
 
-    List<GroupDTO> findByNameContaining(String tokenHeader, String key, String fuzziness);
+    List<GroupDTO> findByNameContaining(String key, String fuzziness);
 }

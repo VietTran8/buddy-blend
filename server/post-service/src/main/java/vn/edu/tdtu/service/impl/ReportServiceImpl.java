@@ -70,13 +70,13 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     @Cacheable(key = "T(java.util.Objects).hash(#a1, #a2)", value = "reports", unless = "#result.data.data.isEmpty()")
-    public ResponseVM<?> getAllReport(String token, int page, int size) {
+    public ResponseVM<?> getAllReport(int page, int size) {
         Page<Report> reportPage = reportRepository
                 .findAllByActiveOrActive(null, true, PageRequest.of(page - 1, size));
 
         List<ReportResponse> reports = reportPage
                 .stream()
-                .map(p -> reportResponseMapper.mapToDto(token, p))
+                .map(reportResponseMapper::mapToDto)
                 .toList();
 
         PaginationResponseVM<ReportResponse> paginationResponse = new PaginationResponseVM<>();

@@ -1,6 +1,7 @@
 package vn.edu.tdtu.security;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,6 +14,7 @@ import vn.edu.tdtu.viewmodel.ResponseVM;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class CustomAuthEntryPoint implements ServerAuthenticationEntryPoint {
     private final JsonUtil<ResponseVM<?>> jsonParser;
 
@@ -32,6 +34,8 @@ public class CustomAuthEntryPoint implements ServerAuthenticationEntryPoint {
             response.getHeaders().set(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "*");
             response.getHeaders().set(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "*");
         }
+
+        log.warn("[CustomAuthEntryPoint] - Unauthorized access attempt: {}", ex.getMessage());
 
         String body = jsonParser.stringify(new ResponseVM<>(
                 "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.",

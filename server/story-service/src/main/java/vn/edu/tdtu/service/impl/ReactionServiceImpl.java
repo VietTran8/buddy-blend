@@ -34,7 +34,7 @@ public class ReactionServiceImpl implements ReactionService {
     private final UserService userService;
 
     @Override
-    public ResponseVM<DoReactResponse> doReact(String accessToken, DoReactRequest payload) {
+    public ResponseVM<DoReactResponse> doReact(DoReactRequest payload) {
         String userId = SecurityContextUtils.getUserId();
 
         Story foundStory = storyRepository.findById(payload.getStoryId())
@@ -50,7 +50,7 @@ public class ReactionServiceImpl implements ReactionService {
 
         viewerRepository.save(foundViewer);
 
-        sendNotification(accessToken, payload, userId, foundStory);
+        sendNotification(payload, userId, foundStory);
 
         return new ResponseVM<>(
                 MessageCode.Story.REACTION_CREATED,
@@ -59,8 +59,8 @@ public class ReactionServiceImpl implements ReactionService {
         );
     }
 
-    private void sendNotification(String accessToken, DoReactRequest payload, String userId, Story foundStory) {
-        UserDTO foundUser = userService.getUserById(accessToken, userId);
+    private void sendNotification(DoReactRequest payload, String userId, Story foundStory) {
+        UserDTO foundUser = userService.getUserById(userId);
 
         if (foundUser != null) {
             InteractNotification notification = new InteractNotification();

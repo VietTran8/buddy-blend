@@ -4,7 +4,7 @@ import vn.edu.tdtu.dto.request.SaveUserFavouriteDTO;
 import vn.tdtu.common.viewmodel.ResponseVM;
 
 public interface UserFavouriteService {
-    ResponseVM<?> getUserFavById(String token, String favId);
+    ResponseVM<?> getUserFavById(String favId);
 
     ResponseVM<?> getUserFavourites();
 

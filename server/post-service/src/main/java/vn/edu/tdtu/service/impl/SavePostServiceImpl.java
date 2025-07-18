@@ -60,7 +60,7 @@ public class SavePostServiceImpl implements SavePostService {
     }
 
     @Override
-    public ResponseVM<List<PostDTO>> getUserSavedPost(String token) {
+    public ResponseVM<List<PostDTO>> getUserSavedPost() {
         ResponseVM<List<PostDTO>> response = new ResponseVM<>();
         response.setMessage(MessageCode.Post.POST_FETCHED);
         response.setCode(HttpServletResponse.SC_OK);
@@ -73,7 +73,7 @@ public class SavePostServiceImpl implements SavePostService {
             return response;
         }
 
-        List<PostDTO> responseData = postService.findPostRespByIds(token, new FindByIdsReq(foundSavePost.getPostIds())).getData();
+        List<PostDTO> responseData = postService.findPostRespByIds(new FindByIdsReq(foundSavePost.getPostIds())).getData();
 
         response.setData(responseData);
 

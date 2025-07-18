@@ -49,34 +49,34 @@ public class PostMapper {
         return null;
     }
 
-    public PostDTO mapToDto(String token, String postId, Post post, Map<String, Post> sharedPostsMap, boolean bulkFetch) {
-        PostDTO postResponse = mapToDto(token, postId, post, bulkFetch);
+    public PostDTO mapToDto(String postId, Post post, Map<String, Post> sharedPostsMap, boolean bulkFetch) {
+        PostDTO postResponse = mapToDto(postId, post, bulkFetch);
 
         if (post.getType().equals(EPostType.SHARE)) {
             Post foundSharedPost = !bulkFetch ?
                     postRepository.findById(post.getSharedPostId()).orElse(null) :
                     sharedPostsMap.get(post.getSharedPostId());
 
-            postResponse.setSharedPost(mapToBasePostDto(token, foundSharedPost, bulkFetch));
+            postResponse.setSharedPost(mapToBasePostDto(foundSharedPost, bulkFetch));
         }
 
         return postResponse;
     }
 
-    public PostDTO mapToDto(String token, String postId, Post post, boolean bulkFetch) {
+    public PostDTO mapToDto(String postId, Post post, boolean bulkFetch) {
         String authUserId = SecurityContextUtils.getUserId();
-        PostDTO postResponse = mapToBasePostDto(token, post, bulkFetch);
+        PostDTO postResponse = mapToBasePostDto(post, bulkFetch);
 
         postResponse.setNoShared(0);
         postResponse.setSaved(savePostRepository.existsByUserIdAndPostIdsContains(authUserId, postId));
 
-        Map<EReactionType, List<ReactionDTO>> reactionsMap = interactionService.findReactionsByPostId(token, postId);
+        Map<EReactionType, List<ReactionDTO>> reactionsMap = interactionService.findReactionsByPostId(postId);
 
         int totalElements = reactionsMap != null ? reactionsMap.values().stream()
                 .mapToInt(List::size)
                 .sum() : 0;
 
-        long commentsCount = interactionService.countCommentByPostId(token, postId);
+        long commentsCount = interactionService.countCommentByPostId(postId);
 
         postResponse.setTopReacts(findTopReact(reactionsMap != null ? reactionsMap : new HashMap<>()));
         postResponse.setNoReactions(totalElements);
@@ -94,17 +94,17 @@ public class PostMapper {
         if (!bulkFetch && post.getType().equals(EPostType.SHARE)) {
             Post foundSharedPost = postRepository.findById(post.getSharedPostId()).orElse(null);
 
-            postResponse.setSharedPost(mapToBasePostDto(token, foundSharedPost, false));
+            postResponse.setSharedPost(mapToBasePostDto(foundSharedPost, false));
         }
 
         return postResponse;
     }
 
-    private PostDTO mapToBasePostDto(String token, Post post, boolean bulkFetch) {
+    private PostDTO mapToBasePostDto(Post post, boolean bulkFetch) {
         UserDTO postedUser = new UserDTO();
 
         if (!bulkFetch)
-            postedUser = userService.findById(token, post.getUserId());
+            postedUser = userService.findById(post.getUserId());
 
         List<UserDTO> taggedUsers = new ArrayList<>();
 
@@ -114,7 +114,7 @@ public class PostMapper {
         GroupDTO foundGroup = null;
 
         if (post.getGroupId() != null && !post.getGroupId().isEmpty())
-            foundGroup = groupService.getGroupById(token, post.getGroupId());
+            foundGroup = groupService.getGroupById(post.getGroupId());
 
         PostDTO postResponse = new PostDTO();
 

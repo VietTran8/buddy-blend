@@ -27,30 +27,32 @@ public class BaseUserMapper {
 
         String userId = SecurityContextUtils.getUserId();
 
-        User authUser = userRepository.findByIdAndActive(userId, true).orElse(null);
+        if(userId != null) {
+            User authUser = userRepository.findByIdAndActive(userId, true).orElse(null);
 
-        List<FriendRequest> authUserFriendRequests = getUserFriendRequest(authUser, user);
+            List<FriendRequest> authUserFriendRequests = getUserFriendRequest(authUser, user);
 
-        userResponse.setFriendStatus(EFriendStatus.NOT_YET);
+            userResponse.setFriendStatus(EFriendStatus.NOT_YET);
 
-        authUserFriendRequests.stream().findFirst()
-                .ifPresent(request -> {
-                    switch (request.getStatus()) {
-                        case PENDING -> {
-                            if (request.getToUser().getId().equals(user.getId())) {
-                                userResponse.setFriendStatus(EFriendStatus.SENT_BY_YOU);
-                            } else {
-                                userResponse.setFriendStatus(EFriendStatus.SENT_TO_YOU);
+            authUserFriendRequests.stream().findFirst()
+                    .ifPresent(request -> {
+                        switch (request.getStatus()) {
+                            case PENDING -> {
+                                if (request.getToUser().getId().equals(user.getId())) {
+                                    userResponse.setFriendStatus(EFriendStatus.SENT_BY_YOU);
+                                } else {
+                                    userResponse.setFriendStatus(EFriendStatus.SENT_TO_YOU);
+                                }
+                            }
+                            case ACCEPTED -> {
+                                userResponse.setFriendStatus(EFriendStatus.IS_FRIEND);
+                            }
+                            case CANCELLED -> {
+                                userResponse.setFriendStatus(EFriendStatus.NOT_YET);
                             }
                         }
-                        case ACCEPTED -> {
-                            userResponse.setFriendStatus(EFriendStatus.IS_FRIEND);
-                        }
-                        case CANCELLED -> {
-                            userResponse.setFriendStatus(EFriendStatus.NOT_YET);
-                        }
-                    }
-                });
+                    });
+        }
 
         userResponse.setId(user.getId());
         userResponse.setUserFullName(user.getUserFullName());

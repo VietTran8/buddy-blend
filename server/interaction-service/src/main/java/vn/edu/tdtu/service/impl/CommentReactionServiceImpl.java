@@ -60,13 +60,13 @@ public record CommentReactionServiceImpl(
     }
 
     @Override
-    public ResponseVM<Map<EReactionType, List<ReactionDTO>>> getReactsByCmtId(String token, String cmtId) {
+    public ResponseVM<Map<EReactionType, List<ReactionDTO>>> getReactsByCmtId(String cmtId) {
         ResponseVM<Map<EReactionType, List<ReactionDTO>>> response = new ResponseVM<>();
         String userId = SecurityContextUtils.getUserId();
 
         List<CommentReactions> reactions = commentReactionRepository.findReactionsByCmtIdOrderByCreatedAtDesc(cmtId);
         List<String> userIds = reactions.stream().map(CommentReactions::getUserId).toList();
-        List<UserDTO> users = userService.findByIds(token, userIds);
+        List<UserDTO> users = userService.findByIds(userIds);
 
         Map<EReactionType, List<ReactionDTO>> reactResponses = reactions
                 .stream()

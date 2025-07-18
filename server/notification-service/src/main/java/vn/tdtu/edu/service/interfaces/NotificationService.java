@@ -8,11 +8,11 @@ import vn.tdtu.edu.model.CommonNotification;
 public interface NotificationService {
     void save(CommonNotification obj);
 
-    ResponseVM<PaginationResponseVM<NotificationResponse>> findAllUserNotifications(String tokenHeader, int page, int size);
+    ResponseVM<PaginationResponseVM<NotificationResponse>> findAllUserNotifications(int page, int size);
 
-    ResponseVM<?> detachNotification(String tokenHeader, String notificationId);
+    ResponseVM<?> detachNotification(String notificationId);
 
     ResponseVM<?> testGetResource();
 
-    ResponseVM<?> readNotification(String tokenHeader, String notificationId);
+    ResponseVM<?> readNotification(String notificationId);
 }

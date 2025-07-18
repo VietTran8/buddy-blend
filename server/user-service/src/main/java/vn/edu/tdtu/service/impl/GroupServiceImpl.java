@@ -14,8 +14,8 @@ public class GroupServiceImpl implements GroupService {
     private final GroupClient groupClient;
 
     @Override
-    public List<String> getFriendUserIdsInGroup(String accessToken, String groupId) {
-        ResponseVM<List<String>> response = groupClient.getFriendUserIdsInGroup(accessToken, groupId);
+    public List<String> getFriendUserIdsInGroup(String groupId) {
+        ResponseVM<List<String>> response = groupClient.getFriendUserIdsInGroup(groupId);
 
         return response.getData();
     }

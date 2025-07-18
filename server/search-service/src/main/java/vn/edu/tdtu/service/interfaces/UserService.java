@@ -12,5 +12,5 @@ public interface UserService {
 
     void deleteUser(SyncUser user);
 
-    List<UserDTO> searchUserFullName(String accessToken, String name, String fuzziness);
+    List<UserDTO> searchUserFullName(String name, String fuzziness);
 }

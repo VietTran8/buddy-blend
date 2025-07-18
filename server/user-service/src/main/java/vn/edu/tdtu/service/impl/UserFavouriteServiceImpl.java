@@ -31,7 +31,7 @@ public class UserFavouriteServiceImpl implements UserFavouriteService {
     private final FavDetailResponseMapper favDetailResponseMapper;
 
     @Override
-    public ResponseVM<?> getUserFavById(String token, String favId) {
+    public ResponseVM<?> getUserFavById(String favId) {
         String userId = SecurityContextUtils.getUserId();
         ResponseVM<UserFavouriteDetailResp> response = new ResponseVM<>();
 
@@ -45,7 +45,7 @@ public class UserFavouriteServiceImpl implements UserFavouriteService {
                 () -> new BadRequestException(MessageCode.User.USER_FAVOURITE_NOT_FOUND)
         );
 
-        response.setData(favDetailResponseMapper.mapToDto(token, fav));
+        response.setData(favDetailResponseMapper.mapToDto(fav));
         response.setCode(200);
         response.setMessage(MessageCode.User.USER_FAVOURITE_FETCHED);
 

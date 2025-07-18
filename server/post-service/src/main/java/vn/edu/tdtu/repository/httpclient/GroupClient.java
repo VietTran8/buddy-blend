@@ -14,14 +14,14 @@ import java.util.List;
 public interface GroupClient {
 
     @GetMapping("/min/{groupId}")
-    ResponseVM<GroupDTO> getGroupInfoById(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
+    ResponseVM<GroupDTO> getGroupInfoById(@PathVariable("groupId") String groupId);
 
     @GetMapping("")
-    ResponseVM<List<GroupDTO>> getMyGroups(@RequestHeader("Authorization") String accessToken);
+    ResponseVM<List<GroupDTO>> getMyGroups();
 
     @GetMapping("/{groupId}/allow-fetch-post")
-    ResponseVM<Boolean> allowFetchPost(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
+    ResponseVM<Boolean> allowFetchPost(@PathVariable("groupId") String groupId);
 
     @GetMapping("/{groupId}/members/id")
-    ResponseVM<List<String>> getMemberIdList(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
+    ResponseVM<List<String>> getMemberIdList(@PathVariable("groupId") String groupId);
 }

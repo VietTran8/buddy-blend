@@ -25,26 +25,26 @@ public class CommentResponseMapper {
     private final CommentsRepository commentsRepository;
     private final CommentReactionRepository commentReactionRepository;
 
-    public CommentDTO mapToDto(String token, Comments comment) {
-        CommentDTO commentResponse = mapToBaseDto(token, comment);
+    public CommentDTO mapToDto(Comments comment) {
+        CommentDTO commentResponse = mapToBaseDto(comment);
 
         commentResponse.setChildren(commentsRepository.findByParentId(comment.getId())
                 .stream()
-                .map(cmt -> mapToChildrenCommentDTO(token, cmt))
+                .map(cmt -> mapToChildrenCommentDTO(cmt))
                 .toList());
 
         return commentResponse;
     }
 
-    private CommentDTO mapToChildrenCommentDTO(String token, Comments comment) {
-        CommentDTO commentResponse = mapToBaseDto(token, comment);
+    private CommentDTO mapToChildrenCommentDTO(Comments comment) {
+        CommentDTO commentResponse = mapToBaseDto(comment);
 
         commentResponse.setChildren(new ArrayList<>());
 
         return commentResponse;
     }
 
-    private CommentDTO mapToBaseDto(String token, Comments comment) {
+    private CommentDTO mapToBaseDto(Comments comment) {
         CommentDTO commentResponse = new CommentDTO();
 
         List<CommentReactions> commentReactions = commentReactionRepository.findByCmtId(comment.getId());
@@ -55,7 +55,7 @@ public class CommentResponseMapper {
                 .orElse(null);
 
         commentResponse.setId(comment.getId());
-        commentResponse.setUser(userService.findById(token, comment.getUserId()));
+        commentResponse.setUser(userService.findById(comment.getUserId()));
         commentResponse.setCreatedAt(DateUtils.localDateTimeToDate(comment.getCreatedAt()));
         commentResponse.setUpdatedAt(DateUtils.localDateTimeToDate(comment.getUpdatedAt()));
         commentResponse.setContent(comment.getContent());

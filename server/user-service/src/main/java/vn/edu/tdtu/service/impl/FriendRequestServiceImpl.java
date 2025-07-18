@@ -152,7 +152,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
     @Override
-    public ResponseVM<?> getListFriendsResp(String token, String id) {
+    public ResponseVM<?> getListFriendsResp(String id) {
         ResponseVM<List<UserDTO>> response = new ResponseVM<>();
         String userId = id == null ? SecurityContextUtils.getUserId() : id;
 
@@ -200,7 +200,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
     @Override
-    public ResponseVM<?> getListFriendRequestResp(String token) {
+    public ResponseVM<?> getListFriendRequestResp() {
         ResponseVM<List<FriendRequestResponse>> response = new ResponseVM<>();
 
         String userId = SecurityContextUtils.getUserId();

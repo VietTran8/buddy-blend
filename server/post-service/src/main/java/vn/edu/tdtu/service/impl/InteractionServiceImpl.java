@@ -20,24 +20,24 @@ public class InteractionServiceImpl implements InteractionService {
     private final InteractionClient interactionClient;
 
     @Override
-    public List<CommentDTO> findCommentsByPostId(String token, String postId) {
-        ResponseVM<List<CommentDTO>> response = interactionClient.findCommentsByPostId(token, postId);
+    public List<CommentDTO> findCommentsByPostId(String postId) {
+        ResponseVM<List<CommentDTO>> response = interactionClient.findCommentsByPostId(postId);
         log.info(response.toString());
 
         return response.getData();
     }
 
     @Override
-    public long countCommentByPostId(String token, String postId) {
-        ResponseVM<Long> response = interactionClient.countCommentByPostId(token, postId);
+    public long countCommentByPostId(String postId) {
+        ResponseVM<Long> response = interactionClient.countCommentByPostId(postId);
         log.info(response.toString());
 
         return response.getData();
     }
 
     @Override
-    public Map<EReactionType, List<ReactionDTO>> findReactionsByPostId(String token, String postId) {
-        ResponseVM<Map<EReactionType, List<ReactionDTO>>> response = interactionClient.findReactionsByPostId(token, postId);
+    public Map<EReactionType, List<ReactionDTO>> findReactionsByPostId(String postId) {
+        ResponseVM<Map<EReactionType, List<ReactionDTO>>> response = interactionClient.findReactionsByPostId(postId);
         log.info(response.toString());
 
         return response.getData();

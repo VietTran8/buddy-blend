@@ -6,6 +6,8 @@ import lombok.experimental.UtilityClass;
 public final class Constants {
     public static final String API_V1_PREFIX = "/api/v1";
     public static final String BEARER_PREFIX = "Bearer ";
+    public static final String SECURED_WORKER_NAME_PREFIX = "secured-worker-";
+    public static final String REQUEST_ATTRIBUTE_START_TIME = "startTime";
 
     public static class SightEngine {
         public static final String REQUEST_BODY_WORKFLOW = "workflow";

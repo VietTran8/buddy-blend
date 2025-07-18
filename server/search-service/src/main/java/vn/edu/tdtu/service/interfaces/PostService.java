@@ -12,5 +12,5 @@ public interface PostService {
 
     void deletePost(SyncPost post);
 
-    List<PostDTO> findByContentContaining(String token, String key, String fuzziness);
+    List<PostDTO> findByContentContaining(String key, String fuzziness);
 }

@@ -17,28 +17,26 @@ public class StoryController {
     private final ReactionService reactionService;
 
     @GetMapping
-    public ResponseEntity<?> getStories(@RequestHeader("Authorization") String accessTokenHeader) {
-        ResponseVM<?> response = storyService.getStories(accessTokenHeader);
+    public ResponseEntity<?> getStories() {
+        ResponseVM<?> response = storyService.getStories();
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/by-id/{userId}")
     public ResponseEntity<?> getUserStory(
-            @RequestHeader("Authorization") String accessTokenHeader,
             @PathVariable("userId") String userId
     ) {
-        ResponseVM<?> response = storyService.getUserStory(accessTokenHeader, userId);
+        ResponseVM<?> response = storyService.getUserStory(userId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/views/{storyId}")
     public ResponseEntity<?> getViews(
-            @RequestHeader("Authorization") String accessTokenHeader,
             @PathVariable("storyId") String storyId
     ) {
-        ResponseVM<?> response = storyService.getViewers(accessTokenHeader, storyId);
+        ResponseVM<?> response = storyService.getViewers(storyId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -58,8 +56,8 @@ public class StoryController {
     }
 
     @PostMapping("/react")
-    public ResponseEntity<?> doReaction(@RequestHeader("Authorization") String tokenHeader, @RequestBody DoReactRequest payload) {
-        ResponseVM<?> response = reactionService.doReact(tokenHeader, payload);
+    public ResponseEntity<?> doReaction(@RequestBody DoReactRequest payload) {
+        ResponseVM<?> response = reactionService.doReact(payload);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }

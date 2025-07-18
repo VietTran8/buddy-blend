@@ -19,32 +19,32 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     @Cacheable(key = "T(java.util.Objects).hash(#a0, #a1)", value = "single-group", unless = "#result == null")
-    public GroupDTO getGroupById(String accessToken, String groupId) {
-        ResponseVM<GroupDTO> response = groupClient.getGroupInfoById(accessToken, groupId);
+    public GroupDTO getGroupById(String groupId) {
+        ResponseVM<GroupDTO> response = groupClient.getGroupInfoById(groupId);
         log.info("getGroupById: " + response.toString());
 
         return response.getData();
     }
 
     @Override
-    public List<GroupDTO> getMyGroups(String accessToken) {
-        ResponseVM<List<GroupDTO>> response = groupClient.getMyGroups(accessToken);
+    public List<GroupDTO> getMyGroups() {
+        ResponseVM<List<GroupDTO>> response = groupClient.getMyGroups();
         log.info("getMyGroups: " + response.toString());
 
         return response.getData();
     }
 
     @Override
-    public boolean allowFetchPost(String accessToken, String groupId) {
-        ResponseVM<Boolean> allowResponse = groupClient.allowFetchPost(accessToken, groupId);
+    public boolean allowFetchPost(String groupId) {
+        ResponseVM<Boolean> allowResponse = groupClient.allowFetchPost(groupId);
         log.info("getAllowFetch: " + allowResponse.toString());
 
         return allowResponse.getData();
     }
 
     @Override
-    public List<String> getMemberIdList(String accessToken, String groupId) {
-        ResponseVM<List<String>> response = groupClient.getMemberIdList(accessToken, groupId);
+    public List<String> getMemberIdList(String groupId) {
+        ResponseVM<List<String>> response = groupClient.getMemberIdList(groupId);
         log.info("memberIdList: " + response.toString());
 
         return response.getData();

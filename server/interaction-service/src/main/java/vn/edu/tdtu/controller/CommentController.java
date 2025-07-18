@@ -17,17 +17,15 @@ public class CommentController {
     private final CommentService commentsService;
 
     @PostMapping
-    public ResponseEntity<?> addComment(@RequestHeader("Authorization") String token,
-                                        @RequestBody AddCommentRequest comment) {
-        ResponseVM<?> response = commentsService.addComment(token, comment);
+    public ResponseEntity<?> addComment(@RequestBody AddCommentRequest comment) {
+        ResponseVM<?> response = commentsService.addComment(comment);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<?> updateComment(@RequestHeader("Authorization") String token,
-                                           @PathVariable("id") String id,
+    public ResponseEntity<?> updateComment(@PathVariable("id") String id,
                                            @RequestBody UpdateCommentRequest comment) {
-        ResponseVM<?> response = commentsService.updateComment(token, id, comment);
+        ResponseVM<?> response = commentsService.updateComment(id, comment);
         return ResponseEntity.ok(response);
     }
 
@@ -38,9 +36,8 @@ public class CommentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findCommentById(@RequestHeader(name = "Authorization") String token,
-                                             @PathVariable("id") String id) {
-        ResponseVM<?> response = commentsService.findCommentById(token, id);
+    public ResponseEntity<?> findCommentById(@PathVariable("id") String id) {
+        ResponseVM<?> response = commentsService.findCommentById(id);
         return ResponseEntity.ok(response);
     }
 
@@ -51,14 +48,13 @@ public class CommentController {
     }
 
     @GetMapping
-    public ResponseEntity<?> findAllComments(@RequestHeader(name = "Authorization") String token,
-                                             @RequestParam(name = "postId", required = false) String postId) {
+    public ResponseEntity<?> findAllComments(@RequestParam(name = "postId", required = false) String postId) {
         if (postId != null) {
-            ResponseVM<?> response = commentsService.findCommentsByPostId(token, postId);
+            ResponseVM<?> response = commentsService.findCommentsByPostId(postId);
             return ResponseEntity.ok(response);
         }
 
-        ResponseVM<?> response = commentsService.findAllComments(token);
+        ResponseVM<?> response = commentsService.findAllComments();
         return ResponseEntity.ok(response);
     }
 }

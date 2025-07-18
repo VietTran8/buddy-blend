@@ -70,10 +70,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseVM<List<UserDTO>> getUserSuggestionForGroup(String tokenHeader, String groupId) {
-        List<String> friendUserIdsInGroup = groupService.getFriendUserIdsInGroup(tokenHeader, groupId);
+    public ResponseVM<List<UserDTO>> getUserSuggestionForGroup(String groupId) {
+        List<String> friendUserIdsInGroup = groupService.getFriendUserIdsInGroup(groupId);
 
-        return findFriendsByNotInIds(tokenHeader, new FindByIdsReqDTO(friendUserIdsInGroup));
+        return findFriendsByNotInIds(new FindByIdsReqDTO(friendUserIdsInGroup));
     }
 
     @Override
@@ -121,7 +121,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseVM<List<UserDTO>> findResByIds(String token, FindByIdsReqDTO request) {
+    public ResponseVM<List<UserDTO>> findResByIds(FindByIdsReqDTO request) {
         ResponseVM<List<UserDTO>> response = new ResponseVM<>();
 
         List<UserDTO> users = userRepository.findByIdInAndActive(request.getUserIds(), true)
@@ -138,7 +138,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseVM<List<UserDTO>> findFriendsByNotInIds(String token, FindByIdsReqDTO request) {
+    public ResponseVM<List<UserDTO>> findFriendsByNotInIds(FindByIdsReqDTO request) {
         ResponseVM<List<UserDTO>> response = new ResponseVM<>();
 
         String userId = SecurityContextUtils.getUserId();
@@ -174,7 +174,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseVM<?> searchByName(String token, String name) {
+    public ResponseVM<?> searchByName(String name) {
         ResponseVM<List<UserDTO>> response = new ResponseVM<>();
 
         List<UserDTO> userResponses = userRepository.findByNamesContaining(name).stream().map(

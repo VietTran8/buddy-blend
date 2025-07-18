@@ -15,5 +15,5 @@ import java.util.List;
 public interface UserClient {
 
     @PostMapping("/by-ids")
-    ResponseVM<List<UserDTO>> findByIds(@RequestHeader("Authorization") String accessToken, @RequestBody FindByUserIdsReq request);
+    ResponseVM<List<UserDTO>> findByIds(@RequestBody FindByUserIdsReq request);
 }

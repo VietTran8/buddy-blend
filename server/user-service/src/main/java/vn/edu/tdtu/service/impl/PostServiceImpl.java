@@ -17,7 +17,7 @@ public class PostServiceImpl implements PostService {
     private final PostClient postClient;
 
     @Override
-    public List<PostDTO> findByIds(String token, FindByIdsReq reqDTO) {
-        return postClient.findAll(token, reqDTO).getData();
+    public List<PostDTO> findByIds(FindByIdsReq reqDTO) {
+        return postClient.findAll(reqDTO).getData();
     }
 }

@@ -12,14 +12,14 @@ import vn.edu.tdtu.service.interfaces.PostService;
 public class FavDetailResponseMapper {
     private final PostService postService;
 
-    public UserFavouriteDetailResp mapToDto(String token, UserFavourite userFavourite) {
+    public UserFavouriteDetailResp mapToDto(UserFavourite userFavourite) {
         UserFavouriteDetailResp resp = new UserFavouriteDetailResp();
 
         resp.setId(userFavourite.getId());
         resp.setName(userFavourite.getName());
         resp.setCreatedAt(userFavourite.getCreatedAt());
         resp.setPosts(
-                postService.findByIds(token, new FindByIdsReq(userFavourite.getPostIds()))
+                postService.findByIds(new FindByIdsReq(userFavourite.getPostIds()))
         );
         resp.setPostCount(resp.getPosts().size());
 

@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 public interface InteractionService {
-    List<CommentDTO> findCommentsByPostId(String token, String postId);
+    List<CommentDTO> findCommentsByPostId(String postId);
 
-    long countCommentByPostId(String token, String postId);
+    long countCommentByPostId(String postId);
 
-    Map<EReactionType, List<ReactionDTO>> findReactionsByPostId(String token, String postId);
+    Map<EReactionType, List<ReactionDTO>> findReactionsByPostId(String postId);
 }

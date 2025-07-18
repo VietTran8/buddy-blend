@@ -35,7 +35,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public ResponseVM<PaginationResponseVM<NotificationResponse>> findAllUserNotifications(String tokenHeader, int page, int size) {
+    public ResponseVM<PaginationResponseVM<NotificationResponse>> findAllUserNotifications(int page, int size) {
         String userId = SecurityContextUtils.getUserId();
         ResponseVM<PaginationResponseVM<NotificationResponse>> response = new ResponseVM<>();
 
@@ -64,7 +64,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public ResponseVM<?> detachNotification(String tokenHeader, String notificationId) {
+    public ResponseVM<?> detachNotification(String notificationId) {
         CommonNotification notification = repository.findById(notificationId)
                 .orElseThrow(() -> new BadRequestException(MessageCode.Notification.NOTIFICATION_NOT_FOUND));
 
@@ -84,7 +84,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public ResponseVM<?> readNotification(String tokenHeader, String notificationId) {
+    public ResponseVM<?> readNotification(String notificationId) {
         CommonNotification notification = repository.findById(notificationId)
                 .orElseThrow(() -> new BadRequestException(MessageCode.Notification.NOTIFICATION_NOT_FOUND));
 

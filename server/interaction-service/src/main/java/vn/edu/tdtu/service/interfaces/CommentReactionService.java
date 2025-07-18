@@ -11,5 +11,5 @@ import java.util.Map;
 public interface CommentReactionService {
     ResponseVM<?> doReact(DoCommentReactRequest request);
 
-    ResponseVM<Map<EReactionType, List<ReactionDTO>>> getReactsByCmtId(String token, String cmtId);
+    ResponseVM<Map<EReactionType, List<ReactionDTO>>> getReactsByCmtId(String cmtId);
 }

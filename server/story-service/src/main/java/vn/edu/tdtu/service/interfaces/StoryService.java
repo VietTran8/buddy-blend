@@ -11,9 +11,9 @@ public interface StoryService {
 
     ResponseVM<IDResponseVM> countView(String storyId);
 
-    ResponseVM<?> getViewers(String accessToken, String storyId);
+    ResponseVM<?> getViewers(String storyId);
 
-    ResponseVM<?> getUserStory(String accessTokenHeader, String userId);
+    ResponseVM<?> getUserStory(String userId);
 
-    ResponseVM<?> getStories(String accessToken);
+    ResponseVM<?> getStories();
 }

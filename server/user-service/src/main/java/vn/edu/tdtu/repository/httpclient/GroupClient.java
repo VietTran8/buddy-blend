@@ -12,5 +12,5 @@ import java.util.List;
 @FeignClient(name = "${service.group-service.name}", configuration = FeignConfig.class, path = "/api/v1/groups")
 public interface GroupClient {
     @GetMapping("/{groupId}/members/friend/all")
-    ResponseVM<List<String>> getFriendUserIdsInGroup(@RequestHeader("Authorization") String accessToken, @PathVariable("groupId") String groupId);
+    ResponseVM<List<String>> getFriendUserIdsInGroup(@PathVariable("groupId") String groupId);
 }

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ReactionService {
-    ResponseVM<?> doReaction(String token, DoReactRequest request);
+    ResponseVM<?> doReaction(DoReactRequest request);
 
-    ResponseVM<Map<EReactionType, List<ReactionDTO>>> getReactsByPostId(String token, String postId);
+    ResponseVM<Map<EReactionType, List<ReactionDTO>>> getReactsByPostId(String postId);
 }

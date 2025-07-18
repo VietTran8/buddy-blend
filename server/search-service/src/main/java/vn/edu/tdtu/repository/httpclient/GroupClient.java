@@ -14,5 +14,5 @@ import java.util.List;
 public interface GroupClient {
 
     @GetMapping("/all")
-    ResponseVM<List<GroupDTO>> getAllGroupByIds(@RequestHeader("Authorization") String tokenHeader, @RequestParam("ids") List<String> requestParam);
+    ResponseVM<List<GroupDTO>> getAllGroupByIds(@RequestParam("ids") List<String> requestParam);
 }

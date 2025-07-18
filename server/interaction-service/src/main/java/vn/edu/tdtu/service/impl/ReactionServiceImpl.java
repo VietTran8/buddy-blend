@@ -38,12 +38,12 @@ public class ReactionServiceImpl implements ReactionService {
     private final PostService postService;
 
     @Override
-    public ResponseVM<?> doReaction(String token, DoReactRequest request) {
+    public ResponseVM<?> doReaction(DoReactRequest request) {
         ResponseVM<List<ReactionDTO>> response = new ResponseVM<>();
         String userId = SecurityContextUtils.getUserId();
         String postId = request.getPostId();
 
-        PostDTO foundPost = postService.findById(token, request.getPostId());
+        PostDTO foundPost = postService.findById(request.getPostId());
 
         if (foundPost == null)
             throw new BadRequestException(MessageCode.Post.POST_NOT_FOUND_ID, request.getPostId());
@@ -76,7 +76,7 @@ public class ReactionServiceImpl implements ReactionService {
                 );
 
         if (isCreateNew.get()) {
-            UserDTO foundUser = userService.findById(token, userId);
+            UserDTO foundUser = userService.findById(userId);
             if (foundUser != null && !foundUser.getId().equals(foundPost.getUser().getId())) {
                 InteractNotification notification = new InteractNotification();
                 notification.setUserFullName(String.join(" ", foundUser.getFirstName(), foundUser.getMiddleName(), foundUser.getLastName()));
@@ -93,7 +93,7 @@ public class ReactionServiceImpl implements ReactionService {
             }
         }
 
-        Map<EReactionType, List<ReactionDTO>> newPostReacts = getReactsByPostId(token, reaction.getPostId()).getData();
+        Map<EReactionType, List<ReactionDTO>> newPostReacts = getReactsByPostId(reaction.getPostId()).getData();
         List<ReactionDTO> topReacts = findTopReact(newPostReacts != null ? newPostReacts : new HashMap<>());
 
         response.setData(topReacts);
@@ -127,13 +127,13 @@ public class ReactionServiceImpl implements ReactionService {
     }
 
     @Override
-    public ResponseVM<Map<EReactionType, List<ReactionDTO>>> getReactsByPostId(String token, String postId) {
+    public ResponseVM<Map<EReactionType, List<ReactionDTO>>> getReactsByPostId(String postId) {
         ResponseVM<Map<EReactionType, List<ReactionDTO>>> response = new ResponseVM<>();
         String userId = SecurityContextUtils.getUserId();
 
         List<Reactions> reactions = reactionRepository.findReactionsByPostIdOrderByCreatedAtDesc(postId);
         List<String> userIds = reactions.stream().map(Reactions::getUserId).toList();
-        List<UserDTO> users = userService.findByIds(token, userIds);
+        List<UserDTO> users = userService.findByIds(userIds);
 
         Map<EReactionType, List<ReactionDTO>> reactResponses = reactions
                 .stream()

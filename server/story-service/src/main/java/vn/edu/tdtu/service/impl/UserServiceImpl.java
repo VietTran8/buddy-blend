@@ -18,24 +18,24 @@ public class UserServiceImpl implements UserService {
     private final UserClient userClient;
 
     @Override
-    public List<UserDTO> getUsersByIds(String accessToken, List<String> userIds) {
-        ResponseVM<List<UserDTO>> response = userClient.findByIds(accessToken, new FindByIdsRequest(userIds));
+    public List<UserDTO> getUsersByIds(List<String> userIds) {
+        ResponseVM<List<UserDTO>> response = userClient.findByIds(new FindByIdsRequest(userIds));
         log.info(response.toString());
 
         return response.getData();
     }
 
     @Override
-    public UserDTO getUserById(String accessToken, String userId) {
-        ResponseVM<UserDTO> response = userClient.findById(accessToken, userId);
+    public UserDTO getUserById(String userId) {
+        ResponseVM<UserDTO> response = userClient.findById(userId);
         log.info(response.toString());
 
         return response.getData();
     }
 
     @Override
-    public List<UserDTO> getUserFriends(String accessToken) {
-        ResponseVM<List<UserDTO>> response = userClient.findUserFriendIdsByUserToken(accessToken);
+    public List<UserDTO> getUserFriends() {
+        ResponseVM<List<UserDTO>> response = userClient.findUserFriendIdsByUserToken();
         log.info(response.toString());
 
         return response.getData();

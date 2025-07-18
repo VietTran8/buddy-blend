@@ -15,6 +15,6 @@ import java.util.List;
 public interface PostClient {
 
     @PostMapping("/find-all")
-    ResponseVM<List<PostDTO>> findAll(@RequestHeader("Authorization") String accessToken, @RequestBody FindByIdsReq requestBody);
+    ResponseVM<List<PostDTO>> findAll(@RequestBody FindByIdsReq requestBody);
 
 }

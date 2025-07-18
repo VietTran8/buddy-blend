@@ -17,13 +17,13 @@ public class ReportResponseMapper {
     private final PostService postService;
     private final UserServiceImpl userService;
 
-    public ReportResponse mapToDto(String token, Report report) {
+    public ReportResponse mapToDto(Report report) {
         ReportResponse response = new ReportResponse();
         response.setId(report.getId());
         response.setReason(report.getReason());
         response.setCreateAt(report.getCreateAt());
 
-        UserDTO foundUser = userService.findById(token, report.getUserId());
+        UserDTO foundUser = userService.findById(report.getUserId());
         if (foundUser != null) {
             ReportUserResponse reportUserResponse = new ReportUserResponse();
             reportUserResponse.setId(foundUser.getId());
@@ -35,7 +35,7 @@ public class ReportResponseMapper {
 
         Post foundPost = postService.findPostById(report.getPostId());
         if (foundPost != null) {
-            PostDTO postResponse = postService.mapToPostDTO(token, foundPost);
+            PostDTO postResponse = postService.mapToPostDTO(foundPost);
             response.setPost(postResponse);
         }
 

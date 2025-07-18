@@ -48,17 +48,14 @@ public class UserController {
     }
 
     @GetMapping("/suggestions/group/{groupId}")
-    public ResponseEntity<?> findFriendNotInGroup(
-            @RequestHeader("Authorization") String tokenHeader,
-            @PathVariable("groupId") String groupId
-    ) {
-        ResponseVM<?> response = userService.getUserSuggestionForGroup(tokenHeader, groupId);
+    public ResponseEntity<?> findFriendNotInGroup(@PathVariable("groupId") String groupId) {
+        ResponseVM<?> response = userService.getUserSuggestionForGroup(groupId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @PostMapping("/by-ids")
-    public ResponseEntity<?> findByIds(@RequestHeader(name = "Authorization", required = false, defaultValue = "") String token, @RequestBody FindByIdsReqDTO request) {
-        ResponseVM<?> response = userService.findResByIds(token, request);
+    public ResponseEntity<?> findByIds(@RequestBody FindByIdsReqDTO request) {
+        ResponseVM<?> response = userService.findResByIds(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -76,8 +73,8 @@ public class UserController {
 
     //Authenticated
     @GetMapping("/search")
-    public ResponseEntity<?> search(@RequestHeader("Authorization") String token, @RequestParam("key") String key) {
-        ResponseVM<?> response = userService.searchByName(token, key);
+    public ResponseEntity<?> search(@RequestParam("key") String key) {
+        ResponseVM<?> response = userService.searchByName(key);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -138,8 +135,8 @@ public class UserController {
 
     //Authenticated
     @GetMapping("/friend-reqs")
-    public ResponseEntity<?> getFriendRequests(@RequestHeader(name = "Authorization") String token) {
-        ResponseVM<?> response = friendRequestService.getListFriendRequestResp(token);
+    public ResponseEntity<?> getFriendRequests() {
+        ResponseVM<?> response = friendRequestService.getListFriendRequestResp();
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -154,11 +151,8 @@ public class UserController {
 
     //Authenticated
     @GetMapping("/friends")
-    public ResponseEntity<?> getFriends(
-            @RequestHeader(name = "Authorization") String token,
-            @RequestParam(name = "id", required = false) String userId
-    ) {
-        ResponseVM<?> response = friendRequestService.getListFriendsResp(token, userId);
+    public ResponseEntity<?> getFriends(@RequestParam(name = "id", required = false) String userId) {
+        ResponseVM<?> response = friendRequestService.getListFriendsResp(userId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
@@ -192,9 +186,9 @@ public class UserController {
 
     //Authenticated
     @GetMapping("/favourite/{id}")
-    public ResponseEntity<?> getUserFavouriteDetail(@RequestHeader(name = "Authorization") String token,
+    public ResponseEntity<?> getUserFavouriteDetail(
                                                     @PathVariable("id") String favId) {
-        ResponseVM<?> response = userFavouriteService.getUserFavById(token, favId);
+        ResponseVM<?> response = userFavouriteService.getUserFavById(favId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 

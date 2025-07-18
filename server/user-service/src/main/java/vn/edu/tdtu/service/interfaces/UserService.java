@@ -13,7 +13,7 @@ public interface UserService {
 
     ResponseVM<?> findProfile(String userId);
 
-    ResponseVM<List<UserDTO>> getUserSuggestionForGroup(String tokenHeader, String groupId);
+    ResponseVM<List<UserDTO>> getUserSuggestionForGroup(String groupId);
 
     ResponseVM<?> findByEmailResp(String email);
 
@@ -21,15 +21,15 @@ public interface UserService {
 
     ResponseVM<?> findResById(String id);
 
-    ResponseVM<List<UserDTO>> findResByIds(String token, FindByIdsReqDTO request);
+    ResponseVM<List<UserDTO>> findResByIds(FindByIdsReqDTO request);
 
-    ResponseVM<List<UserDTO>> findFriendsByNotInIds(String token, FindByIdsReqDTO request);
+    ResponseVM<List<UserDTO>> findFriendsByNotInIds(FindByIdsReqDTO request);
 
     User findById(String id);
 
     ResponseVM<?> existsById(String id);
 
-    ResponseVM<?> searchByName(String token, String name);
+    ResponseVM<?> searchByName(String name);
 
     ResponseVM<?> saveUser(SaveUserReqDTO user);
 

@@ -29,8 +29,8 @@ public class GroupController {
     }
 
     @GetMapping("/{groupId}")
-    public ResponseEntity<?> getGroupById(@RequestHeader("Authorization") String tokenHeader, @PathVariable("groupId") String groupId) {
-        ResponseVM<?> response = groupService.getGroupById(tokenHeader, groupId);
+    public ResponseEntity<?> getGroupById(@PathVariable("groupId") String groupId) {
+        ResponseVM<?> response = groupService.getGroupById(groupId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -50,12 +50,10 @@ public class GroupController {
     }
 
     @GetMapping("/{groupId}/members")
-    public ResponseEntity<?> getAllMembersList(
-            @RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId,
-            @RequestParam(name = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(name = "size", required = false, defaultValue = "10") int size
-    ) {
-        ResponseVM<?> response = groupService.getGroupMembers(accessTokenHeader, groupId, page, size, EGetMemberOption.ALL_MEMBERS);
+    public ResponseEntity<?> getAllMembersList(@PathVariable("groupId") String groupId, 
+                                               @RequestParam(name = "page", required = false, defaultValue = "1") int page, 
+                                               @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
+        ResponseVM<?> response = groupService.getGroupMembers(groupId, page, size, EGetMemberOption.ALL_MEMBERS);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -69,47 +67,47 @@ public class GroupController {
 
     @GetMapping("/{groupId}/members/new")
     public ResponseEntity<?> getNewMembersList(
-            @RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId,
+            @PathVariable("groupId") String groupId,
             @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size
     ) {
-        ResponseVM<?> response = groupService.getGroupMembers(accessTokenHeader, groupId, page, size, EGetMemberOption.NEW_MEMBERS);
+        ResponseVM<?> response = groupService.getGroupMembers(groupId, page, size, EGetMemberOption.NEW_MEMBERS);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/{groupId}/members/admin")
     public ResponseEntity<?> getAdminMembersList(
-            @RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId,
+            @PathVariable("groupId") String groupId,
             @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size
     ) {
-        ResponseVM<?> response = groupService.getGroupMembers(accessTokenHeader, groupId, page, size, EGetMemberOption.ADMIN_MEMBERS);
+        ResponseVM<?> response = groupService.getGroupMembers(groupId, page, size, EGetMemberOption.ADMIN_MEMBERS);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/{groupId}/members/friend")
     public ResponseEntity<?> getFriendMembersList(
-            @RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId,
+            @PathVariable("groupId") String groupId,
             @RequestParam(name = "page", required = false, defaultValue = "1") int page,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size
     ) {
-        ResponseVM<?> response = groupService.getGroupMembers(accessTokenHeader, groupId, page, size, EGetMemberOption.FRIEND_MEMBERS);
+        ResponseVM<?> response = groupService.getGroupMembers(groupId, page, size, EGetMemberOption.FRIEND_MEMBERS);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/{groupId}/members/friend/all")
-    public ResponseEntity<?> getFriendMembersList(@RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId) {
-        ResponseVM<?> response = groupService.getAllFriendGroupMemberUserIds(accessTokenHeader, groupId);
+    public ResponseEntity<?> getFriendMembersList(@PathVariable("groupId") String groupId) {
+        ResponseVM<?> response = groupService.getAllFriendGroupMemberUserIds(groupId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/{groupId}/members/pending")
-    public ResponseEntity<?> getPendingMembersList(@RequestHeader("Authorization") String accessTokenHeader, @PathVariable("groupId") String groupId) {
-        ResponseVM<?> response = groupService.getPendingMembersList(accessTokenHeader, groupId);
+    public ResponseEntity<?> getPendingMembersList(@PathVariable("groupId") String groupId) {
+        ResponseVM<?> response = groupService.getPendingMembersList(groupId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -136,11 +134,8 @@ public class GroupController {
     }
 
     @PostMapping("/member/invite")
-    public ResponseEntity<?> inviteUsers(
-            @RequestHeader("Authorization") String tokenHeader,
-            @RequestBody InviteUsersRequest payload
-    ) {
-        groupService.inviteUsers(tokenHeader, payload);
+    public ResponseEntity<?> inviteUsers(@RequestBody InviteUsersRequest payload) {
+        groupService.inviteUsers(payload);
 
         return ResponseEntity.noContent().build();
     }

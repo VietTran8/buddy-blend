@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class GroupMapper {
     private final UserClient userClient;
 
-    public GroupDTO mapToDto(String accessToken, Group group, boolean collectBaseInfo) {
+    public GroupDTO mapToDto(Group group, boolean collectBaseInfo) {
         String userId = SecurityContextUtils.getUserId();
 
         List<GroupMember> first10GroupMembers = new ArrayList<>();
@@ -41,7 +41,7 @@ public class GroupMapper {
         List<UserDTO> first10Members = new ArrayList<>();
 
         if (!collectBaseInfo)
-            first10Members = userClient.findByIds(accessToken, new FindByIdsRequest(first10MemberIds)).getData();
+            first10Members = userClient.findByIds(new FindByIdsRequest(first10MemberIds)).getData();
 
         Map<String, UserDTO> userMap = first10Members.stream()
                 .collect(Collectors.toMap(UserDTO::getId, user -> user));

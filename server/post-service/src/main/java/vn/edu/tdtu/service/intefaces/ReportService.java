@@ -7,7 +7,7 @@ import vn.tdtu.common.viewmodel.ResponseVM;
 public interface ReportService {
     ResponseVM<?> reportPost(ReportRequest request);
 
-    ResponseVM<?> getAllReport(String token, int page, int size);
+    ResponseVM<?> getAllReport(int page, int size);
 
     ResponseVM<?> approvePost(ApprovePostRequest request);
 }

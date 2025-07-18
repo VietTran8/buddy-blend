@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.service.interfaces.SearchService;
+import vn.tdtu.common.utils.SecurityContextUtils;
 import vn.tdtu.common.viewmodel.ResponseVM;
 
 @RestController
@@ -15,24 +16,24 @@ public class SearchController {
     private final SearchService searchService;
 
     @GetMapping()
-    public ResponseEntity<?> search(@RequestHeader(name = "Authorization", required = false) String token,
-                                    @RequestParam("key") String key) {
-        ResponseVM<?> response = searchService.search(token, key);
-
+    public ResponseEntity<?> search(@RequestParam("key") String key) {
+        String authUserId = SecurityContextUtils.getUserId();
+        ResponseVM<?> response = searchService.search(authUserId, key);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/fetch")
-    public ResponseEntity<?> fetch(@RequestHeader(name = "Authorization", required = false) String token,
-                                   @RequestParam("key") String key) {
-        ResponseVM<?> response = searchService.fetchResult(token, key);
+    public ResponseEntity<?> fetch(@RequestParam("key") String key) {
+        String authUserId = SecurityContextUtils.getUserId();
+        ResponseVM<?> response = searchService.fetchResult(authUserId, key);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @GetMapping("/history")
-    public ResponseEntity<?> getSearchHistory(@RequestHeader(name = "Authorization") String token) {
-        ResponseVM<?> response = searchService.getSearchHistory(token);
+    public ResponseEntity<?> getSearchHistory() {
+        String userId = SecurityContextUtils.getUserId();
+        ResponseVM<?> response = searchService.getSearchHistory(userId);
 
         return ResponseEntity.status(response.getCode()).body(response);
     }

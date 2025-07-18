@@ -14,29 +14,29 @@ import java.util.List;
 public interface PostService {
     Post findPostById(String postId);
 
-    ResponseVM<?> findPostRespById(String token, String postId);
+    ResponseVM<?> findPostRespById(String postId);
 
-    ResponseVM<List<PostDTO>> findPostRespByIds(String token, FindByIdsReq req);
+    ResponseVM<List<PostDTO>> findPostRespByIds(FindByIdsReq req);
 
     ResponseVM<?> getUserIdByPostId(String postId);
 
-    PostDTO mapToPostDTO(String token, Post post);
+    PostDTO mapToPostDTO(Post post);
 
-    ResponseVM<?> getGroupPosts(String token, String groupId, int page, int limit);
+    ResponseVM<?> getGroupPosts(String groupId, int page, int limit);
 
-    ResponseVM<?> getNewsFeed(String token, int page, int size, String startTime);
+    ResponseVM<?> getNewsFeed(int page, int size, String startTime);
 
-    ResponseVM<?> findByContentContaining(String token, String key);
+    ResponseVM<?> findByContentContaining(String key);
 
-    ResponseVM<?> savePost(String token, CreatePostRequest postRequest);
+    ResponseVM<?> savePost(CreatePostRequest postRequest);
 
-    ResponseVM<?> updatePostContent(String token, UpdatePostContentRequest request);
+    ResponseVM<?> updatePostContent(UpdatePostContentRequest request);
 
     ResponseVM<?> deletePost(String postId);
 
-    ResponseVM<?> sharePost(String token, SharePostRequest request);
+    ResponseVM<?> sharePost(SharePostRequest request);
 
-    ResponseVM<PostDTO> findDetachedPost(String token, String postId);
+    ResponseVM<PostDTO> findDetachedPost(String postId);
 
-    ResponseVM<PaginationResponseVM<PostDTO>> findUserPosts(String token, String uId, int page, int size);
+    ResponseVM<PaginationResponseVM<PostDTO>> findUserPosts(String uId, int page, int size);
 }

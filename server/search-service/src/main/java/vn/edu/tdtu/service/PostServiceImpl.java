@@ -51,7 +51,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDTO> findByContentContaining(String token, String key, String fuzziness) {
+    public List<PostDTO> findByContentContaining(String key, String fuzziness) {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q.match(mq -> mq
                                 .field("content")
@@ -74,7 +74,7 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
 
         return postClient
-                .findAll(token, new FindByIdsReq(matchPostIds))
+                .findAll(new FindByIdsReq(matchPostIds))
                 .getData();
     }
 }

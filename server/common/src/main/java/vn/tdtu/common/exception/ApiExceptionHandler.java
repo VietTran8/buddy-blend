@@ -19,7 +19,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> uncheckedExceptionHandler(Exception ex, WebRequest webRequest) {
-        log.warn("[uncheckedExceptionHandler]", ex);
+        log.warn("[uncheckedExceptionHandler] - {}", ex.getMessage(), ex);
 
         String message;
         int status;
@@ -50,7 +50,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<?> jwtExceptionHandler(JwtException ex) {
-        log.warn("[jwtExceptionHandler]", ex);
+        log.warn("[jwtExceptionHandler] - {}", ex.getMessage(), ex);
 
         ResponseVM<?> response = new ResponseVM<>(
                 ex.getMessage(),
@@ -63,7 +63,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<?> missingHeaderRequestHandler(MissingRequestHeaderException ex) {
-        log.warn("[missingHeaderRequestHandler]", ex);
+        log.warn("[missingHeaderRequestHandler] - {}", ex.getMessage(), ex);
 
         ResponseVM<?> response = new ResponseVM<>();
         response.setCode(HttpServletResponse.SC_UNAUTHORIZED);
@@ -76,7 +76,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> otherExceptionHandler(Exception ex, WebRequest webRequest) {
-        log.warn("[otherExceptionHandler]", ex);
+        log.warn("[otherExceptionHandler] - {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ResponseVM<Object>(
@@ -88,7 +88,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<?> unauthorizedExceptionHandler(UnauthorizedException ex, WebRequest webRequest) {
-        log.warn("[unauthorizedExceptionHandler]", ex);
+        log.warn("[unauthorizedExceptionHandler] - {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ResponseVM<Object>(
@@ -100,7 +100,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<?> badRequestExceptionHandler(BadRequestException ex, WebRequest webRequest) {
-        log.warn("[unauthorizedExceptionHandler]", ex);
+        log.warn("[unauthorizedExceptionHandler] - {}", ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ResponseVM<Object>(

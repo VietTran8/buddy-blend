@@ -5,5 +5,5 @@ import vn.edu.tdtu.dto.response.DoReactResponse;
 import vn.tdtu.common.viewmodel.ResponseVM;
 
 public interface ReactionService {
-    ResponseVM<DoReactResponse> doReact(String accessToken, DoReactRequest payload);
+    ResponseVM<DoReactResponse> doReact(DoReactRequest payload);
 }

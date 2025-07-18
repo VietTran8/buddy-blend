@@ -27,10 +27,9 @@ public class ReportController {
     }
 
     @GetMapping()
-    public ResponseEntity<?> reports(@RequestHeader("Authorization") String token,
-                                     @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+    public ResponseEntity<?> reports(@RequestParam(name = "page", required = false, defaultValue = "1") int page,
                                      @RequestParam(name = "size", required = false, defaultValue = "10") int size) {
-        ResponseVM<?> response = reportService.getAllReport(token, page, size);
+        ResponseVM<?> response = reportService.getAllReport(page, size);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 }

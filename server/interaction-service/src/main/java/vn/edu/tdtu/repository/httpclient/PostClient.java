@@ -11,5 +11,5 @@ import vn.tdtu.common.viewmodel.ResponseVM;
 @FeignClient(name = "${service.post-service.name}", configuration = FeignConfig.class, path = "/api/v1/posts")
 public interface PostClient {
     @GetMapping("/{postId}")
-    ResponseVM<PostDTO> findById(@RequestHeader("Authorization") String accessToken, @PathVariable("postId") String postId);
+    ResponseVM<PostDTO> findById(@PathVariable("postId") String postId);
 }

@@ -48,7 +48,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public List<GroupDTO> findByNameContaining(String tokenHeader, String key, String fuzziness) {
+    public List<GroupDTO> findByNameContaining(String key, String fuzziness) {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q.match(mq -> mq
                                 .field("name")
@@ -71,7 +71,7 @@ public class GroupServiceImpl implements GroupService {
                 .collect(Collectors.toList());
 
         return groupClient
-                .getAllGroupByIds(tokenHeader, matchGroupIds)
+                .getAllGroupByIds(matchGroupIds)
                 .getData();
     }
 }

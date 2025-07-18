@@ -15,11 +15,11 @@ import java.util.List;
 @FeignClient(name = "${service.user-service.name}", configuration = FeignConfig.class, path = "/api/v1/users")
 public interface UserClient {
     @GetMapping("/by-id/{userId}")
-    ResponseVM<UserDTO> findById(@RequestHeader("Authorization") String accessToken, @PathVariable("userId") String userId);
+    ResponseVM<UserDTO> findById(@PathVariable("userId") String userId);
 
     @GetMapping("/by-ids")
-    ResponseVM<List<UserDTO>> findByIds(@RequestHeader("Authorization") String accessToken, @RequestBody FindByIdsRequest request);
+    ResponseVM<List<UserDTO>> findByIds(@RequestBody FindByIdsRequest request);
 
     @GetMapping("/friends")
-    ResponseVM<List<UserDTO>> findUserFriendIdsByUserToken(@RequestHeader("Authorization") String accessToken);
+    ResponseVM<List<UserDTO>> findUserFriendIdsByUserToken();
 }

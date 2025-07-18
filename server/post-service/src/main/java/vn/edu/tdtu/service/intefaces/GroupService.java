@@ -5,11 +5,11 @@ import vn.tdtu.common.dto.GroupDTO;
 import java.util.List;
 
 public interface GroupService {
-    GroupDTO getGroupById(String accessToken, String groupId);
+    GroupDTO getGroupById(String groupId);
 
-    List<GroupDTO> getMyGroups(String accessToken);
+    List<GroupDTO> getMyGroups();
 
-    boolean allowFetchPost(String accessToken, String groupId);
+    boolean allowFetchPost(String groupId);
 
-    List<String> getMemberIdList(String accessToken, String groupId);
+    List<String> getMemberIdList(String groupId);
 }

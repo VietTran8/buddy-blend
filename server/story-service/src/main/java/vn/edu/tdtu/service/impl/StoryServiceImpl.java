@@ -113,14 +113,13 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    public ResponseVM<?> getViewers(String accessToken, String storyId) {
+    public ResponseVM<?> getViewers(String storyId) {
         Story foundStory = storyRepository.findById(storyId)
                 .orElseThrow(() -> new BadRequestException(MessageCode.Story.STORY_FETCHED));
 
         List<Viewer> viewers = foundStory.getViewers();
 
         Map<String, UserDTO> userMap = userService.getUsersByIds(
-                        accessToken,
                         viewers.stream().map(Viewer::getUserId).toList()
                 )
                 .stream()
@@ -140,10 +139,10 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    public ResponseVM<?> getUserStory(String accessTokenHeader, String userId) {
-        UserDTO foundUser = userService.getUserById(accessTokenHeader, userId);
+    public ResponseVM<?> getUserStory(String userId) {
+        UserDTO foundUser = userService.getUserById(userId);
 
-        List<UserDTO> friends = userService.getUserFriends(accessTokenHeader);
+        List<UserDTO> friends = userService.getUserFriends();
 
         if (foundUser == null)
             throw new BadRequestException(MessageCode.User.USER_NOT_FOUND);
@@ -172,9 +171,9 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    public ResponseVM<?> getStories(String accessToken) {
+    public ResponseVM<?> getStories() {
         String userId = SecurityContextUtils.getUserId();
-        List<UserDTO> friends = userService.getUserFriends(accessToken);
+        List<UserDTO> friends = userService.getUserFriends();
 
         List<Story> stories = storyRepository.findStories(
                 LocalDateTime.now(),
@@ -187,7 +186,7 @@ public class StoryServiceImpl implements StoryService {
                 .map(Story::getUserId)
                 .distinct()
                 .collect(Collectors.toMap(
-                        ownId -> ownId, anotherOwnId -> userService.getUserById(accessToken, anotherOwnId)
+                        ownId -> ownId, userService::getUserById
                 ));
 
         List<LatestStoriesResponse> storyResponses = stories.stream()

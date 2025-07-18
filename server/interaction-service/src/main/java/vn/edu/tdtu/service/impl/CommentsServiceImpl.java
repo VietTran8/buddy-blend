@@ -38,24 +38,24 @@ public class CommentsServiceImpl implements CommentService {
     private final PostService postService;
 
     @Override
-    public ResponseVM<?> addComment(String token, AddCommentRequest request) {
+    public ResponseVM<?> addComment(AddCommentRequest request) {
         String postId = request.getPostId();
         String parentCommentId = request.getParentId();
-        String userIdFromJwtToken = SecurityContextUtils.getUserId();
+        String authUserId = SecurityContextUtils.getUserId();
 
-        UserDTO foundUser = userService.findById(token, userIdFromJwtToken);
+        UserDTO foundUser = userService.findById(authUserId);
 
         if (foundUser == null)
-            throw new BadRequestException(MessageCode.User.USER_NOT_FOUND_ID, userIdFromJwtToken);
+            throw new BadRequestException(MessageCode.User.USER_NOT_FOUND_ID, authUserId);
 
-        PostDTO foundPost = postService.findById(token, request.getPostId());
+        PostDTO foundPost = postService.findById(request.getPostId());
         if (foundPost == null)
             throw new BadRequestException(MessageCode.Post.POST_NOT_FOUND_ID, request.getPostId());
 
         Comments comment = new Comments();
         comment.setCreatedAt(LocalDateTime.now());
         comment.setUpdatedAt(LocalDateTime.now());
-        comment.setUserId(userIdFromJwtToken);
+        comment.setUserId(authUserId);
         comment.setContent(request.getContent());
         comment.setImageUrls(request.getImageUrls());
         comment.setPostId(postId);
@@ -67,7 +67,7 @@ public class CommentsServiceImpl implements CommentService {
         }
 
         Comments savedComment = commentsRepository.save(comment);
-        CommentDTO commentResponse = commentResponseMapper.mapToDto(token, savedComment);
+        CommentDTO commentResponse = commentResponseMapper.mapToDto(savedComment);
         commentResponse.setMine(true);
 
         //Send message if user comment on the post directly
@@ -83,7 +83,7 @@ public class CommentsServiceImpl implements CommentService {
             interactNotification.setContent("đã bình luận về bài viết của bạn");
             interactNotification.setRefId(postId);
             interactNotification.setTitle("Có người tương tác nè!");
-            interactNotification.setFromUserId(userIdFromJwtToken);
+            interactNotification.setFromUserId(authUserId);
             interactNotification.setToUserIds(List.of(foundPost.getUser().getId()));
             interactNotification.setType(ENotificationType.COMMENT);
             interactNotification.setCreateAt(new Date().getTime() + "");
@@ -104,7 +104,7 @@ public class CommentsServiceImpl implements CommentService {
     }
 
     @Override
-    public ResponseVM<?> updateComment(String token, String id, UpdateCommentRequest comment) {
+    public ResponseVM<?> updateComment(String id, UpdateCommentRequest comment) {
         String userId = SecurityContextUtils.getUserId();
 
         CommentDTO updatedComment = commentsRepository.findById(id)
@@ -114,7 +114,7 @@ public class CommentsServiceImpl implements CommentService {
                         existingComment.setImageUrls(comment.getImageUrls());
                         existingComment.setUpdatedAt(LocalDateTime.now());
 
-                        CommentDTO commentResponse = commentResponseMapper.mapToDto(token, commentsRepository.save(existingComment));
+                        CommentDTO commentResponse = commentResponseMapper.mapToDto(commentsRepository.save(existingComment));
                         commentResponse.setMine(true);
 
                         return commentResponse;
@@ -154,11 +154,11 @@ public class CommentsServiceImpl implements CommentService {
     }
 
     @Override
-    public ResponseVM<?> findCommentById(String token, String id) {
+    public ResponseVM<?> findCommentById(String id) {
         String userId = SecurityContextUtils.getUserId();
 
         CommentDTO comment = commentsRepository.findById(id)
-                .map(cmt -> commentResponseMapper.mapToDto(token, cmt))
+                .map(cmt -> commentResponseMapper.mapToDto(cmt))
                 .orElseThrow(() -> new RuntimeException("Comment not found with id " + id));
 
         comment.setMine(comment.getUser().getId().equals(userId));
@@ -169,13 +169,13 @@ public class CommentsServiceImpl implements CommentService {
     }
 
     @Override
-    public ResponseVM<?> findCommentsByPostId(String token, String postId) {
+    public ResponseVM<?> findCommentsByPostId(String postId) {
         String userId = SecurityContextUtils.getUserId();
 
         List<Comments> comments = commentsRepository.findByPostIdAndParentIdIsNull(postId);
         List<CommentDTO> commentResponses = comments.stream().map(
                 comment -> {
-                    CommentDTO response = commentResponseMapper.mapToDto(token, comment);
+                    CommentDTO response = commentResponseMapper.mapToDto(comment);
                     response.setMine(response.getUser().getId().equals(userId));
                     response.getChildren().forEach(cmt -> {
                         cmt.setMine(cmt.getUser().getId().equals(userId));
@@ -189,11 +189,11 @@ public class CommentsServiceImpl implements CommentService {
     }
 
     @Override
-    public ResponseVM<?> findAllComments(String token) {
+    public ResponseVM<?> findAllComments() {
         String userId = SecurityContextUtils.getUserId();
         List<CommentDTO> commentResponses = commentsRepository.findAll().stream().map(
                 comment -> {
-                    CommentDTO response = commentResponseMapper.mapToDto(token, comment);
+                    CommentDTO response = commentResponseMapper.mapToDto(comment);
                     response.setMine(response.getUser().getId().equals(userId));
                     response.getChildren().forEach(cmt -> {
                         cmt.setMine(cmt.getUser().getId().equals(userId));

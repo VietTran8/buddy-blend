@@ -18,15 +18,14 @@ public class UserServiceImpl implements UserService {
     private final UserClient userClient;
 
     @Override
-    public UserDTO findById(String accessToken, String userId) {
-        ResponseVM<UserDTO> response = userClient.findById(accessToken, userId);
+    public UserDTO findById(String userId) {
+        ResponseVM<UserDTO> response = userClient.findById(userId);
         return response.getData();
     }
 
     @Override
-    public List<UserDTO> findByIds(String accessToken, List<String> ids) {
+    public List<UserDTO> findByIds(List<String> ids) {
         ResponseVM<List<UserDTO>> response = userClient.findByIds(
-                accessToken,
                 new FindByIdsRequest(ids)
         );
 

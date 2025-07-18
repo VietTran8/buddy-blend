@@ -5,11 +5,11 @@ import vn.tdtu.common.dto.UserDTO;
 import java.util.List;
 
 public interface UserService {
-    UserDTO findById(String accessToken, String userId);
+    UserDTO findById(String userId);
 
-    List<UserDTO> findByIds(String accessToken, List<String> ids);
+    List<UserDTO> findByIds(List<String> ids);
 
-    List<UserDTO> findUserFriendIdsByUserToken(String token);
+    List<UserDTO> findUserFriendIds();
 
-    List<String> findUserFriendIdsByUserId(String token, String userId);
+    List<String> findUserFriendIdsByUserId(String userId);
 }

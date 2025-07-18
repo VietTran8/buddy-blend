@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> searchUserFullName(String accessToken, String name, String fuzziness) {
+    public List<UserDTO> searchUserFullName(String name, String fuzziness) {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q
                         .match(mq -> mq
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
                 .toList();
 
         return userClient
-                .findByIds(accessToken, new FindByUserIdsReq(matchedUserIds))
+                .findByIds(new FindByUserIdsReq(matchedUserIds))
                 .getData();
     }
 }

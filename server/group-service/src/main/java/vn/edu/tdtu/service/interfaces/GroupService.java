@@ -21,7 +21,7 @@ public interface GroupService {
 
     ResponseVM<?> getMyGroups();
 
-    ResponseVM<?> getGroupById(String accessToken, String groupId);
+    ResponseVM<?> getGroupById(String groupId);
 
     ResponseVM<?> getAllGroupByIds(List<String> groupId);
 
@@ -29,15 +29,15 @@ public interface GroupService {
 
     ResponseVM<?> moderateMember(ModerateMemberRequest payload);
 
-    void inviteUsers(String accessToken, InviteUsersRequest payload);
+    void inviteUsers(InviteUsersRequest payload);
 
-    ResponseVM<?> getPendingMembersList(String accessToken, String groupId);
+    ResponseVM<?> getPendingMembersList(String groupId);
 
-    ResponseVM<?> getGroupMembers(String accessToken, String groupId, int page, int size, EGetMemberOption option);
+    ResponseVM<?> getGroupMembers(String groupId, int page, int size, EGetMemberOption option);
 
     ResponseVM<?> getGroupMembers(String groupId);
 
-    ResponseVM<?> getAllFriendGroupMemberUserIds(String accessToken, String groupId);
+    ResponseVM<?> getAllFriendGroupMemberUserIds(String groupId);
 
     ResponseVM<?> isPrivateGroupOrUserJoined(String groupId);
 }
