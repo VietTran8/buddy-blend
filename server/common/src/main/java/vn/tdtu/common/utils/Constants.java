@@ -4,9 +4,37 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public final class Constants {
-    public static final String API_V1_PREFIX = "/api/v1";
+
+    public static final String API_VERSION = "v1";
+
+    public static final String API_PREFIX = "/api/" + API_VERSION;
+
+    public static final String API_PREFIX_ADMIN = "/api/" + API_VERSION + "/admin";
+
+    public static final String API_SUB_PREFIX_AUTH = "/auth";
+
+    public static final String API_SUB_PREFIX_USER = "/users";
+
+    public static final String API_SUB_PREFIX_POST = "/posts";
+
+    public static final String API_SUB_PREFIX_STORY = "/stories";
+
+    public static final String API_SUB_PREFIX_SEARCH = "/search";
+
+    public static final String API_SUB_PREFIX_NOTIFICATION = "/notifications";
+
+    public static final String API_SUB_PREFIX_MESSAGE = "/messages";
+
+    public static final String API_SUB_PREFIX_INTERACTION = "/interactions";
+
+    public static final String API_SUB_PREFIX_GROUP = "/groups";
+
+    public static final String API_SUB_PREFIX_FILE = "/file";
+
     public static final String BEARER_PREFIX = "Bearer ";
+
     public static final String SECURED_WORKER_NAME_PREFIX = "secured-worker-";
+
     public static final String REQUEST_ATTRIBUTE_START_TIME = "startTime";
 
     public static class SightEngine {

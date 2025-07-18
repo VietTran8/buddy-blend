@@ -10,6 +10,7 @@ import vn.edu.tdtu.dto.request.FileReq;
 import vn.edu.tdtu.dto.response.UploadFileResponse;
 import vn.edu.tdtu.enums.EUploadFolder;
 import vn.edu.tdtu.service.interfaces.IFileService;
+import vn.tdtu.common.utils.Constants;
 import vn.tdtu.common.utils.MessageCode;
 import vn.tdtu.common.viewmodel.ResponseVM;
 
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/file")
+@RequestMapping(Constants.API_PREFIX + Constants.API_SUB_PREFIX_FILE)
 @RequiredArgsConstructor
 @Slf4j
 public class FileController {

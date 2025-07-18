@@ -1,7 +1,7 @@
 import { http } from "@/config";
 import { Media, PaginationResponse } from "@/types";
 
-const baseUrl = "/album";
+const baseUrl = "/posts/album";
 
 export const getAlbum = async (ownerId: string, page: number, size: number): Promise<PaginationResponse<Media>> => {
     const response: PaginationResponse<Media> = await http.get(`${baseUrl}/${ownerId}`, {

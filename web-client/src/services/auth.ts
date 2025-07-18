@@ -2,8 +2,10 @@ import { http } from "../config";
 import { BaseResponse, ChangePasswordRequest, CreateChangePasswordRequest, CreateForgotPasswordRequest, PasswordCheckingRequest, PasswordCheckingResponse, SignInRequest, SignInResponse, SignUpRequest, SignUpResponse, ValidateOTPRequest } from "../types";
 import { hashMD5 } from "../utils";
 
+const basePath = "/auth";
+
 export const login = async (payload: SignInRequest): Promise<BaseResponse<any>> => {
-    const response: BaseResponse<SignInResponse> = await http.post("/auth/login", {
+    const response: BaseResponse<SignInResponse> = await http.post(`${basePath}/login`, {
         ...payload,
         password: hashMD5(payload.password)
     });
@@ -12,13 +14,13 @@ export const login = async (payload: SignInRequest): Promise<BaseResponse<any>> 
 }
 
 export const refreshToken = async (): Promise<BaseResponse<SignInResponse>> => {
-    const response: BaseResponse<SignInResponse> = await http.post("/auth/refresh-token", {});
+    const response: BaseResponse<SignInResponse> = await http.post(`${basePath}/refresh-token`, {});
 
     return response;
 }
 
 export const signUp = async (payload: SignUpRequest): Promise<BaseResponse<SignUpResponse>> => {
-    const response: BaseResponse<SignUpResponse> = await http.post("/auth/sign-up", {
+    const response: BaseResponse<SignUpResponse> = await http.post(`${basePath}/sign-up`, {
         ...payload,
         password: hashMD5(payload.password)
     });
@@ -27,7 +29,7 @@ export const signUp = async (payload: SignUpRequest): Promise<BaseResponse<SignU
 }
 
 export const createChangePasswordOtp = async (payload: CreateChangePasswordRequest): Promise<BaseResponse<any>> => {
-    const response: BaseResponse<any> = await http.post("/auth/create-change-pass", {
+    const response: BaseResponse<any> = await http.post(`${basePath}/create-change-pass`, {
         ...payload,
         oldPassword: hashMD5(payload.oldPassword)
     });
@@ -36,13 +38,13 @@ export const createChangePasswordOtp = async (payload: CreateChangePasswordReque
 }
 
 export const createForgotPasswordOtp = async (payload: CreateForgotPasswordRequest): Promise<BaseResponse<any>> => {
-    const response: BaseResponse<any> = await http.post("/auth/create-forgot-pass", payload);
+    const response: BaseResponse<any> = await http.post(`${basePath}/create-forgot-pass`, payload);
 
     return response;
 }
 
 export const changePassword = async (payload: ChangePasswordRequest): Promise<BaseResponse<any>> => {
-    const response: BaseResponse<any> = await http.post("/auth/change-pass", {
+    const response: BaseResponse<any> = await http.post(`${basePath}/change-pass`, {
         ...payload,
         newPassword: hashMD5(payload.newPassword)
     });
@@ -51,19 +53,19 @@ export const changePassword = async (payload: ChangePasswordRequest): Promise<Ba
 }
 
 export const logout = async (): Promise<BaseResponse<any>> => {
-    const response: BaseResponse<any> = await http.post("/auth/logout");
+    const response: BaseResponse<any> = await http.post(`${basePath}/logout`);
 
     return response;
 }
 
 export const validateOtp = async (payload: ValidateOTPRequest): Promise<BaseResponse<any>> => {
-    const response: BaseResponse<any> = await http.post("/auth/validate-otp", payload);
+    const response: BaseResponse<any> = await http.post(`${basePath}/validate-otp`, payload);
 
     return response;
 }
 
 export const passwordChecking = async (payload: PasswordCheckingRequest): Promise<BaseResponse<PasswordCheckingResponse | undefined>> => {
-    const response: BaseResponse<PasswordCheckingResponse | undefined> = await http.post("/auth/password-checking", {
+    const response: BaseResponse<PasswordCheckingResponse | undefined> = await http.post(`${basePath}/password-checking`, {
         ...payload,
         password: hashMD5(payload.password)
     });

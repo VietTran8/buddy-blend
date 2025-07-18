@@ -13,12 +13,13 @@ import vn.edu.tdtu.dto.request.UpdatePostContentRequest;
 import vn.edu.tdtu.service.intefaces.PostService;
 import vn.edu.tdtu.service.intefaces.SavePostService;
 import vn.tdtu.common.dto.PostDTO;
+import vn.tdtu.common.utils.Constants;
 import vn.tdtu.common.viewmodel.ResponseVM;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/posts")
+@RequestMapping(Constants.API_PREFIX + Constants.API_SUB_PREFIX_POST)
 public class PostController {
     private final PostService postService;
     private final SavePostService savePostService;

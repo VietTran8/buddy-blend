@@ -1,14 +1,14 @@
 package vn.tdtu.edu.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.tdtu.common.utils.Constants;
 import vn.tdtu.common.viewmodel.ResponseVM;
 import vn.tdtu.edu.service.interfaces.NotificationService;
 
 @RestController
-@RequestMapping("/api/v1/notifications")
+@RequestMapping(Constants.API_PREFIX + Constants.API_SUB_PREFIX_NOTIFICATION)
 @RequiredArgsConstructor
 public class NotificationController {
     private final NotificationService notificationService;

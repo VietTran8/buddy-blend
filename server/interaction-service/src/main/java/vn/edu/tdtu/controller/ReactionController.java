@@ -7,10 +7,11 @@ import vn.edu.tdtu.dto.requests.DoCommentReactRequest;
 import vn.edu.tdtu.dto.requests.DoReactRequest;
 import vn.edu.tdtu.service.interfaces.CommentReactionService;
 import vn.edu.tdtu.service.interfaces.ReactionService;
+import vn.tdtu.common.utils.Constants;
 import vn.tdtu.common.viewmodel.ResponseVM;
 
 @RestController
-@RequestMapping("/api/v1/reacts")
+@RequestMapping(Constants.API_PREFIX + Constants.API_SUB_PREFIX_INTERACTION + "/reacts")
 @RequiredArgsConstructor
 public class ReactionController {
     private final ReactionService reactionService;

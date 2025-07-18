@@ -6,10 +6,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.dto.request.SignUpRequest;
 import vn.edu.tdtu.service.interfaces.AuthService;
+import vn.tdtu.common.utils.Constants;
 import vn.tdtu.common.viewmodel.ResponseVM;
 
 @RestController
-@RequestMapping("/api/v1/admin/auth")
+@RequestMapping(Constants.API_PREFIX_ADMIN + Constants.API_SUB_PREFIX_AUTH)
 @RequiredArgsConstructor
 public class AuthAdminController {
     private final AuthService authService;

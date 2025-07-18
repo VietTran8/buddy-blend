@@ -2,6 +2,8 @@ import { UploadFile } from "antd";
 import { http } from "../config"
 import { BaseResponse, FileType, UploadFileResponse } from "../types"
 
+const basePath = "/file";
+
 const convertToFiles = (uploadFiles: any[]): File[] => {
     return uploadFiles
         .map((file) => {
@@ -27,7 +29,7 @@ export const uploadFile = async (type: FileType, files?: (File | UploadFile)[]):
     });
 
     try {
-        const response: BaseResponse<UploadFileResponse[]> = await http.post(`/file/upload-all/${type}`, formData);
+        const response: BaseResponse<UploadFileResponse[]> = await http.post(`${basePath}/upload-all/${type}`, formData);
 
         return response;
     } catch (error) {

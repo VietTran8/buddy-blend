@@ -9,14 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.dto.request.*;
 import vn.edu.tdtu.dto.response.LoginResponse;
 import vn.edu.tdtu.service.interfaces.AuthService;
-import vn.edu.tdtu.util.CookieUtils;
-import vn.tdtu.common.exception.UnauthorizedException;
 import vn.tdtu.common.utils.Constants;
-import vn.tdtu.common.utils.MessageCode;
 import vn.tdtu.common.viewmodel.ResponseVM;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping(Constants.API_PREFIX + Constants.API_SUB_PREFIX_AUTH)
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {

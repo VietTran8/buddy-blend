@@ -55,13 +55,13 @@ public class SecurityContextUtils {
         String userIdHeader = request.getHeader(Constants.RequestHeader.X_FEIGN_USER_ID);
 
         if(existedAuthentication.isEmpty() && StringUtils.isNotBlank(userIdHeader)) {
-            Authentication authentication = getAuthentication(userIdHeader);
+            Authentication authentication = getFeignAuthentication(userIdHeader);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
     }
 
-    private static Authentication getAuthentication(String userIdHeader) {
+    private static Authentication getFeignAuthentication(String userIdHeader) {
         Map<String, Object> dummyHeader = Map.of(
                 "alg", "HS256",
                 "typ", "JWT"

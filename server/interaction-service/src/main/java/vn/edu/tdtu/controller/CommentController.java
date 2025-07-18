@@ -7,10 +7,11 @@ import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.dto.requests.AddCommentRequest;
 import vn.edu.tdtu.dto.requests.UpdateCommentRequest;
 import vn.edu.tdtu.service.interfaces.CommentService;
+import vn.tdtu.common.utils.Constants;
 import vn.tdtu.common.viewmodel.ResponseVM;
 
 @RestController
-@RequestMapping("/api/v1/comments")
+@RequestMapping(Constants.API_PREFIX + Constants.API_SUB_PREFIX_INTERACTION + "/comments")
 @RequiredArgsConstructor
 @Slf4j
 public class CommentController {

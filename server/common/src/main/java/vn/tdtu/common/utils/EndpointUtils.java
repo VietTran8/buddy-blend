@@ -10,12 +10,12 @@ public class EndpointUtils {
 
     public static String addPrefix(String path) {
         if (path == null || path.isEmpty()) {
-            return Constants.API_V1_PREFIX;
+            return Constants.API_PREFIX;
         }
         if (path.startsWith("/")) {
-            return Constants.API_V1_PREFIX + path;
+            return Constants.API_PREFIX + path;
         }
-        return Constants.API_V1_PREFIX + "/" + path;
+        return Constants.API_PREFIX + "/" + path;
     }
 
     public static String[] getEndpoints(String... paths) {

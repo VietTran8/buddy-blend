@@ -3,12 +3,13 @@ package vn.tdtu.edu.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.tdtu.common.utils.Constants;
 import vn.tdtu.common.viewmodel.ResponseVM;
 import vn.tdtu.edu.model.Violation;
 import vn.tdtu.edu.service.interfaces.ViolationService;
 
 @RestController
-@RequestMapping("/api/v1/violation")
+@RequestMapping(Constants.API_PREFIX + Constants.API_SUB_PREFIX_NOTIFICATION + "/violation")
 @RequiredArgsConstructor
 public class ViolationController {
     private final ViolationService violationService;

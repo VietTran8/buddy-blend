@@ -2,7 +2,7 @@ import { http } from "@/config";
 import { BaseResponse } from "@/types";
 import { Violation } from "@/types/notification";
 
-const basePath = "/violation"
+const basePath = "/notifications/violation"
 
 export const getViolationByRefId = async (refId: string): Promise<BaseResponse<Violation>> => {
     const response: BaseResponse<Violation> = await http.get(`${basePath}`, {

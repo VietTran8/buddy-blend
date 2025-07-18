@@ -1,16 +1,16 @@
 import { http } from "@/config";
 import { BaseResponse, SearchHistory, SearchResponse } from "@/types";
 
-const baseUrl = "/search";
+const basePath = "/search";
 
 export const getSearchHistory = async (): Promise<BaseResponse<SearchHistory[]>> => {
-    const response: BaseResponse<SearchHistory[]> = await http.get(`${baseUrl}/history`);
+    const response: BaseResponse<SearchHistory[]> = await http.get(`${basePath}/history`);
 
     return response;
 }
 
 export const search = async (key: string): Promise<BaseResponse<SearchResponse>> => {
-    const response: BaseResponse<SearchResponse> = await http.get(`${baseUrl}`, {
+    const response: BaseResponse<SearchResponse> = await http.get(`${basePath}`, {
         params: {
             key
         }
@@ -20,7 +20,7 @@ export const search = async (key: string): Promise<BaseResponse<SearchResponse>>
 }
 
 export const fetchResult = async (key: string): Promise<BaseResponse<SearchResponse>> => {
-    const response: BaseResponse<SearchResponse> = await http.get(`${baseUrl}/fetch`, {
+    const response: BaseResponse<SearchResponse> = await http.get(`${basePath}/fetch`, {
         params: {
             key
         }
@@ -30,13 +30,13 @@ export const fetchResult = async (key: string): Promise<BaseResponse<SearchRespo
 }
 
 export const deleteHistory = async (id: string): Promise<BaseResponse<any>> => {
-    const response: BaseResponse<any> = await http.post(`${baseUrl}/history/delete/${id}`);
+    const response: BaseResponse<any> = await http.post(`${basePath}/history/delete/${id}`);
 
     return response;
 }
 
 export const clearHistory = async (): Promise<BaseResponse<any>> => {
-    const response: BaseResponse<any> = await http.post(`${baseUrl}/history/clear`);
+    const response: BaseResponse<any> = await http.post(`${basePath}/history/clear`);
 
     return response;
 }

@@ -7,10 +7,11 @@ import vn.edu.tdtu.dto.request.CreateStoryRequest;
 import vn.edu.tdtu.dto.request.DoReactRequest;
 import vn.edu.tdtu.service.interfaces.ReactionService;
 import vn.edu.tdtu.service.interfaces.StoryService;
+import vn.tdtu.common.utils.Constants;
 import vn.tdtu.common.viewmodel.ResponseVM;
 
 @RestController
-@RequestMapping("/api/v1/stories")
+@RequestMapping(Constants.API_PREFIX + Constants.API_SUB_PREFIX_STORY)
 @RequiredArgsConstructor
 public class StoryController {
     private final StoryService storyService;

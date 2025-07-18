@@ -9,12 +9,13 @@ import vn.edu.tdtu.enums.EHandleLeaveType;
 import vn.edu.tdtu.service.interfaces.GroupAdminService;
 import vn.edu.tdtu.service.interfaces.GroupMemberService;
 import vn.edu.tdtu.service.interfaces.GroupService;
+import vn.tdtu.common.utils.Constants;
 import vn.tdtu.common.viewmodel.ResponseVM;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/groups")
+@RequestMapping(Constants.API_PREFIX + Constants.API_SUB_PREFIX_GROUP)
 @RequiredArgsConstructor
 public class GroupController {
     private final GroupService groupService;

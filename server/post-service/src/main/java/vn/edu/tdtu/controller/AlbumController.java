@@ -6,10 +6,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.tdtu.model.Media;
 import vn.edu.tdtu.service.intefaces.MediaService;
+import vn.tdtu.common.utils.Constants;
 import vn.tdtu.common.viewmodel.PaginationResponseVM;
 
 @RestController
-@RequestMapping("/api/v1/album")
+@RequestMapping(Constants.API_PREFIX + Constants.API_SUB_PREFIX_POST + "/album")
 @RequiredArgsConstructor
 public class AlbumController {
     private final MediaService mediaService;

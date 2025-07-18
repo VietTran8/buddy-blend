@@ -10,10 +10,11 @@ import vn.edu.tdtu.service.interfaces.BlockingService;
 import vn.edu.tdtu.service.interfaces.FriendRequestService;
 import vn.edu.tdtu.service.interfaces.UserFavouriteService;
 import vn.edu.tdtu.service.interfaces.UserService;
+import vn.tdtu.common.utils.Constants;
 import vn.tdtu.common.viewmodel.ResponseVM;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping(Constants.API_PREFIX + Constants.API_SUB_PREFIX_USER)
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
@@ -28,7 +29,6 @@ public class UserController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @GetMapping("/profile")
     public ResponseEntity<?> getUserInfo(@RequestParam(name = "id", required = false, defaultValue = "") String id) {
         ResponseVM<?> response = userService.findProfile(id);
@@ -71,42 +71,36 @@ public class UserController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @GetMapping("/search")
     public ResponseEntity<?> search(@RequestParam("key") String key) {
         ResponseVM<?> response = userService.searchByName(key);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @PostMapping("/bio/update")
     public ResponseEntity<?> updateBio(@RequestBody UpdateBioReqDTO request) {
         ResponseVM<?> response = userService.updateBio(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @PostMapping("/info/update")
     public ResponseEntity<?> updateBio(@RequestBody UpdateInfoReqDTO request) {
         ResponseVM<?> response = userService.updateInfo(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @PostMapping("/name/update")
     public ResponseEntity<?> updateUserName(@RequestBody RenameReqDTO request) {
         ResponseVM<?> response = userService.renameUser(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @PostMapping("/profile/update")
     public ResponseEntity<?> updateProfilePic(@RequestParam("file") MultipartFile file) {
         ResponseVM<?> response = userService.updatePicture(file, true);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @PostMapping("/cover/update")
     public ResponseEntity<?> updateCover(@RequestParam("file") MultipartFile file) {
         ResponseVM<?> response = userService.updatePicture(file, false);
@@ -119,28 +113,24 @@ public class UserController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @PostMapping("/friend-req")
     public ResponseEntity<?> handle(@RequestBody FriendReqDTO request) {
         ResponseVM<?> response = friendRequestService.handleFriendRequest(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @PostMapping("/friend-req/acceptation")
     public ResponseEntity<?> acceptation(@RequestBody FQAcceptationDTO request) {
         ResponseVM<?> response = friendRequestService.friendRequestAcceptation(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @GetMapping("/friend-reqs")
     public ResponseEntity<?> getFriendRequests() {
         ResponseVM<?> response = friendRequestService.getListFriendRequestResp();
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @GetMapping("/friend-req/{fromUserId}")
     public ResponseEntity<?> getFriendRequestByFromUserId(
             @PathVariable("fromUserId") String fromUserId
@@ -149,42 +139,36 @@ public class UserController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @GetMapping("/friends")
     public ResponseEntity<?> getFriends(@RequestParam(name = "id", required = false) String userId) {
         ResponseVM<?> response = friendRequestService.getListFriendsResp(userId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @GetMapping("/friends/id")
     public ResponseEntity<?> getFriendIds(@RequestParam(name = "id", required = true) String userId) {
         ResponseVM<?> response = friendRequestService.getFriendIds(userId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @GetMapping("/friends/suggestions")
     public ResponseEntity<?> getFriendSuggestions() {
         ResponseVM<?> response = friendRequestService.getFriendSuggestions();
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @PostMapping("/favourite")
     public ResponseEntity<?> saveUserFavourite(@RequestBody SaveUserFavouriteDTO request) {
         ResponseVM<?> response = userFavouriteService.saveUserFavorite(request);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @GetMapping("/favourite")
     public ResponseEntity<?> getUserFavourite() {
         ResponseVM<?> response = userFavouriteService.getUserFavourites();
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @GetMapping("/favourite/{id}")
     public ResponseEntity<?> getUserFavouriteDetail(
                                                     @PathVariable("id") String favId) {
@@ -192,14 +176,12 @@ public class UserController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @PostMapping("/favourite/delete/{id}")
     public ResponseEntity<?> deleteUserFavourite(@PathVariable("id") String id) {
         ResponseVM<?> response = userFavouriteService.deleteUserFavourite(id);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @PostMapping("/registration/save")
     public ResponseEntity<?> saveRegistrationId(@RequestBody SaveUserResIdReq request) {
         ResponseVM<?> response = userService.saveUserRegistrationId(request);
@@ -207,7 +189,6 @@ public class UserController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @PostMapping("/registration/remove")
     public ResponseEntity<?> removeRegistrationId(@RequestBody SaveUserResIdReq request) {
         ResponseVM<?> response = userService.removeUserRegistrationId(request);
@@ -215,14 +196,12 @@ public class UserController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @PostMapping("/block/{blockUserId}")
     public ResponseEntity<?> handleBlockUser(@PathVariable("blockUserId") String banUserId) {
         ResponseVM<?> response = blockingService.handleUserBlocking(banUserId);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    //Authenticated
     @GetMapping("/block")
     public ResponseEntity<?> getBlockedUsers() {
         ResponseVM<?> response = blockingService.getBlockedUserList();
